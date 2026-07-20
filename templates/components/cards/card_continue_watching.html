@@ -1,0 +1,84 @@
+{% load static %}
+                         <li class="splide__slide">
+                                <div class="flex flex-col cursor-pointer group">
+                                    <div
+                                        class="relative aspect-[2/3] rounded-[10px] md:rounded-[20px] overflow-hidden mb-2 md:mb-3 border border-white/5 shadow-2xl"
+                                    >
+                                        <img
+                                            src="{% static 'public/assets/img/Rectangle.jpg' %}"
+                                            class="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105"
+                                        />
+
+                                        <div
+                                            class="absolute inset-0 flex items-center justify-center z-10 bg-[#00000063] pointer-events-none"
+                                        >
+                                            <div
+                                                class="relative shrink-0 w-[53px] h-[53px] rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center shadow-[0_4px_15px_rgba(0,0,0,0.5)] pointer-events-auto cursor-pointer hover:bg-black/60 hover:scale-110 transition-all duration-300"
+                                            >
+                                                <svg fill="none" viewBox="0 0 53 53">
+<circle
+                                                        cx="26.3599"
+                                                        cy="26.3599"
+                                                        r="26.3599"
+                                                        fill="white"
+                                                        fill-opacity="0.24"
+                                                    ></circle>
+                                                    <path
+                                                        d="M26.3055 44.6656C36.4153 44.6656 44.6109 36.47 44.6109 26.3602C44.6109 16.2503 36.4153 8.05469 26.3055 8.05469C16.1956 8.05469 8 16.2503 8 26.3602C8 36.47 16.1956 44.6656 26.3055 44.6656Z"
+                                                        stroke="white"
+                                                        stroke-width="1.31799"
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                    ></path>
+                                                    <path
+                                                        d="M20.3926 26.7813V23.7242C20.3926 19.9167 23.0835 18.3607 26.3785 20.2645L29.0328 21.8022L31.6871 23.3398C34.982 25.2436 34.982 28.3555 31.6871 30.2593L29.0328 31.797L26.3785 33.3346C23.0835 35.2384 20.3926 33.6824 20.3926 29.8749V26.7813Z"
+                                                        stroke="white"
+                                                        stroke-width="1.31799"
+                                                        stroke-miterlimit="10"
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                    ></path>
+                                                    <mask
+                                                        id="path-5-inside-1_573_5379"
+                                                        fill="white"
+                                                    >
+                                                        <path
+                                                            d="M21.4592 8.26354C21.2811 7.59134 21.6767 6.89661 22.3577 6.75534C25.0339 6.2001 27.7989 6.21887 30.4758 6.81608C33.5618 7.50456 36.44 8.94154 38.867 11.0055C41.294 13.0694 43.1984 15.6997 44.4192 18.6737C45.64 21.6478 46.1413 24.8783 45.8807 28.0919C45.6201 31.3055 44.6052 34.4078 42.9219 37.1365C41.2386 39.8651 38.9364 42.1398 36.2099 43.7682C33.4835 45.3966 30.413 46.3309 27.2581 46.4919C24.5175 46.6318 21.7832 46.1846 19.2297 45.1847C18.586 44.9326 18.3118 44.1873 18.5948 43.5565C18.884 42.9117 19.644 42.6334 20.3051 42.8835C22.4826 43.7072 24.8056 44.0733 27.1338 43.9545C29.8895 43.8138 32.5716 42.9978 34.9531 41.5754C37.3347 40.153 39.3456 38.1661 40.816 35.7826C42.2863 33.3992 43.1728 30.6894 43.4005 27.8823C43.6281 25.0752 43.1902 22.2534 42.1239 19.6556C41.0575 17.0578 39.394 14.7603 37.274 12.9575C35.1541 11.1546 32.64 9.89945 29.9444 9.29808C27.6666 8.78991 25.3159 8.7612 23.0348 9.2084C22.3423 9.34417 21.64 8.94569 21.4592 8.26354Z"
+                                                        ></path>
+                                                    </mask>
+                                                    <path
+                                                        d="M21.4592 8.26354C21.2811 7.59134 21.6767 6.89661 22.3577 6.75534C25.0339 6.2001 27.7989 6.21887 30.4758 6.81608C33.5618 7.50456 36.44 8.94154 38.867 11.0055C41.294 13.0694 43.1984 15.6997 44.4192 18.6737C45.64 21.6478 46.1413 24.8783 45.8807 28.0919C45.6201 31.3055 44.6052 34.4078 42.9219 37.1365C41.2386 39.8651 38.9364 42.1398 36.2099 43.7682C33.4835 45.3966 30.413 46.3309 27.2581 46.4919C24.5175 46.6318 21.7832 46.1846 19.2297 45.1847C18.586 44.9326 18.3118 44.1873 18.5948 43.5565C18.884 42.9117 19.644 42.6334 20.3051 42.8835C22.4826 43.7072 24.8056 44.0733 27.1338 43.9545C29.8895 43.8138 32.5716 42.9978 34.9531 41.5754C37.3347 40.153 39.3456 38.1661 40.816 35.7826C42.2863 33.3992 43.1728 30.6894 43.4005 27.8823C43.6281 25.0752 43.1902 22.2534 42.1239 19.6556C41.0575 17.0578 39.394 14.7603 37.274 12.9575C35.1541 11.1546 32.64 9.89945 29.9444 9.29808C27.6666 8.78991 25.3159 8.7612 23.0348 9.2084C22.3423 9.34417 21.64 8.94569 21.4592 8.26354Z"
+                                                        stroke="#DD0202"
+                                                        stroke-width="2.63599"
+                                                        mask="url(#path-5-inside-1_573_5379)"
+                                                    ></path>
+</svg>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="w-full text-left md:text-right px-1 md:px-0">
+                                        <h3
+                                            class="text-[10px] md:text-[14px] md:text-base text-white md:mb-1 group-hover:text-red-500 transition-colors"
+                                        >
+                                            Hitman: Agent 47
+                                        </h3>
+<div class="flex items-center flex-row-reverse md:flex-row justify-between gap-2 md:gap-3">
+    <span class="text-[9px] md:text-base font-light md:font-normal text-white">
+        2026
+    </span>
+
+    <div class="w-[1px] h-3 md:hidden bg-white/30"></div>
+
+    <div class="flex items-center gap-[1px] md:gap-1 md:bg-[#292B33] md:px-1.5 md:py-0.5 md:rounded-full text-[8px] md:text-base md:border border-white/5">
+        <svg class="h-2.5 w-2.5 md:h-3.5 md:w-3.5 text-yellow-500 fill-current" viewBox="0 0 20 20">
+<path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+</svg>
+        <span class="text-[9px] md:text-[12px] text-yellow-500 md:text-white pt-0.5">
+            5.7
+        </span>
+    </div>
+</div>
+                                    </div>
+                                </div>
+                            </li>

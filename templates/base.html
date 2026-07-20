@@ -1,0 +1,70 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ page_title|default:'' }}{% endblock %}</title>
+
+    {% if site_settings.favicon %}
+        <link rel="icon" type="image/x-icon" href="{{ site_settings.favicon.url }}">
+    {% else %}
+        <link rel="icon" type="image/x-icon" href="{% static 'public/assets/img/favicon.ico' %}">
+    {% endif %}
+
+    <link rel="stylesheet" href="{% static 'dist/assets/css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'public/assets/css/splide.min.css' %}">
+
+    <script defer src="{% static 'public/assets/js/main.js' %}"></script>
+    <script defer src="{% static 'public/assets/js/alpine.min.js' %}"></script>
+
+    {% block header_references %}{% endblock %}
+
+    {% block meta_description %}
+    <meta name="description" content="{{ page_desc|default:'' }}">
+    {% endblock %}
+    
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="{{ canonical_url|default:request.build_absolute_uri }}">
+    
+    {% block opengraph %}
+    <meta property="og:title" content="{{ page_title|default:'' }}">
+    <meta property="og:description" content="{{ page_desc|default:'' }}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="{{ site_name|default:'' }}">
+    <meta property="og:locale" content="fa_IR">
+    {% endblock %}
+ 
+    {% block schema_markup %}{% endblock %}
+</head>
+ 
+<body class="overflow-x-hidden antialiased text-white bg-black" {% block body_attrs %}{% endblock %}>
+  <div style="display: none;">{% csrf_token %}</div>
+
+{% block header %}
+{% include 'components/header.html' %}
+{% endblock %}
+
+{% block breadcrumb %}{% endblock %}
+
+<main {% block main_attrs %}{% endblock %}>
+  {% block content %}
+  {% endblock %}
+</main>
+
+{% block footer %}
+{% include 'components/footer.html' %}
+{% endblock %}
+
+{% block navbar %}
+{% include 'components/navbar.html' %}
+{% endblock %}
+
+{% include 'components/modals.html' %}
+{% include 'components/toasts.html' %}
+{% include 'components/toast.html' %}
+
+{% block footer_references %}{% endblock %}
+
+</body>
+</html>

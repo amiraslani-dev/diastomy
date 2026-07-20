@@ -1,0 +1,751 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-05 23:00+0330\n"
+"PO-Revision-Date: 2026-07-05 17:59+0330\n"
+"Last-Translator: امیر اصلانی <amir@yahoo.com>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Translated-Using: django-rosetta 0.10.3\n"
+
+#: accounts/services.py:50
+msgid "کد تایید قبلاً برای شما ارسال شده است. لطفاً ۲ دقیقه صبر کنید."
+msgstr ""
+
+#: accounts/services.py:64
+msgid "کد تایید با موفقیت ارسال شد"
+msgstr ""
+
+#: accounts/services.py:113
+msgid "توکن گوگل نامعتبر است."
+msgstr ""
+
+#: accounts/services.py:120
+msgid "ایمیل در اطلاعات حساب گوگل یافت نشد."
+msgstr ""
+
+#: accounts/services.py:134
+msgid "خطا در ارتباط با سرورهای گوگل."
+msgstr ""
+
+#: accounts/views.py:31 accounts/views.py:47
+#, fuzzy
+#| msgid "لطفا برای ثبت دیدگاه ابتدا وارد سایت شوید."
+msgid "شماره موبایل وارد شده معتبر نیست"
+msgstr "please login"
+
+#: accounts/views.py:37 accounts/views.py:56 accounts/views.py:82
+#: accounts/views.py:121 accounts/views.py:143 accounts/views.py:167
+#: accounts/views.py:198 accounts/views.py:240 accounts/views.py:265
+#: accounts/views.py:289 accounts/views.py:324 core/views.py:72
+msgid "داده‌های نامعتبر"
+msgstr ""
+
+#: accounts/views.py:67
+msgid "شماره موبایل معتبر و کد تایید الزامی است"
+msgstr ""
+
+#: accounts/views.py:74 accounts/views.py:138 accounts/views.py:162
+msgid "با موفقیت وارد شدید"
+msgstr ""
+
+#: accounts/views.py:79 accounts/views.py:237 accounts/views.py:286
+msgid "کد تایید نامعتبر است یا منقضی شده"
+msgstr ""
+
+#: accounts/views.py:96
+msgid "نشست شما منقضی شده است. لطفا مجدد تلاش کنید."
+msgstr ""
+
+#: accounts/views.py:99 accounts/views.py:181
+#, fuzzy
+#| msgid "لطفا برای ثبت دیدگاه ابتدا وارد سایت شوید."
+msgid "تمامی فیلدها الزامی است"
+msgstr "please login"
+
+#: accounts/views.py:102 accounts/views.py:187
+msgid "این نام کاربری قبلا استفاده شده است"
+msgstr ""
+
+#: accounts/views.py:104
+msgid "این ایمیل قبلا استفاده شده است"
+msgstr ""
+
+#: accounts/views.py:118
+msgid "ثبت‌نام با موفقیت انجام شد"
+msgstr ""
+
+#: accounts/views.py:132
+msgid "شماره موبایل معتبر و رمز عبور الزامی است"
+msgstr ""
+
+#: accounts/views.py:140
+msgid "شماره موبایل یا رمز عبور اشتباه است"
+msgstr ""
+
+#: accounts/views.py:152
+msgid "توکن گوگل دریافت نشد."
+msgstr ""
+
+#: accounts/views.py:178 accounts/views.py:212
+msgid "نشست شما منقضی شده است. لطفاً مجدداً تلاش کنید."
+msgstr ""
+
+#: accounts/views.py:184
+msgid "این شماره موبایل قبلا استفاده شده است"
+msgstr ""
+
+#: accounts/views.py:215
+msgid "شماره موبایل با درخواست اولیه مطابقت ندارد"
+msgstr ""
+
+#: accounts/views.py:231
+msgid "ثبت‌نام با موفقیت تکمیل شد"
+msgstr ""
+
+#: accounts/views.py:233 accounts/views.py:321
+msgid "کاربر یافت نشد"
+msgstr ""
+
+#: accounts/views.py:235
+msgid "این شماره موبایل متعلق به حساب دیگری است."
+msgstr ""
+
+#: accounts/views.py:252
+msgid "شماره موبایل الزامی است"
+msgstr ""
+
+#: accounts/views.py:255
+msgid "حسابی با این شماره یافت نشد."
+msgstr ""
+
+#: accounts/views.py:277
+msgid "نشست نامعتبر است. لطفاً مجدداً تلاش کنید."
+msgstr ""
+
+#: accounts/views.py:299
+msgid "نشست منقضی شده است. لطفا مجدد تلاش کنید."
+msgstr ""
+
+#: accounts/views.py:302
+#, fuzzy
+#| msgid "لطفا برای ثبت دیدگاه ابتدا وارد سایت شوید."
+msgid "رمز عبور باید حداقل ۶ کاراکتر باشد"
+msgstr "please login"
+
+#: accounts/views.py:318
+msgid "رمز عبور با موفقیت تغییر یافت"
+msgstr ""
+
+#: core/models.py:137
+msgid "عنوان صفحه"
+msgstr ""
+
+#: core/models.py:138
+msgid "فیلم‌ها"
+msgstr ""
+
+#: core/models.py:139
+msgid "سریال‌ها"
+msgstr ""
+
+#: core/models.py:142 core/models.py:143
+msgid "تنظیمات صفحه سلیقه کاربر"
+msgstr ""
+
+#: core/models.py:153
+msgid "مجموع تعداد فیلم‌ها و سریال‌های انتخاب شده نمی‌تواند بیشتر از 10 باشد."
+msgstr ""
+
+#: core/views.py:42
+msgid ""
+"با انتخاب حداقل 3 عنوان مورد علاقه خود، فیلم و سریالهای مرتبط با سلیقهتان را "
+"به شما نمایش خواهیم داد."
+msgstr ""
+
+#: core/views.py:51
+#, fuzzy
+#| msgid "لطفا برای ثبت دیدگاه ابتدا وارد سایت شوید."
+msgid "شما قبلاً سلیقه خود را انتخاب کرده‌اید."
+msgstr "please login"
+
+#: core/views.py:58
+#, fuzzy
+#| msgid "لطفا برای ثبت دیدگاه ابتدا وارد سایت شوید."
+msgid "لطفاً دقیقاً ۳ مورد را انتخاب کنید."
+msgstr "please login"
+
+#: core/views.py:69
+msgid "انتخاب‌های شما با موفقیت ثبت شد."
+msgstr ""
+
+#: diastomy/settings.py:135
+msgid "Persian"
+msgstr ""
+
+#: diastomy/settings.py:136
+msgid "English"
+msgstr ""
+
+#: diastomy/settings.py:137
+msgid "Arabic"
+msgstr ""
+
+#: movie/models.py:158
+msgid "First Season"
+msgstr ""
+
+#: movie/models.py:159
+msgid "Second Season"
+msgstr ""
+
+#: movie/models.py:160
+msgid "Third Season"
+msgstr ""
+
+#: movie/models.py:161
+msgid "Fourth Season"
+msgstr ""
+
+#: movie/models.py:162
+msgid "Fifth Season"
+msgstr ""
+
+#: movie/models.py:163
+msgid "Sixth Season"
+msgstr ""
+
+#: movie/models.py:164
+msgid "Seventh Season"
+msgstr ""
+
+#: movie/models.py:165
+msgid "Eighth Season"
+msgstr ""
+
+#: movie/models.py:166
+msgid "Ninth Season"
+msgstr ""
+
+#: movie/models.py:167
+msgid "Tenth Season"
+msgstr ""
+
+#: movie/models.py:174
+#, python-format
+msgid "Season %(number)s"
+msgstr ""
+
+#: templates/accounts/auth/forgot.html:46
+msgid "بازگشت به ورود"
+msgstr ""
+
+#: templates/accounts/auth/forgot.html:50
+#: templates/accounts/auth/login.html:164
+msgid "فراموشی رمز عبور"
+msgstr ""
+
+#: templates/accounts/auth/forgot.html:54 templates/accounts/auth/login.html:95
+#: templates/accounts/auth/login.html:290
+#, fuzzy
+#| msgid "لطفا برای ثبت دیدگاه ابتدا وارد سایت شوید."
+msgid ".موبایل خود را وارد کنید"
+msgstr "please login"
+
+#: templates/accounts/auth/forgot.html:65
+msgid "بازیابی رمز عبور"
+msgstr ""
+
+#: templates/accounts/auth/forgot.html:66
+#: templates/accounts/auth/forgot.html:140
+#: templates/accounts/auth/login.html:107
+#: templates/accounts/auth/login.html:159
+#: templates/accounts/auth/login.html:264
+#: templates/accounts/auth/login.html:296
+msgid "درحال بررسی..."
+msgstr ""
+
+#: templates/accounts/auth/forgot.html:80 templates/accounts/auth/login.html:88
+#: templates/accounts/auth/login.html:137
+#: templates/accounts/auth/login.html:189
+#: templates/accounts/auth/login.html:230
+#: templates/accounts/auth/login.html:278
+msgid "بازگشت"
+msgstr ""
+
+#: templates/accounts/auth/forgot.html:84
+#: templates/accounts/auth/login.html:193
+#, fuzzy
+#| msgid "لطفا برای ثبت دیدگاه ابتدا وارد سایت شوید."
+msgid "کد ارسال شده را وارد کنید."
+msgstr "please login"
+
+#: templates/accounts/auth/forgot.html:106
+#: templates/accounts/auth/login.html:215
+msgid "مانده تا دریافت مجدد کد تایید"
+msgstr ""
+
+#: templates/accounts/auth/forgot.html:107
+#: templates/accounts/auth/login.html:216
+msgid "ارسال مجدد کد"
+msgstr ""
+
+#: templates/accounts/auth/forgot.html:108
+#: templates/accounts/auth/login.html:217
+msgid "درحال ارسال..."
+msgstr ""
+
+#: templates/accounts/auth/forgot.html:117
+#: templates/accounts/auth/forgot.html:139
+msgid "تایید رمز عبور"
+msgstr ""
+
+#: templates/accounts/auth/forgot.html:121
+msgid "رمز عبور جدید"
+msgstr ""
+
+#: templates/accounts/auth/forgot.html:134
+msgid "رمزعبوری که انتخاب می‌کنید باید حداقل 6 کاراکتر باشد."
+msgstr ""
+
+#: templates/accounts/auth/forgot.html:201
+#: templates/accounts/auth/forgot.html:222
+#: templates/accounts/auth/forgot.html:226
+#: templates/accounts/auth/forgot.html:248
+#: templates/accounts/auth/forgot.html:267
+#: templates/accounts/auth/forgot.html:282
+#: templates/accounts/auth/forgot.html:286
+#: templates/accounts/auth/login.html:330
+#: templates/accounts/auth/login.html:334
+#: templates/accounts/auth/login.html:387
+#: templates/accounts/auth/login.html:414
+#: templates/accounts/auth/login.html:433
+#: templates/accounts/auth/login.html:437
+#: templates/accounts/auth/login.html:461
+#: templates/accounts/auth/login.html:483
+#: templates/accounts/auth/login.html:487
+#: templates/accounts/auth/login.html:498
+#: templates/accounts/auth/login.html:519
+#: templates/accounts/auth/login.html:547
+#: templates/accounts/auth/login.html:564
+#: templates/accounts/auth/login.html:578
+#: templates/accounts/auth/login.html:582 templates/core/selection.html:123
+#: templates/core/selection.html:131 templates/movie/cinematic.html:1207
+#: templates/movie/serial.html:1366
+msgid "خطا"
+msgstr ""
+
+#: templates/accounts/auth/forgot.html:201
+#: templates/accounts/auth/login.html:414
+#: templates/accounts/auth/login.html:498
+msgid "شماره موبایل نامعتبر است!"
+msgstr ""
+
+#: templates/accounts/auth/forgot.html:222
+#: templates/accounts/auth/login.html:461
+#: templates/accounts/auth/login.html:519
+msgid "خطا در ارسال کد"
+msgstr ""
+
+#: templates/accounts/auth/forgot.html:226
+#: templates/accounts/auth/forgot.html:286
+#: templates/accounts/auth/login.html:334
+#: templates/accounts/auth/login.html:437
+#: templates/accounts/auth/login.html:487
+#: templates/accounts/auth/login.html:582 templates/core/selection.html:131
+#: templates/core/selection.html:133
+msgid "مشکل در ارتباط با سرور"
+msgstr ""
+
+#: templates/accounts/auth/forgot.html:248
+#: templates/accounts/auth/login.html:547
+msgid "کد نامعتبر است"
+msgstr ""
+
+#: templates/accounts/auth/forgot.html:267
+msgid "رمز عبور باید حداقل ۶ کاراکتر باشد."
+msgstr ""
+
+#: templates/accounts/auth/forgot.html:282
+#: templates/accounts/auth/login.html:330
+#: templates/accounts/auth/login.html:433
+#: templates/accounts/auth/login.html:483
+#: templates/accounts/auth/login.html:578
+msgid "خطایی رخ داد"
+msgstr ""
+
+#: templates/accounts/auth/login.html:92
+msgid "ورود یا ثبت‌نام"
+msgstr ""
+
+#: templates/accounts/auth/login.html:106
+#: templates/accounts/auth/login.html:158
+msgid "ادامه"
+msgstr ""
+
+#: templates/accounts/auth/login.html:113
+msgid "یا"
+msgstr ""
+
+#: templates/accounts/auth/login.html:124
+msgid "ادامه با گوگل"
+msgstr "continue with google"
+
+#: templates/accounts/auth/login.html:141
+#, fuzzy
+#| msgid "لطفا برای ثبت دیدگاه ابتدا وارد سایت شوید."
+msgid "رمز عبور خود را وارد کنید."
+msgstr "please login"
+
+#: templates/accounts/auth/login.html:144
+#: templates/accounts/auth/login.html:249
+msgid "رمز عبور"
+msgstr ""
+
+#: templates/accounts/auth/login.html:172
+msgid "دریافت کد ورود از طریق پیامک"
+msgstr ""
+
+#: templates/accounts/auth/login.html:234
+msgid "تکمیل اطلاعات حساب"
+msgstr ""
+
+#: templates/accounts/auth/login.html:237
+msgid "نام و نام خانوادگی"
+msgstr ""
+
+#: templates/accounts/auth/login.html:241
+#: templates/accounts/auth/login.html:286
+msgid "نام کاربری (انگلیسی)"
+msgstr ""
+
+#: templates/accounts/auth/login.html:245
+msgid "ایمیل"
+msgstr ""
+
+#: templates/accounts/auth/login.html:263
+msgid "تکمیل ثبت‌نام"
+msgstr ""
+
+#: templates/accounts/auth/login.html:282
+msgid "تکمیل پروفایل"
+msgstr ""
+
+#: templates/accounts/auth/login.html:283
+msgid ""
+"برای تکمیل ثبت‌نام با گوگل، لطفاً شماره موبایل و نام کاربری خود را وارد کنید."
+msgstr ""
+
+#: templates/accounts/auth/login.html:295
+msgid "ارسال کد تایید"
+msgstr ""
+
+#: templates/accounts/auth/login.html:387
+msgid "سرویس گوگل در حال بارگذاری است. لحظاتی بعد مجدد تلاش کنید."
+msgstr ""
+
+#: templates/accounts/auth/login.html:564
+#, fuzzy
+#| msgid "لطفا برای ثبت دیدگاه ابتدا وارد سایت شوید."
+msgid "لطفا تمامی فیلدها را پر کنید"
+msgstr "please login"
+
+#: templates/admin/base_site.html:4
+msgid "Django site admin"
+msgstr ""
+
+#: templates/admin/base_site.html:7
+msgid "Django administration"
+msgstr ""
+
+#: templates/admin/base_site.html:134
+msgid "Welcome,"
+msgstr ""
+
+#: templates/admin/base_site.html:139
+msgid "View site"
+msgstr ""
+
+#: templates/admin/base_site.html:144
+msgid "Documentation"
+msgstr ""
+
+#: templates/admin/base_site.html:148
+msgid "Change password"
+msgstr ""
+
+#: templates/admin/base_site.html:152
+msgid "Log out"
+msgstr ""
+
+#: templates/components/cards/card_collection_item.html:21
+#: templates/components/cards/card_episode.html:21
+msgid "تماشا کنید"
+msgstr ""
+
+#: templates/components/cards/card_collection_item.html:34
+#: templates/components/cards/card_episode.html:34
+#, python-format
+msgid "از %(votes)s رای"
+msgstr "from %(votes)s ray"
+
+#: templates/components/cards/card_hero.html:136
+#: templates/movie/cinematic.html:154 templates/movie/serial.html:155
+msgid "تماشای فیلم"
+msgstr ""
+
+#: templates/core/selection.html:11
+msgid ""
+"لطفاً برای تکمیل پروفایل، دقیقاً ۳ فیلم یا سریال مورد علاقه خود را انتخاب کنید"
+msgstr ""
+
+#: templates/core/selection.html:26
+msgid "بدون تصویر"
+msgstr ""
+
+#: templates/core/selection.html:33
+msgid "فیلم"
+msgstr ""
+
+#: templates/core/selection.html:33 templates/movie/cinematic.html:714
+msgid "سریال"
+msgstr ""
+
+#: templates/core/selection.html:54
+msgid "انتخاب شده:"
+msgstr ""
+
+#: templates/core/selection.html:62
+msgid "ثبت و ورود به سایت"
+msgstr ""
+
+#: templates/core/selection.html:91
+msgid "توجه"
+msgstr ""
+
+#: templates/core/selection.html:91 templates/core/selection.html:93
+msgid "شما فقط می‌توانید ۳ مورد را انتخاب کنید."
+msgstr ""
+
+#: templates/movie/cinematic.html:127
+#, python-format
+msgid "%(count)s پارت"
+msgstr ""
+
+#: templates/movie/cinematic.html:160 templates/movie/serial.html:161
+msgid "دانلود فیلم"
+msgstr ""
+
+#: templates/movie/cinematic.html:246 templates/movie/serial.html:256
+msgid "بستن"
+msgstr "close"
+
+#: templates/movie/cinematic.html:246 templates/movie/serial.html:256
+msgid "بیشتر"
+msgstr "more"
+
+#: templates/movie/cinematic.html:397 templates/movie/serial.html:403
+msgid "بازیگران"
+msgstr ""
+
+#: templates/movie/cinematic.html:410
+msgid "بازیگری یافت نشد."
+msgstr ""
+
+#: templates/movie/cinematic.html:433
+msgid "دیدگاه کاربران"
+msgstr ""
+
+#: templates/movie/cinematic.html:446
+msgid "کالکشن"
+msgstr ""
+
+#: templates/movie/cinematic.html:459 templates/movie/serial.html:471
+msgid "فیلم‌های مشابه"
+msgstr ""
+
+#: templates/movie/cinematic.html:474
+#, python-format
+msgid "دیدگاه‌های فیلم %(title)s"
+msgstr ""
+
+#: templates/movie/cinematic.html:477 templates/movie/serial.html:754
+msgid "دیدگاه"
+msgstr ""
+
+#: templates/movie/cinematic.html:504 templates/movie/cinematic.html:1215
+#: templates/movie/serial.html:761 templates/movie/serial.html:1374
+msgid "نظرت رو اینجا بنویس ..."
+msgstr ""
+
+#: templates/movie/cinematic.html:531 templates/movie/serial.html:768
+msgid "لطفا برای ثبت دیدگاه ابتدا وارد سایت شوید."
+msgstr "please login"
+
+#: templates/movie/cinematic.html:674
+msgid "پارتی برای این کالکشن ثبت نشده است."
+msgstr ""
+
+#: templates/movie/cinematic.html:685
+msgid "هیچ موردی موجود نیست."
+msgstr ""
+
+#: templates/movie/cinematic.html:718
+msgid "دوبله"
+msgstr ""
+
+#: templates/movie/cinematic.html:834 templates/movie/serial.html:1223
+msgid "زبان ها"
+msgstr ""
+
+#: templates/movie/cinematic.html:839
+msgid "فارسی"
+msgstr ""
+
+#: templates/movie/cinematic.html:839
+msgid "اسپانیایی"
+msgstr ""
+
+#: templates/movie/cinematic.html:839
+msgid "ترکی"
+msgstr ""
+
+#: templates/movie/cinematic.html:839
+msgid "عربی"
+msgstr ""
+
+#: templates/movie/cinematic.html:839
+msgid "انگلیسی"
+msgstr ""
+
+#: templates/movie/cinematic.html:928 templates/movie/serial.html:1316
+msgid "کیفیت ها"
+msgstr ""
+
+#: templates/movie/cinematic.html:933
+msgid "خودکار"
+msgstr ""
+
+#: templates/movie/cinematic.html:991
+msgid "لینک‌های دانلود"
+msgstr ""
+
+#: templates/movie/cinematic.html:1039 templates/movie/serial.html:994
+msgid "نسخه زیرنویس"
+msgstr ""
+
+#: templates/movie/cinematic.html:1046 templates/movie/cinematic.html:1191
+#: templates/movie/serial.html:1001 templates/movie/serial.html:1147
+msgid "نسخه دوبله"
+msgstr ""
+
+#: templates/movie/cinematic.html:1094 templates/movie/serial.html:1049
+msgid "دانلود با لینک مستقیم"
+msgstr ""
+
+#: templates/movie/cinematic.html:1112 templates/movie/serial.html:1067
+msgid "نمونه کیفیت"
+msgstr ""
+
+#: templates/movie/cinematic.html:1133
+msgid "نسخه‌های 10bit دارای عمق رنگ بیشتر و وضوح بهتری می‌باشند."
+msgstr ""
+
+#: templates/movie/cinematic.html:1160 templates/movie/serial.html:1116
+msgid "اینستاگرام ما"
+msgstr ""
+
+#: templates/movie/cinematic.html:1180 templates/movie/serial.html:1136
+msgid "کانال تلگرام ما"
+msgstr ""
+
+#: templates/movie/cinematic.html:1206 templates/movie/serial.html:1365
+msgid "موفق"
+msgstr ""
+
+#: templates/movie/cinematic.html:1208 templates/movie/serial.html:1367
+msgid "دسترسی غیرمجاز"
+msgstr ""
+
+#: templates/movie/cinematic.html:1209 templates/movie/serial.html:1368
+#, fuzzy
+#| msgid "لطفا برای ثبت دیدگاه ابتدا وارد سایت شوید."
+msgid "لطفا ابتدا وارد سایت شوید."
+msgstr "please login"
+
+#: templates/movie/cinematic.html:1210 templates/movie/serial.html:1369
+msgid "خطا در برقراری ارتباط با سرور."
+msgstr ""
+
+#: templates/movie/cinematic.html:1211 templates/movie/serial.html:1370
+msgid "لینک صفحه با موفقیت کپی شد."
+msgstr ""
+
+#: templates/movie/cinematic.html:1212 templates/movie/serial.html:1371
+msgid "مشکلی در کپی لینک رخ داد."
+msgstr ""
+
+#: templates/movie/cinematic.html:1213 templates/movie/serial.html:1372
+msgid "امکان کپی لینک وجود ندارد."
+msgstr ""
+
+#: templates/movie/cinematic.html:1214 templates/movie/serial.html:1373
+#, fuzzy
+#| msgid "لطفا برای ثبت دیدگاه ابتدا وارد سایت شوید."
+msgid "لطفا متن دیدگاه را وارد کنید."
+msgstr "please login"
+
+#: templates/movie/cinematic.html:1216 templates/movie/serial.html:1375
+msgid "پاسخ به"
+msgstr ""
+
+#: templates/movie/serial.html:124
+#, python-format
+msgid "%(count)s فصل"
+msgstr ""
+
+#: templates/movie/serial.html:425 templates/movie/serial.html:576
+#: templates/movie/serial.html:579 templates/movie/serial.html:623
+#: templates/movie/serial.html:626
+msgid "جدیدترین"
+msgstr ""
+
+#: templates/movie/serial.html:430
+msgid "فصل اول"
+msgstr ""
+
+#: templates/movie/serial.html:445
+msgid "قسمت‌ها"
+msgstr ""
+
+#: templates/movie/serial.html:458
+msgid "تریلرها"
+msgstr ""
+
+#: templates/movie/serial.html:484 templates/movie/serial.html:752
+msgid "دیدگاه‌ها"
+msgstr ""
+
+#: templates/movie/serial.html:582 templates/movie/serial.html:585
+#: templates/movie/serial.html:629 templates/movie/serial.html:632
+msgid "قدیمی‌ترین"
+msgstr ""
+
+#: templates/movie/serial.html:645
+msgid "قسمت‌های این فصل به زودی اضافه می‌شود."
+msgstr ""
+
+#: templates/movie/serial.html:651
+msgid "فصلی برای این سریال ثبت نشده است."
+msgstr ""

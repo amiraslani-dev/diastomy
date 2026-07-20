@@ -1,0 +1,157 @@
+{% extends "admin/base.html" %}
+{% load i18n static %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block branding %}
+<div id="site-name"><a href="{% url 'admin:index' %}">{{ site_header|default:_('Django administration') }}</a></div>
+{% endblock %}
+
+{% block usertools %}
+<!-- Notification Bell CSS Styles -->
+<style>
+    .notification-bell-container {
+        position: relative;
+        display: inline-block;
+        margin-left: 20px;
+        vertical-align: middle;
+    }
+    .notification-bell-icon {
+        cursor: pointer;
+        position: relative;
+        font-size: 20px;
+        color: #ccc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 5px;
+        border-radius: 50%;
+        background-color: #222;
+        transition: background-color 0.2s, color 0.2s;
+    }
+    .notification-bell-icon:hover {
+        color: #fff;
+        background-color: #333;
+    }
+    .notification-badge-count {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        background-color: #e41a1a;
+        color: white;
+        border-radius: 50%;
+        padding: 2px 6px;
+        font-size: 10px;
+        font-weight: bold;
+        line-height: 1;
+        box-shadow: 0 0 4px rgba(0,0,0,0.5);
+    }
+    .notification-dropdown {
+        display: none;
+        position: absolute;
+        left: 0;
+        top: 35px;
+        background-color: #1a1a1a;
+        min-width: 320px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.6);
+        z-index: 1000;
+        border: 1px solid #444;
+        border-radius: 8px;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    .notification-dropdown a {
+        color: #eee !important;
+        padding: 12px 14px;
+        text-decoration: none;
+        display: block;
+        border-bottom: 1px solid #333;
+        font-size: 12px;
+        text-align: right;
+        line-height: 1.5;
+        transition: background-color 0.2s;
+    }
+    .notification-dropdown a:hover {
+        background-color: #2b2b2b !important;
+    }
+    .notification-dropdown .no-notifications {
+        padding: 16px;
+        color: #888;
+        text-align: center;
+        font-size: 12px;
+    }
+    .notification-dropdown .header-title {
+        padding: 10px 14px;
+        background-color: #111;
+        font-weight: bold;
+        font-size: 11px;
+        color: #aaa;
+        border-bottom: 1px solid #333;
+        text-align: right;
+    }
+</style>
+
+<div id="user-tools" style="display: flex; align-items: center; justify-content: flex-end; gap: 15px;">
+    <!-- Notification Bell Dropdown -->
+    <div class="notification-bell-container" id="notification-bell-toggle">
+        <span class="notification-bell-icon">
+            🔔
+            {% if admin_unread_count > 0 %}
+                <span class="notification-badge-count">{{ admin_unread_count }}</span>
+            {% endif %}
+        </span>
+        <div class="notification-dropdown" id="notification-dropdown-menu">
+            <div class="header-title">اعلان‌های خوانده نشده جدید</div>
+            {% if admin_notifications %}
+                {% for notif in admin_notifications %}
+                    <a href="{{ notif.get_admin_url }}">{{ notif.message }}</a>
+                {% endfor %}
+            {% else %}
+                <div class="no-notifications">هیچ اعلان جدیدی وجود ندارد</div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <script>
+        (function() {
+            var toggle = document.getElementById('notification-bell-toggle');
+            var menu = document.getElementById('notification-dropdown-menu');
+            if (toggle && menu) {
+                toggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+                });
+                document.addEventListener('click', function() {
+                    menu.style.display = 'none';
+                });
+            }
+        })();
+    </script>
+
+    <!-- Normal User Tools Links -->
+    <div style="display: flex; align-items: center; gap: 8px;">
+        {% block welcome-msg %}
+            {% translate 'Welcome,' %}
+            <strong>{% firstof user.get_short_name user.get_username %}</strong>.
+        {% endblock %}
+        {% block userlinks %}
+            {% if site_url %}
+                <a href="{{ site_url }}">{% translate 'View site' %}</a> /
+            {% endif %}
+            {% if user.is_active and user.is_staff %}
+                {% url 'django-admindocs-docroot' as admindocurl %}
+                {% if admindocurl %}
+                    <a href="{{ admindocurl }}">{% translate 'Documentation' %}</a> /
+                {% endif %}
+            {% endif %}
+            {% if user.has_usable_password %}
+            <a href="{% url 'admin:password_change' %}">{% translate 'Change password' %}</a> /
+            {% endif %}
+            <form id="logout-form" action="{% url 'admin:logout' %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" style="background:none; border:none; color:#e41a1a; cursor:pointer; padding:0; font:inherit; text-decoration:underline;">{% translate 'Log out' %}</button>
+            </form>
+        {% endblock %}
+    </div>
+</div>
+{% endblock %}

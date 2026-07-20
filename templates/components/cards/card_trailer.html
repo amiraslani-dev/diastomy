@@ -1,0 +1,34 @@
+{% load static %}
+                            <li class="splide__slide">
+                                <div
+                                    class="relative w-full aspect-video rounded-[20px] overflow-hidden group"
+                                >
+                                    <img
+                                        src="{% static 'public/assets/img/banner2.jpg' %}"
+                                        class="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
+                                        alt="Trailer"
+                                    />
+                                    <div
+                                        class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"
+                                    ></div>
+                                    <div class="absolute bottom-6 left-6">
+                                        <button
+                                            class="flex items-center gap-3 {% if variant == 'dark' %}bg-[#1a1a1a]/90 hover:bg-black border border-white/10{% else %}bg-red-600 hover:bg-red-700 shadow-xl shadow-red-900/20{% endif %} text-white px-6 py-2 rounded-[100px] font-bold transition-all"
+                                        >
+                                            <span class="text-sm sm:text-lg"
+                                                >مشاهده تریلر</span
+                                            >
+                                            <svg class="size-6" fill="none" viewBox="0 0 29 29">
+<path
+                                                    d="M4.82458 14.4736V10.1797C4.82458 4.84859 8.5998 2.66548 13.2193 5.33105L16.9463 7.47798L20.6733 9.62491C25.2928 12.2905 25.2928 16.6567 20.6733 19.3223L16.9463 21.4692L13.2193 23.6161C8.5998 26.2817 4.82458 24.0986 4.82458 18.7675V14.4736Z"
+                                                    stroke="white"
+                                                    stroke-width="2.17105"
+                                                    stroke-miterlimit="10"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                />
+</svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </li>

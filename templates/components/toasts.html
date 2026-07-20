@@ -1,0 +1,66 @@
+<!-- Global Toast Component using Alpine.store -->
+<div class="fixed bottom-5 right-5 z-[120] flex flex-col gap-3 pointer-events-none" dir="rtl" x-data>
+    <template x-for="toast in $store.globalToast.toasts" :key="toast.id">
+        <div x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+             x-transition:leave-end="opacity-0 translate-y-4 scale-95"
+             class="relative w-[320px] shadow-2xl rounded-2xl p-[1px] bg-[linear-gradient(149.1deg,rgba(255,255,255,0.18)_9.71%,rgba(255,255,255,0)_103.07%)] pointer-events-auto overflow-hidden flex flex-col">
+            
+            <div class="bg-[#0C0C0CCC] backdrop-blur-xl rounded-[15px] p-4 flex items-start gap-3 w-full h-full relative">
+                
+                <!-- Icon: Success -->
+                <div x-show="toast.type === 'success'" class="flex-shrink-0 mt-0.5" style="display: none;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z" fill="#26AB5B" fill-opacity="0.2" stroke="#26AB5B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M7.75 12L10.58 14.83L16.25 9.17" stroke="#26AB5B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                
+                <!-- Icon: Error -->
+                <div x-show="toast.type === 'error'" class="flex-shrink-0 mt-0.5" style="display: none;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z" fill="#DD0202" fill-opacity="0.2" stroke="#DD0202" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9.17004 14.83L14.83 9.17004" stroke="#DD0202" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M14.83 14.83L9.17004 9.17004" stroke="#DD0202" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+
+                <!-- Icon: Info/Warning -->
+                <div x-show="toast.type !== 'success' && toast.type !== 'error'" class="flex-shrink-0 mt-0.5" style="display: none;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z" fill="#3B82F6" fill-opacity="0.2" stroke="#3B82F6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 8V13" stroke="#3B82F6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M11.9941 16H12.0031" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+
+                <!-- Content -->
+                <div class="flex-1 min-w-0">
+                    <h4 class="text-sm font-bold text-white truncate" x-text="toast.title"></h4>
+                    <p class="text-xs text-gray-400 mt-1 line-clamp-2" x-text="toast.message"></p>
+                </div>
+
+                <!-- Close -->
+                <button @click="$store.globalToast.remove(toast.id)" class="flex-shrink-0 text-gray-500 hover:text-white transition cursor-pointer relative z-10">
+                    <svg class="w-4 h-4" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9.17004 14.83L14.83 9.17004" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M14.83 14.83L9.17004 9.17004" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                
+                <!-- Progress Bar -->
+                <div class="absolute bottom-0 left-0 right-0 h-[2px] bg-white/5 rounded-b-[15px] overflow-hidden">
+                    <div class="h-full toast-progress" :class="{
+                        'bg-[#26AB5B]': toast.type === 'success',
+                        'bg-[#DD0202]': toast.type === 'error',
+                        'bg-[#3B82F6]': toast.type !== 'success' && toast.type !== 'error'
+                    }"></div>
+                </div>
+
+            </div>
+        </div>
+    </template>
+</div>

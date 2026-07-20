@@ -1,0 +1,845 @@
+﻿<!doctype html>
+<html lang="fa" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Hero Component</title>
+        <link rel="stylesheet" href="dist/assets/css/main.css" />
+        <script defer src="public/assets/js/alpine.min.js"></script>
+    </head>
+    <body>
+        <style>
+            .no-select {
+                -webkit-user-select: none;
+                user-select: none;
+            }
+        </style>
+
+        <div
+            x-data="customPlayer()"
+            x-ref="playerContainer"
+            @mousemove="resetControlsTimeout"
+            @touchstart.passive="resetControlsTimeout"
+            @mouseleave="hideControls"
+            class="relative w-full h-[100svh] mx-auto bg-black overflow-hidden font-sans text-white shadow-2xl transition-all duration-300 no-select"
+            :class="{ 'rounded-none': isFullscreen, 'rounded-none': !isFullscreen, 'cursor-none': !showControls }"
+            dir="ltr"
+        >
+            <video
+                x-ref="videoPlayer"
+                @loadedmetadata="initVideo"
+                @timeupdate="updateProgress"
+                @ended="isPlaying = false; showControls = true;"
+                @click="handleVideoClick"
+                class="absolute inset-0 object-contain w-full h-full bg-black"
+                poster="https://image.tmdb.org/t/p/original/reEMJA1uzscCbkpeRJeTT2bjqUp.jpg"
+                playsinline
+                webkit-playsinline
+            >
+                <source
+                    src="https://www.w3schools.com/html/mov_bbb.mp4"
+                    type="video/mp4"
+                />
+
+                <track
+                    label="فارسی"
+                    kind="subtitles"
+                    srclang="fa"
+                    src="path_to_subtitle.vtt"
+                    default
+                />
+                <track
+                    label="English"
+                    kind="subtitles"
+                    srclang="en"
+                    src="path_to_english.vtt"
+                />
+            </video>
+
+            <div
+                x-show="showControls && !isLocked && !showSpeedMenu && !showQualityMenu && !showCcMenu && !showEpisodesMenu"
+                x-transition.opacity.duration.300ms
+                class="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/60 via-transparent to-black/80"
+            ></div>
+
+            <div
+                x-show="showControls && !showSpeedMenu && !showQualityMenu && !showCcMenu && !showEpisodesMenu"
+                x-transition.opacity.duration.300ms
+                class="absolute top-0 left-0 z-30 w-full px-6 py-6 pointer-events-none md:px-10 md:py-8"
+            >
+                <div
+                    class="relative flex items-center justify-center w-full h-12"
+                >
+                    <button
+                        x-show="!isLocked"
+                        class="absolute left-0 flex items-center justify-center w-10 h-10 transition rounded-full cursor-pointer pointer-events-auto md:w-12 md:h-12 bg-white/10 backdrop-blur-md hover:bg-white/20"
+                    >
+                        <svg
+                            class="w-5 h-5 text-white md:w-6 md:h-6"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            stroke-width="1.5"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                            />
+                        </svg>
+                    </button>
+
+                    <h2
+                        x-show="!isLocked"
+                        class="absolute text-xl font-bold tracking-wider md:text-3xl drop-shadow-md"
+                    >
+                        LaCasa De Papel
+                    </h2>
+
+                    <button
+                        @click.stop="toggleLock"
+                        class="absolute right-0 flex items-center justify-center w-10 h-10 transition-all rounded-full shadow-lg cursor-pointer pointer-events-auto md:w-12 md:h-12 backdrop-blur-md"
+                        :class="isLocked ? 'bg-white/20 hover:bg-white/15  scale-110' : 'bg-white/10 hover:bg-white/20'"
+                    >
+                        <svg
+                            x-show="isLocked"
+                            style="display: none"
+                            class="w-5 h-5 md:w-6 md:h-6 text-black/50"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            stroke-width="1.5"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                            />
+                        </svg>
+
+                        <svg
+                            x-show="!isLocked"
+                            width="27"
+                            height="27"
+                            viewBox="0 0 27 27"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path
+                                d="M18.8438 9.34195V7.875C18.8438 4.92863 16.4464 2.53125 13.5 2.53125C10.5536 2.53125 8.15625 4.92863 8.15625 7.875V9.34195C5.976 9.63107 4.78125 11.0767 4.78125 13.5V20.25C4.78125 22.9702 6.27975 24.4688 9 24.4688H18C20.7203 24.4688 22.2188 22.9702 22.2188 20.25V13.5C22.2188 11.0779 21.024 9.6322 18.8438 9.34195ZM13.5 4.21875C15.516 4.21875 17.1562 5.859 17.1562 7.875V9.28125H9.84375V7.875C9.84375 5.859 11.484 4.21875 13.5 4.21875ZM20.5312 20.25C20.5312 22.0241 19.7741 22.7812 18 22.7812H9C7.22587 22.7812 6.46875 22.0241 6.46875 20.25V13.5C6.46875 11.7259 7.22587 10.9688 9 10.9688H18C19.7741 10.9688 20.5312 11.7259 20.5312 13.5V20.25ZM14.9288 15.75C14.9288 16.2135 14.6903 16.6051 14.3438 16.8604V19.125C14.3438 19.5907 13.9657 19.9688 13.5 19.9688C13.0343 19.9688 12.6562 19.5907 12.6562 19.125V16.8322C12.3323 16.5745 12.1105 16.1944 12.1105 15.75C12.1105 14.9738 12.735 14.3438 13.5113 14.3438H13.5225C14.2988 14.3438 14.9288 14.9738 14.9288 15.75Z"
+                                fill="white"
+                            />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div
+                x-show="showControls && !isLocked && !showSpeedMenu && !showQualityMenu && !showCcMenu && !showEpisodesMenu"
+                x-transition.opacity.duration.300ms
+                class="absolute inset-0 z-40 flex items-center justify-center gap-10 pointer-events-none"
+            >
+                <button
+                    @click.stop="skip(-10)"
+                    class="relative z-50 flex items-center justify-center transition-transform duration-200 pointer-events-auto hover:scale-110"
+                >
+                    <svg
+                        width="56"
+                        height="56"
+                        viewBox="0 0 56 56"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <path
+                            d="M22.2598 37.1469V24.687L18.7598 28.5836"
+                            stroke="white"
+                            stroke-width="1.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        />
+                        <path
+                            d="M23.3789 10.4303L27.9989 4.66699"
+                            stroke="white"
+                            stroke-width="1.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        />
+                        <path
+                            d="M11.4549 18.2001C8.86493 21.6534 7.25488 25.9234 7.25488 30.59C7.25488 42.0467 16.5416 51.3334 27.9983 51.3334C39.4549 51.3334 48.7416 42.0467 48.7416 30.59C48.7416 19.1334 39.4549 9.84668 27.9983 9.84668C26.4116 9.84668 24.8716 10.0568 23.3782 10.4068"
+                            stroke="white"
+                            stroke-width="1.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        />
+                        <path
+                            d="M32.6647 24.687C35.2314 24.687 37.3314 26.787 37.3314 29.3537V32.5036C37.3314 35.0703 35.2314 37.1703 32.6647 37.1703C30.098 37.1703 27.998 35.0703 27.998 32.5036V29.3537C27.998 26.7637 30.098 24.687 32.6647 24.687Z"
+                            stroke="white"
+                            stroke-width="1.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        />
+                    </svg>
+                </button>
+
+                <button
+                    @click.stop="togglePlay"
+                    class="pointer-events-auto relative z-50 rounded-full backdrop-blur-md flex items-center justify-center shadow-[0_0_20px_rgba(0,0,0,0.5)] hover:bg-black/60 hover:scale-105 hover:border-white transition-all duration-300"
+                >
+                    <svg
+                        x-show="!isPlaying"
+                        width="68"
+                        height="68"
+                        viewBox="0 0 68 68"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <foreignObject x="-15" y="-15" width="98" height="98"
+                            ><div
+                                xmlns="http://www.w3.org/1999/xhtml"
+                                style="
+                                    backdrop-filter: blur(7.5px);
+                                    clip-path: url(#bgblur_0_639_7631_clip_path);
+                                    height: 100%;
+                                    width: 100%;
+                                "
+                            ></div
+                        ></foreignObject>
+                        <rect
+                            data-figma-bg-blur-radius="15"
+                            x="0.5"
+                            y="0.5"
+                            width="67"
+                            height="67"
+                            rx="33.5"
+                            fill="black"
+                            fill-opacity="0.3"
+                            stroke="url(#paint0_linear_639_7631)"
+                        />
+                        <path
+                            d="M42.8645 37.42L30.0336 45.2719C27.4804 46.8344 24.1963 45.0018 24.1963 42.0144V26.7475C24.1963 23.7601 27.4804 21.9278 30.0336 23.4903L42.8645 31.3421C45.1375 32.734 45.1375 36.0295 42.8645 37.42Z"
+                            fill="white"
+                        />
+                        <defs>
+                            <clipPath
+                                id="bgblur_0_639_7631_clip_path"
+                                transform="translate(15 15)"
+                            >
+                                <rect
+                                    x="0.5"
+                                    y="0.5"
+                                    width="67"
+                                    height="67"
+                                    rx="33.5"
+                                />
+                            </clipPath>
+                            <linearGradient
+                                id="paint0_linear_639_7631"
+                                x1="34"
+                                y1="0"
+                                x2="34"
+                                y2="68"
+                                gradientUnits="userSpaceOnUse"
+                            >
+                                <stop stop-color="white" stop-opacity="0.56" />
+                                <stop
+                                    offset="1"
+                                    stop-color="white"
+                                    stop-opacity="0"
+                                />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+
+                    <svg
+                        x-show="isPlaying"
+                        width="68"
+                        height="68"
+                        viewBox="0 0 68 68"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <foreignObject x="-15" y="-15" width="98" height="98">
+                            <div
+                                xmlns="http://www.w3.org/1999/xhtml"
+                                style="
+                                    backdrop-filter: blur(7.5px);
+                                    clip-path: url(#pause_clip_path);
+                                    height: 100%;
+                                    width: 100%;
+                                "
+                            ></div>
+                        </foreignObject>
+
+                        <rect
+                            data-figma-bg-blur-radius="15"
+                            x="0.5"
+                            y="0.5"
+                            width="67"
+                            height="67"
+                            rx="33.5"
+                            fill="black"
+                            fill-opacity="0.3"
+                            stroke="url(#pause_gradient)"
+                        />
+
+                        <path
+                            d="M28 23C26.3431 23 25 24.3431 25 26V42C25 43.6569 26.3431 45 28 45C29.6569 45 31 43.6569 31 42V26C31 24.3431 29.6569 23 28 23Z"
+                            fill="white"
+                        />
+                        <path
+                            d="M40 23C38.3431 23 37 24.3431 37 26V42C37 43.6569 38.3431 45 40 45C41.6569 45 43 43.6569 43 42V26C43 24.3431 41.6569 23 40 23Z"
+                            fill="white"
+                        />
+
+                        <defs>
+                            <clipPath
+                                id="pause_clip_path"
+                                transform="translate(15 15)"
+                            >
+                                <rect
+                                    x="0.5"
+                                    y="0.5"
+                                    width="67"
+                                    height="67"
+                                    rx="33.5"
+                                />
+                            </clipPath>
+                            <linearGradient
+                                id="pause_gradient"
+                                x1="34"
+                                y1="0"
+                                x2="34"
+                                y2="68"
+                                gradientUnits="userSpaceOnUse"
+                            >
+                                <stop stop-color="white" stop-opacity="0.56" />
+                                <stop
+                                    offset="1"
+                                    stop-color="white"
+                                    stop-opacity="0"
+                                />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </button>
+
+                <button
+                    @click.stop="skip(10)"
+                    class="relative z-50 flex items-center justify-center transition-transform duration-200 pointer-events-auto hover:scale-110"
+                >
+                    <svg
+                        width="56"
+                        height="56"
+                        viewBox="0 0 56 56"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <path
+                            d="M22.1689 37.1469V24.687L18.6689 28.5836"
+                            stroke="white"
+                            stroke-width="1.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        />
+                        <path
+                            d="M32.6211 10.4303L28.0011 4.66699"
+                            stroke="white"
+                            stroke-width="1.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        />
+                        <path
+                            d="M44.5451 18.2001C47.1351 21.6534 48.7451 25.9234 48.7451 30.59C48.7451 42.0467 39.4584 51.3334 28.0017 51.3334C16.5451 51.3334 7.25838 42.0467 7.25838 30.59C7.25838 19.1334 16.5451 9.84668 28.0017 9.84668C29.5884 9.84668 31.1284 10.0568 32.6218 10.4068"
+                            stroke="white"
+                            stroke-width="1.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        />
+                        <path
+                            d="M32.5739 24.687C35.1406 24.687 37.2406 26.787 37.2406 29.3537V32.5036C37.2406 35.0703 35.1406 37.1703 32.5739 37.1703C30.0072 37.1703 27.9072 35.0703 27.9072 32.5036V29.3537C27.9072 26.7637 30.0072 24.687 32.5739 24.687Z"
+                            stroke="white"
+                            stroke-width="1.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        />
+                    </svg>
+                </button>
+            </div>
+
+            <div
+                x-show="showControls && !isLocked && !showSpeedMenu && !showQualityMenu && !showCcMenu && !showEpisodesMenu"
+                x-transition.opacity.duration.300ms
+                class="absolute bottom-0 left-0 z-30 flex flex-col justify-end w-full px-6 py-5 md:px-10 md:py-8"
+            >
+                <div
+                    class="flex justify-between items-center text-[13px] md:text-[15px] font-medium text-white/90 mb-2"
+                    dir="rtl"
+                >
+                    <span class="drop-shadow-md" x-text="durationFormatted"
+                        >۰:۰۰</span
+                    >
+                    <span class="drop-shadow-md" x-text="currentTimeFormatted"
+                        >۰:۰۰</span
+                    >
+                </div>
+
+                <div
+                    x-ref="progressBar"
+                    @mousedown="startDrag($event)"
+                    @touchstart.passive="startDrag($event)"
+                    @mouseenter="showPreview = true"
+                    @mouseleave="showPreview = false"
+                    @mousemove="updatePreview($event)"
+                    class="relative flex items-center w-full h-6 cursor-pointer group/prog"
+                >
+                    <div
+                        x-show="showPreview"
+                        class="absolute bottom-6 w-32 md:w-40 aspect-video bg-black rounded-lg border-[1.5px] border-white shadow-2xl overflow-hidden transform -translate-x-1/2 pointer-events-none z-50 transition-all duration-75"
+                        :style="`left: ${previewPos}%`"
+                    >
+                        <video
+                            x-ref="previewVideo"
+                            class="absolute inset-0 object-cover w-full h-full"
+                            muted
+                            preload="auto"
+                        >
+                            <source
+                                src="https://www.w3schools.com/html/mov_bbb.mp4"
+                                type="video/mp4"
+                            />
+                        </video>
+
+                        <span
+                            class="absolute bottom-1 left-1/2 transform -translate-x-1/2 bg-black/80 px-2 py-0.5 rounded text-[10px] md:text-[11px] font-bold text-white shadow"
+                            x-text="previewTimeFormatted"
+                            dir="rtl"
+                        ></span>
+                    </div>
+
+                    <div
+                        class="absolute left-0 w-full h-1 bg-[#FFFFFF29] rounded-full pointer-events-none"
+                    ></div>
+                    <div
+                        class="absolute left-0 h-1 bg-white rounded-full pointer-events-none"
+                        :style="`width: ${progress}%`"
+                    ></div>
+                    <div
+                        class="absolute w-3 h-3 md:w-4 md:h-4 bg-[#cc0000] border-[3px] border-white rounded-full -ml-2 md:-ml-2.5 group-hover/prog:scale-125 transition-transform pointer-events-none"
+                        :style="`left: ${progress}%`"
+                    ></div>
+                </div>
+
+                <div class="flex items-center justify-between mt-3 md:mt-4">
+                    <div class="relative z-50 flex items-center gap-3 md:gap-8">
+                        <button
+                            @click="togglePlay"
+                            class="transition-all hover:scale-110 hover:text-white/80"
+                        >
+                            <svg
+                                x-show="isPlaying"
+                                class="object-contain w-6 h-6 md:w-7 md:h-7"
+                                viewBox="5 3 14 18"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    d="M5 19.5V4.5C5 3.5 5.5 3 6.5 3H8.5C9.5 3 10 3.5 10 4.5V19.5C10 20.5 9.5 21 8.5 21H6.5C5.5 21 5 20.5 5 19.5ZM15.5 21H17.5C18.5 21 19 20.5 19 19.5V4.5C19 3.5 18.5 3 17.5 3H15.5C14.5 3 14 3.5 14 4.5V19.5C14 20.5 14.5 21 15.5 21Z"
+                                    fill="white"
+                                />
+                            </svg>
+
+                            <svg
+                                x-show="!isPlaying"
+                                style="display: none"
+                                class="object-contain w-6 h-6 md:w-7 md:h-7"
+                                viewBox="0 0 21 23"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    d="M18.6682 14.5001L5.83728 22.352C3.2841 23.9144 0 22.0819 0 19.0945V3.82754C0 0.840128 3.2841 -0.99213 5.83728 0.570342L18.6682 8.4222C20.9412 9.81403 20.9412 13.1095 18.6682 14.5001Z"
+                                    fill="white"
+                                />
+                            </svg>
+                        </button>
+                        <button
+                            @click="toggleMute"
+                            class="transition-all hover:scale-110 hover:text-white/80"
+                        >
+                            <svg
+                                x-show="!isMuted"
+                                class="object-contain w-6 h-6 md:w-7 md:h-7"
+                                viewBox="0 1 21 17"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    d="M1.5 3.99989H3.26697C3.74097 3.99989 4.19906 3.83177 4.56006 3.52577L8.25098 0.398818C9.33598 -0.520182 11.001 0.250988 11.001 1.67299V16.3268C11.001 17.7488 9.33598 18.521 8.25098 17.601L4.56006 14.474C4.19906 14.168 3.74097 13.9999 3.26697 13.9999H1.5C0.672 13.9999 0 13.3279 0 12.4999V5.50087C0 4.67187 0.672 3.99989 1.5 3.99989ZM14.767 13.7709C16.046 12.4979 16.75 10.8029 16.75 8.99989C16.75 7.19689 16.046 5.5019 14.767 4.2289C14.473 3.9369 13.9981 3.93685 13.7061 4.23085C13.4131 4.52385 13.415 4.99988 13.708 5.29188C14.702 6.28188 15.25 7.59987 15.25 9.00087C15.25 10.4019 14.702 11.7199 13.708 12.7099C13.415 13.0019 13.4131 13.4769 13.7061 13.7709C13.8521 13.9179 14.0451 13.9918 14.2371 13.9918C14.4291 13.9898 14.62 13.9169 14.767 13.7709ZM17.067 16.82C16.875 16.82 16.682 16.747 16.536 16.6C16.244 16.307 16.244 15.832 16.538 15.539C18.287 13.795 19.25 11.4729 19.25 8.99989C19.25 6.52689 18.287 4.20583 16.538 2.46083C16.244 2.16783 16.244 1.69279 16.536 1.39979C16.828 1.10679 17.303 1.10582 17.597 1.39882C19.63 3.42682 20.75 6.12689 20.75 8.99989C20.75 11.8729 19.63 14.573 17.597 16.601C17.45 16.747 17.259 16.82 17.067 16.82Z"
+                                    fill="white"
+                                />
+                            </svg>
+
+                            <svg
+                                class="object-contain w-6 h-6 text-red-500 md:w-7 md:h-7"
+                                x-show="isMuted"
+                                style="display: none"
+                                viewBox="0 1 21 17"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    d="M1.5 3.99989H3.26697C3.74097 3.99989 4.19906 3.83177 4.56006 3.52577L8.25098 0.398818C9.33598 -0.520182 11.001 0.250988 11.001 1.67299V16.3268C11.001 17.7488 9.33598 18.521 8.25098 17.601L4.56006 14.474C4.19906 14.168 3.74097 13.9999 3.26697 13.9999H1.5C0.672 13.9999 0 13.3279 0 12.4999V5.50087C0 4.67187 0.672 3.99989 1.5 3.99989Z M14.207 5.793c-.391-.391-1.023-.391-1.414 0-.391.391-.391 1.023 0 1.414L15.086 9l-2.293 2.293c-.391.391-.391 1.023 0 1.414.195.195.451.293.707.293.256 0 .512-.098.707-.293L16.5 10.414l2.293 2.293c.195.195.451.293.707.293.256 0 .512-.098.707-.293.391-.391.391-1.023 0-1.414L17.914 9l2.293-2.293c.391-.391.391-1.023 0-1.414-.391-.391-1.023-.391-1.414 0L16.5 7.586l-2.293-2.293z"
+                                    fill="currentColor"
+                                />
+                            </svg>
+                        </button>
+                        <button
+                            class="transition-all hover:scale-110 hover:text-white/80"
+                        >
+                            <svg
+                                class="object-contain w-6 h-6 md:w-7 md:h-7"
+                                viewBox="4.5 3 13.5 18"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    d="M17.75 4V20C17.75 20.414 17.414 20.75 17 20.75C16.586 20.75 16.25 20.414 16.25 20V13.813C16.17 13.895 16.099 13.9829 16.007 14.0559L9.19202 19.439C7.49102 20.783 5 19.5611 5 17.3831V6.61792C5 4.43892 7.49004 3.21804 9.19104 4.56104L16.006 9.94312C16.099 10.0161 16.17 10.104 16.249 10.186V4C16.249 3.586 16.585 3.25 16.999 3.25C17.413 3.25 17.75 3.586 17.75 4Z"
+                                    fill="white"
+                                ></path>
+                            </svg>
+                        </button>
+
+                        <button
+                            @click.stop="openMenu('episodes')"
+                            class="transition-all hover:scale-110 hover:text-white/80"
+                        >
+                            <svg
+                                class="object-contain w-6 h-6 md:w-7 md:h-7"
+                                viewBox="3 2 18 20"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    d="M18 6.75H6C5.586 6.75 5.25 6.414 5.25 6C5.25 5.586 5.586 5.25 6 5.25H18C18.414 5.25 18.75 5.586 18.75 6C18.75 6.414 18.414 6.75 18 6.75ZM16.75 3C16.75 2.586 16.414 2.25 16 2.25H8C7.586 2.25 7.25 2.586 7.25 3C7.25 3.414 7.586 3.75 8 3.75H16C16.414 3.75 16.75 3.414 16.75 3ZM21 12V19C21 21 20 22 18 22H6C4 22 3 21 3 19V12C3 10 4 9 6 9H18C20 9 21 10 21 12ZM14.5811 14.7539L11.432 12.8269C10.805 12.4439 9.99902 12.893 9.99902 13.626V17.373C9.99902 18.106 10.805 18.5561 11.432 18.1721L14.5811 16.2451C15.1401 15.9041 15.1401 15.0959 14.5811 14.7539Z"
+                                    fill="white"
+                                />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="relative z-50 flex items-center gap-3 md:gap-8">
+                        <button
+                            @click.stop="openMenu('cc')"
+                            class="transition-all hover:scale-110 hover:text-white/80"
+                        >
+                            <svg
+                                class="w-6 h-6 md:w-7 md:h-7"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    d="M18 4H6C4 4 3 5 3 7V17C3 19 4 20 6 20H18C20 20 21 19 21 17V7C21 5 20 4 18 4ZM8.75 13.75C9.302 13.75 9.75 13.301 9.75 12.75H11.25C11.25 14.128 10.129 15.25 8.75 15.25C7.371 15.25 6.25 14.128 6.25 12.75V11.25C6.25 9.872 7.371 8.75 8.75 8.75C10.129 8.75 11.25 9.872 11.25 11.25H9.75C9.75 10.699 9.302 10.25 8.75 10.25C8.198 10.25 7.75 10.699 7.75 11.25V12.75C7.75 13.301 8.198 13.75 8.75 13.75ZM15.25 13.75C15.802 13.75 16.25 13.301 16.25 12.75H17.75C17.75 14.128 16.629 15.25 15.25 15.25C13.871 15.25 12.75 14.128 12.75 12.75V11.25C12.75 9.872 13.871 8.75 15.25 8.75C16.629 8.75 17.75 9.872 17.75 11.25H16.25C16.25 10.699 15.802 10.25 15.25 10.25C14.698 10.25 14.25 10.699 14.25 11.25V12.75C14.25 13.301 14.698 13.75 15.25 13.75Z"
+                                    fill="white"
+                                />
+                            </svg>
+                        </button>
+
+                        <button
+                            @click.stop="openMenu('quality')"
+                            class="transition-all hover:scale-110 hover:text-white/80"
+                        >
+                            <svg
+                                class="w-6 h-6 md:w-7 md:h-7"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    d="M20.83 14.6C19.9 14.06 19.33 13.07 19.33 12C19.33 10.93 19.9 9.93999 20.83 9.39999C20.99 9.29999 21.05 9.1 20.95 8.94L19.28 6.06C19.22 5.95 19.11 5.89001 19 5.89001C18.94 5.89001 18.88 5.91 18.83 5.94C18.37 6.2 17.85 6.34 17.33 6.34C16.8 6.34 16.28 6.19999 15.81 5.92999C14.88 5.38999 14.31 4.41 14.31 3.34C14.31 3.15 14.16 3 13.98 3H10.02C9.83999 3 9.69 3.15 9.69 3.34C9.69 4.41 9.12 5.38999 8.19 5.92999C7.72 6.19999 7.20001 6.34 6.67001 6.34C6.15001 6.34 5.63001 6.2 5.17001 5.94C5.01001 5.84 4.81 5.9 4.72 6.06L3.04001 8.94C3.01001 8.99 3 9.05001 3 9.10001C3 9.22001 3.06001 9.32999 3.17001 9.39999C4.10001 9.93999 4.67001 10.92 4.67001 11.99C4.67001 13.07 4.09999 14.06 3.17999 14.6H3.17001C3.01001 14.7 2.94999 14.9 3.04999 15.06L4.72 17.94C4.78 18.05 4.89 18.11 5 18.11C5.06 18.11 5.12001 18.09 5.17001 18.06C6.11001 17.53 7.26 17.53 8.19 18.07C9.11 18.61 9.67999 19.59 9.67999 20.66C9.67999 20.85 9.82999 21 10.02 21H13.98C14.16 21 14.31 20.85 14.31 20.66C14.31 19.59 14.88 18.61 15.81 18.07C16.28 17.8 16.8 17.66 17.33 17.66C17.85 17.66 18.37 17.8 18.83 18.06C18.99 18.16 19.19 18.1 19.28 17.94L20.96 15.06C20.99 15.01 21 14.95 21 14.9C21 14.78 20.94 14.67 20.83 14.6ZM12 15C10.34 15 9 13.66 9 12C9 10.34 10.34 9 12 9C13.66 9 15 10.34 15 12C15 13.66 13.66 15 12 15Z"
+                                    fill="white"
+                                />
+                            </svg>
+                        </button>
+
+                        <button
+                            @click.stop="openMenu('speed')"
+                            class="transition-all hover:scale-110 hover:text-white/80"
+                        >
+                            <svg
+                                class="w-6 h-6 md:w-7 md:h-7"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM7.45999 14.62C7.66999 14.98 7.55 15.43 7.19 15.65C7.07 15.72 6.94 15.75 6.81 15.75C6.55 15.75 6.3 15.62 6.16 15.38C5.57 14.37 5.25 13.2 5.25 12C5.25 8.28 8.28 5.25 12 5.25C12.49 5.25 12.96 5.3 13.46 5.41C13.86 5.49 14.12 5.88999 14.03 6.29999C13.95 6.69999 13.55 6.96 13.14 6.87C9.81001 6.16 6.75 8.72 6.75 12C6.75 12.95 6.98999 13.83 7.45999 14.62ZM15.54 8.87C14.82 10.2 13.48 12.64 13.06 13.06C12.47 13.65 11.53 13.65 10.94 13.06C10.35 12.47 10.35 11.53 10.94 10.94C11.36 10.52 13.8 9.17999 15.13 8.45999C15.4 8.31999 15.68 8.6 15.54 8.87ZM17.84 15.38C17.7 15.62 17.45 15.75 17.19 15.75C17.06 15.75 16.93 15.72 16.81 15.65C16.45 15.43 16.33 14.98 16.54 14.62C17.01 13.83 17.25 12.95 17.25 12C17.25 11.62 17.21 11.24 17.13 10.86C17.04 10.45 17.3 10.05 17.7 9.97C18.11 9.88 18.51 10.14 18.59 10.54C18.7 11.03 18.75 11.51 18.75 12C18.75 13.2 18.43 14.37 17.84 15.38Z"
+                                    fill="white"
+                                />
+                            </svg>
+                        </button>
+
+                        <button
+                            @click="toggleFullscreen"
+                            class="text-white transition-all hover:scale-110 hover:text-white/80"
+                        >
+                            <svg
+                                x-show="!isFullscreen"
+                                class="w-6 h-6 md:w-7 md:h-7"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    d="M17 4C16.448 4 16 3.552 16 3C16 2.448 16.448 2 17 2H19.5C20.88 2 22 3.12 22 4.5V9C22 9.552 21.552 10 21 10C20.448 10 20 9.552 20 9V4.5C20 4.224 19.776 4 19.5 4H17ZM7 4C7.552 4 8 3.552 8 3C8 2.448 7.552 2 7 2H4.5C3.12 2 2 3.12 2 4.5V9C2 9.552 2.448 10 3 10C3.552 10 4 9.552 4 9V4.5C4 4.224 4.224 4 4.5 4H7ZM17 20C16.448 20 16 20.448 16 21C16 21.552 16.448 22 17 22H19.5C20.88 22 22 20.88 22 19.5V15C22 14.448 21.552 14 21 14C20.448 14 20 14.448 20 15V19.5C20 19.776 19.776 20 19.5 20H17ZM7 20C7.552 20 8 20.448 8 21C8 21.552 7.552 22 7 22H4.5C3.12 22 2 20.88 2 19.5V15C2 14.448 2.448 14 3 14C3.552 14 4 14.448 4 15V19.5C4 19.776 4.224 20 4.5 20H7Z"
+                                    fill="white"
+                                />
+                            </svg>
+
+                            <svg
+                                x-show="isFullscreen"
+                                style="display: none"
+                                class="w-6 h-6 md:w-7 md:h-7"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    d="M21 9H17.5C15.958 9 15 8.042 15 6.5V3C15 2.448 15.447 2 16 2C16.553 2 17 2.448 17 3V6.5C17 6.949 17.052 7 17.5 7H21C21.553 7 22 7.448 22 8C22 8.552 21.553 9 21 9ZM9 6.5V3C9 2.448 8.553 2 8 2C7.447 2 7 2.448 7 3V6.5C7 6.949 6.948 7 6.5 7H3C2.447 7 2 7.448 2 8C2 8.552 2.447 9 3 9H6.5C8.042 9 9 8.042 9 6.5ZM9 21V17.5C9 15.958 8.042 15 6.5 15H3C2.447 15 2 15.448 2 16C2 16.552 2.447 17 3 17H6.5C6.948 17 7 17.051 7 17.5V21C7 21.552 7.447 22 8 22C8.553 22 9 21.552 9 21ZM17 21V17.5C17 17.051 17.052 17 17.5 17H21C21.553 17 22 16.552 22 16C22 15.448 21.553 15 21 15H17.5C15.958 15 15 15.958 15 17.5V21C15 21.552 15.447 22 16 22C16.553 22 17 21.552 17 21Z"
+                                    fill="white"
+                                />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div
+                x-show="showSpeedMenu || showQualityMenu || showCcMenu || showEpisodesMenu"
+                x-transition.opacity.duration.300ms
+                class="absolute inset-0 z-[60] bg-[#00000080] backdrop-blur-md flex items-center justify-center pointer-events-auto"
+                @click="closeMenus()"
+            >
+                <div
+                    x-show="showEpisodesMenu"
+                    @click.stop
+                    class="w-full max-w-[850px] px-6 md:px-10 flex flex-col font-sans max-h-[95vh] md:max-h-[75vh] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                    dir="rtl"
+                >
+                    <div class="flex items-center justify-between px-2 mb-10">
+                        <span
+                            class="text-base font-bold md:text-3xl text-white/90"
+                            x-text="`(${episodes.length})`"
+                        ></span>
+                        <h3
+                            class="text-2xl font-bold md:text-4xl drop-shadow-md"
+                        >
+                            <span class="text-[#DD0202]">LaCasa</span> De Papel
+                        </h3>
+                    </div>
+
+                    <div
+                        class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-5 overflow-y-auto pb-4 pr-3 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-white/5 [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full"
+                    >
+                        <template x-for="ep in episodes" :key="ep">
+                            <button
+                                @click="currentEpisode = ep; closeMenus();"
+                                class="relative p-[1px] rounded-[5rem] overflow-hidden group border transition-all duration-300"
+                                :class="currentEpisode === ep ? 'bg-[#DD020229] border-[#ED1C24]' : 'bg-[#4A4A4A80] border-[#FFFFFF4A]'"
+                            >
+                                <div
+                                    class="w-full h-14 md:h-16 rounded-[5rem] flex items-center justify-center text-[15px] md:text-base font-medium transition-colors duration-300"
+                                    :class="currentEpisode === ep ? 'bg-[#DD020229] text-white' : 'bg-[#4A4A4A80] text-gray-200 group-hover:text-white group-hover:bg-[#5A5A5A80]'"
+                                >
+                                    <span x-text="`قسمت ${ep}`"></span>
+                                </div>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <div
+                    x-show="showSpeedMenu"
+                    @click.stop
+                    class="bg-[#171717CC] w-[280px] md:w-[320px] max-h-[95vh] rounded-3xl overflow-hidden shadow-2xl border border-white/10 flex flex-col font-sans overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                    dir="rtl"
+                >
+                    <div
+                        class="py-4 text-base font-bold text-center text-white border-b border-white/10 md:text-lg"
+                    >
+                        سرعت پخش
+                    </div>
+                    <div class="flex flex-col py-3">
+                        <template x-for="rate in playbackRates" :key="rate">
+                            <button
+                                @click="setSpeed(rate)"
+                                class="relative w-full py-3.5 flex items-center justify-center hover:bg-white/5 transition-colors group cursor-pointer"
+                            >
+                                <span
+                                    class="text-[15px] md:text-base transition-colors"
+                                    :class="playbackRate === rate ? 'text-white drop-shadow-md' : 'text-gray-400 group-hover:text-gray-200'"
+                                    x-text="rate + 'X'"
+                                ></span>
+                                <svg
+                                    x-show="playbackRate === rate"
+                                    class="absolute w-5 h-5 text-white right-6"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M5 13l4 4L19 7"
+                                    />
+                                </svg>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <div
+                    x-show="showQualityMenu"
+                    @click.stop
+                    class="bg-[#171717CC] w-[280px] md:w-[320px] max-h-[95vh] rounded-3xl overflow-hidden shadow-2xl border border-white/10 flex flex-col font-sans overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                    dir="rtl"
+                >
+                    <div
+                        class="py-4 text-base font-bold text-center text-white border-b border-white/10 md:text-lg"
+                    >
+                        کیفیت پخش
+                    </div>
+                    <div class="flex flex-col py-3">
+                        <template
+                            x-for="quality in qualityOptions"
+                            :key="quality"
+                        >
+                            <button
+                                @click="setQuality(quality)"
+                                class="relative w-full py-3.5 flex items-center justify-center hover:bg-white/5 transition-colors group cursor-pointer"
+                            >
+                                <span
+                                    class="text-[15px] md:text-base transition-colors"
+                                    :class="currentQuality === quality ? 'text-white drop-shadow-md' : 'text-gray-400 group-hover:text-gray-200'"
+                                    x-text="quality"
+                                ></span>
+                                <svg
+                                    x-show="currentQuality === quality"
+                                    class="absolute w-5 h-5 text-white right-6"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M5 13l4 4L19 7"
+                                    />
+                                </svg>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <div
+                    x-show="showCcMenu"
+                    @click.stop
+                    class="bg-[#171717CC] w-[320px] md:w-[400px] max-h-[95vh] rounded-[30px] shadow-2xl border border-white/10 flex flex-col font-sans px-5 py-8 gap-5 overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                    dir="rtl"
+                >
+                    <div class="pb-4 border-b border-white/10">
+                        <div
+                            class="text-[13px] md:text-sm font-semibold text-gray-300 mb-3 text-right"
+                        >
+                            زیرنویس
+                        </div>
+                        <div
+                            class="flex flex-wrap items-center justify-start gap-2"
+                        >
+                            <template x-for="lang in ccLangs" :key="lang">
+                                <button
+                                    @click="setCcLang(lang)"
+                                    class="px-4 py-1.5 rounded-full text-[13px] md:text-sm font-medium transition-all"
+                                    :class="ccLang === lang ? 'text-white bg-[linear-gradient(179deg,#ED1C24_0.86%,rgba(153,0,6,0.76)_99.14%)]' : 'border border-white/30 text-white/80 hover:border-white hover:text-white'"
+                                    x-text="lang"
+                                ></button>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="pb-4 border-b border-white/10">
+                        <div
+                            class="text-[13px] md:text-sm font-semibold text-gray-300 mb-3 text-right"
+                        >
+                            اندازه زیرنویس
+                        </div>
+                        <div
+                            class="flex flex-wrap items-center justify-start gap-2"
+                        >
+                            <template x-for="size in ccSizes" :key="size">
+                                <button
+                                    @click="setCcStyle('size', size)"
+                                    class="px-3 py-1 md:px-4 md:py-1.5 rounded-full text-[13px] md:text-sm font-medium transition-all"
+                                    :class="ccSize === size ? 'text-white bg-[linear-gradient(179deg,#ED1C24_0.86%,rgba(153,0,6,0.76)_99.14%)]' : 'border border-white/30 text-white/80 hover:border-white hover:text-white'"
+                                    x-text="size"
+                                ></button>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="pb-4 border-b border-white/10">
+                        <div
+                            class="text-[13px] md:text-sm font-semibold text-gray-300 mb-3 text-right"
+                        >
+                            رنگ زیرنویس
+                        </div>
+                        <div
+                            class="flex flex-wrap items-center justify-start gap-2"
+                        >
+                            <template x-for="color in ccColors" :key="color">
+                                <button
+                                    @click="setCcStyle('color', color)"
+                                    class="px-3 py-1 md:px-4 md:py-1.5 rounded-full text-[13px] md:text-sm font-medium transition-all"
+                                    :class="ccColor === color ? 'text-white bg-[linear-gradient(179deg,#ED1C24_0.86%,rgba(153,0,6,0.76)_99.14%)]' : 'border border-white/30 text-white/80 hover:border-white hover:text-white'"
+                                    x-text="color"
+                                ></button>
+                            </template>
+                        </div>
+                    </div>
+                    <div>
+                        <div
+                            class="text-[13px] md:text-sm font-semibold text-gray-300 mb-3 text-right"
+                        >
+                            پس زمینه زیرنویس
+                        </div>
+                        <div
+                            class="flex flex-wrap items-center justify-start gap-2"
+                        >
+                            <template x-for="bg in ccBgs" :key="bg">
+                                <button
+                                    @click="setCcStyle('bg', bg)"
+                                    class="px-3 py-1 md:px-4 md:py-1.5 rounded-full text-[13px] md:text-sm font-medium transition-all"
+                                    :class="ccBg === bg ? 'text-white bg-[linear-gradient(179deg,#ED1C24_0.86%,rgba(153,0,6,0.76)_99.14%)]' : 'border border-white/30 text-white/80 hover:border-white hover:text-white'"
+                                    x-text="bg"
+                                ></button>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="public/assets/js/player.js"></script>
+    </body>
+</html>
+

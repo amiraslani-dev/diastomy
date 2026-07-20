@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'YekanBakh';
+  src: url('/static/public/assets/fonts/YekanBakhFaNum-VF.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/static/public/assets/fonts/Inter.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-007F, U+00A0-00FF;
+}
+
+@layer base {
+  html, body, button, input, select, textarea, * {
+    font-family: 'Inter', 'YekanBakh', sans-serif !important;
+}
+
+@keyframes toastProgress {
+    from { width: 100%; }
+    to { width: 0%; }
+}
+
+.toast-progress {
+    animation: toastProgress 3s linear forwards;
+}

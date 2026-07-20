@@ -1,0 +1,710 @@
+{% extends 'accounts/account_base.html' %}
+{% load static %}
+
+{% block dashboard_title %}تنظیمات{% endblock %}
+
+{% block profile_content %}
+{% with active_tab='settings' %}
+                            <button
+                                class="w-[56px] h-[56px] cursor-pointer rounded-full border border-[#4B4B4B] flex items-center justify-center hover:bg-white/5 transition-colors"
+                            >
+                                <svg
+                                    class="w-[28px] h-[28px]"
+                                    width="38"
+                                    height="38"
+                                    viewBox="0 0 38 38"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
+                                    <path
+                                        d="M26.125 19C26.125 22.9283 22.9283 26.125 19 26.125C15.0718 26.125 11.875 22.9283 11.875 19C11.875 15.0718 15.0718 11.875 19 11.875C22.9283 11.875 26.125 15.0718 26.125 19ZM20.1875 7.91667V4.75C20.1875 4.0945 19.6555 3.5625 19 3.5625C18.3445 3.5625 17.8125 4.0945 17.8125 4.75V7.91667C17.8125 8.57217 18.3445 9.10417 19 9.10417C19.6555 9.10417 20.1875 8.57217 20.1875 7.91667ZM20.1875 33.25V30.0833C20.1875 29.4278 19.6555 28.8958 19 28.8958C18.3445 28.8958 17.8125 29.4278 17.8125 30.0833V33.25C17.8125 33.9055 18.3445 34.4375 19 34.4375C19.6555 34.4375 20.1875 33.9055 20.1875 33.25ZM9.10417 19C9.10417 18.3445 8.57217 17.8125 7.91667 17.8125H4.75C4.0945 17.8125 3.5625 18.3445 3.5625 19C3.5625 19.6555 4.0945 20.1875 4.75 20.1875H7.91667C8.57217 20.1875 9.10417 19.6555 9.10417 19ZM34.4375 19C34.4375 18.3445 33.9055 17.8125 33.25 17.8125H30.0833C29.4278 17.8125 28.8958 18.3445 28.8958 19C28.8958 19.6555 29.4278 20.1875 30.0833 20.1875H33.25C33.9055 20.1875 34.4375 19.6555 34.4375 19ZM12.0032 12.0032C12.4672 11.5393 12.4672 10.7872 12.0032 10.3233L9.7644 8.08448C9.30049 7.62056 8.5484 7.62056 8.08448 8.08448C7.62056 8.5484 7.62056 9.30049 8.08448 9.7644L10.3233 12.0032C10.5545 12.2344 10.8585 12.3516 11.1625 12.3516C11.4665 12.3516 11.7705 12.2344 12.0032 12.0032ZM29.9155 29.9155C30.3794 29.4516 30.3794 28.6995 29.9155 28.2356L27.6767 25.9968C27.2128 25.5328 26.4607 25.5328 25.9968 25.9968C25.5328 26.4607 25.5328 27.2128 25.9968 27.6767L28.2356 29.9155C28.4668 30.1467 28.7708 30.2639 29.0748 30.2639C29.3788 30.2639 29.6844 30.1483 29.9155 29.9155ZM9.7644 29.9155L12.0032 27.6767C12.4672 27.2128 12.4672 26.4607 12.0032 25.9968C11.5393 25.5328 10.7872 25.5328 10.3233 25.9968L8.08448 28.2356C7.62056 28.6995 7.62056 29.4516 8.08448 29.9155C8.31565 30.1467 8.61965 30.2639 8.92365 30.2639C9.22765 30.2639 9.53165 30.1483 9.7644 29.9155ZM27.6767 12.0032L29.9155 9.7644C30.3794 9.30049 30.3794 8.5484 29.9155 8.08448C29.4516 7.62056 28.6995 7.62056 28.2356 8.08448L25.9968 10.3233C25.5328 10.7872 25.5328 11.5393 25.9968 12.0032C26.2279 12.2344 26.5319 12.3516 26.8359 12.3516C27.1399 12.3516 27.4439 12.2344 27.6767 12.0032Z"
+                                        fill="white"
+                                    />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div
+                        class="grid items-start w-full grid-cols-1 gap-6 lg:grid-cols-2"
+                    >
+                        <div class="flex flex-col gap-6">
+                            <div
+                                x-data="{ open: window.innerWidth >= 768 }"
+                                @resize.window="open = window.innerWidth >= 768"
+                                class="flex flex-col w-full border border-[#4B4B4B8A] rounded-[22px] overflow-hidden bg-[#0A0A0A]"
+                            >
+                                <div
+                                    @click="if(window.innerWidth < 768) open = !open"
+                                    class="flex justify-between items-center bg-[#D9D9D908] px-4 py-4 transition-colors"
+                                    :class="window.innerWidth < 768 ? 'cursor-pointer hover:bg-white/5' : 'cursor-default', open ? 'border-b border-[#4B4B4B8A]' : ''"
+                                >
+                                    <div
+                                        class="flex items-center justify-between w-full"
+                                    >
+                                        <span
+                                            class="text-white text-[15px] font-bold"
+                                            >لیست دستگاه‌های فعال</span
+                                        >
+                                        <span
+                                            class="text-[#939393] text-[14px] ml-3 md:ml-0"
+                                            >(۱) عدد</span
+                                        >
+                                    </div>
+
+                                    <svg
+                                        class="transition-transform duration-300 md:hidden"
+                                        :class="open ? '-rotate-90' : 'rotate-180'"
+                                        width="20"
+                                        height="20"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="#A5A5A5"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    >
+                                        <polyline
+                                            points="9 18 15 12 9 6"
+                                        ></polyline>
+                                    </svg>
+                                </div>
+
+                                <div x-show="open" x-collapse.duration.400ms>
+                                    <div class="flex flex-col px-2 py-5">
+                                        <div
+                                            class="border-b border-b-[#8A8A8A63] py-4 px-2 md:px-5 flex flex-col gap-5 relative first:pt-0 last:pb-0 last:border-b-0 overflow-hidden"
+                                        >
+                                            <div
+                                                class="relative z-10 flex items-center justify-between"
+                                            >
+                                                <div
+                                                    class="flex flex-row-reverse items-center gap-2"
+                                                >
+                                                    <span
+                                                        class="text-white text-[12px] md:text-[14px]"
+                                                        >windows chrome</span
+                                                    >
+                                                    <svg
+                                                        class="w-[18px] h-[18px]"
+                                                        width="21"
+                                                        height="21"
+                                                        viewBox="0 0 21 21"
+                                                        fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                    >
+                                                        <path
+                                                            d="M15.4263 2.625H5.5825C3.61375 2.625 2.625 3.605 2.625 5.57375V15.4175C2.625 17.3862 3.61375 18.375 5.5825 18.375H15.4263C17.395 18.375 18.375 17.3862 18.375 15.4175V5.57375C18.375 3.605 17.395 2.625 15.4263 2.625ZM14.0263 8.92501L9.93999 13.0025C9.81749 13.1337 9.65127 13.195 9.47626 13.195C9.31001 13.195 9.14374 13.1337 9.01249 13.0025L6.97372 10.9638C6.71997 10.71 6.71997 10.29 6.97372 10.0362C7.22747 9.78247 7.64753 9.78247 7.90128 10.0362L9.47626 11.6113L13.0987 7.99751C13.3525 7.73501 13.7725 7.73501 14.0263 7.99751C14.28 8.25126 14.28 8.66251 14.0263 8.92501Z"
+                                                            fill="white"
+                                                        />
+                                                    </svg>
+                                                </div>
+                                                <div
+                                                    class="bg-[#2D663A5C] text-[#6DE474] font-medium text-[8px] px-2.5 py-1 rounded-[36px] flex items-center gap-1.5 shadow-[0_0_8px_rgba(45,102,58,0.3)] shrink-0"
+                                                >
+                                                    <div
+                                                        class="w-1.5 h-1.5 rounded-full bg-[#6DE474]"
+                                                    ></div>
+                                                    دستگاه فعلی
+                                                </div>
+                                            </div>
+
+                                            <div
+                                                class="border-b border-dashed border-[#8C8C8C] w-full"
+                                            ></div>
+
+                                            <div
+                                                class="relative z-10 flex items-center justify-between"
+                                            >
+                                                <div
+                                                    class="flex items-center gap-1 md:gap-3"
+                                                >
+                                                    <div
+                                                        class="w-8 h-8 md:w-9 md:h-9 rounded-full border border-[#4B4B4B] overflow-hidden shrink-0"
+                                                    >
+                                                        <img
+                                                            src="https://i.pravatar.cc/100?img=32"
+                                                            alt="avatar"
+                                                            class="object-cover w-full h-full"
+                                                        />
+                                                    </div>
+                                                    <span
+                                                        class="text-white font-medium text-[14px]"
+                                                        >خودم</span
+                                                    >
+                                                </div>
+                                                <div
+                                                    class="flex items-center gap-1.5 flex-row-reverse font-light text-white text-[10px] md:text-[13px]"
+                                                >
+                                                    <span dir="ltr"
+                                                        >1405/2/26 ،
+                                                        11:31:55</span
+                                                    >
+                                                    <svg
+                                                        class="w-[18px] h-[18px]"
+                                                        width="21"
+                                                        height="21"
+                                                        viewBox="0 0 21 21"
+                                                        fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                    >
+                                                        <path
+                                                            fill-rule="evenodd"
+                                                            clip-rule="evenodd"
+                                                            d="M10.5 1.75C5.66738 1.75 1.75 5.66738 1.75 10.5C1.75 15.3326 5.66738 19.25 10.5 19.25C15.3326 19.25 19.25 15.3326 19.25 10.5C19.25 5.66738 15.3326 1.75 10.5 1.75ZM13.5888 13.5888C13.461 13.7165 13.293 13.7812 13.125 13.7812C12.957 13.7812 12.789 13.7174 12.6612 13.5888L10.0362 10.9638C9.91285 10.8404 9.84375 10.6733 9.84375 10.5V6.125C9.84375 5.76275 10.1377 5.46875 10.5 5.46875C10.8623 5.46875 11.1562 5.76275 11.1562 6.125V10.2278L13.5888 12.6604C13.8452 12.9176 13.8452 13.3324 13.5888 13.5888Z"
+                                                            fill="white"
+                                                        />
+                                                    </svg>
+                                                </div>
+                                            </div>
+
+                                            <button
+                                                class="w-full cursor-pointer rounded-[13px] border border-[#FFFFFF1A] py-1.5 text-white hover:text-white text-[13px] transition-colors relative z-10"
+                                                style="
+                                                    background: linear-gradient(
+                                                        89.21deg,
+                                                        rgba(20, 19, 19, 0.74)
+                                                            23.78%,
+                                                        rgba(0, 0, 0, 0) 212.52%
+                                                    );
+                                                "
+                                            >
+                                                خروج دستگاه
+                                            </button>
+                                        </div>
+
+                                        <div
+                                            class="border-b border-b-[#8A8A8A63] py-4 px-2 md:px-5 flex flex-col gap-5 relative first:pt-0 last:pb-0 last:border-b-0 overflow-hidden"
+                                        >
+                                            <div
+                                                class="relative z-10 flex items-center justify-between"
+                                            >
+                                                <div
+                                                    class="flex flex-row-reverse items-center gap-2"
+                                                >
+                                                    <span
+                                                        class="text-white text-[12px] md:text-[14px]"
+                                                        >windows chrome</span
+                                                    >
+                                                    <svg
+                                                        class="w-[18px] h-[18px]"
+                                                        width="21"
+                                                        height="21"
+                                                        viewBox="0 0 21 21"
+                                                        fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                    >
+                                                        <path
+                                                            d="M15.4263 2.625H5.5825C3.61375 2.625 2.625 3.605 2.625 5.57375V15.4175C2.625 17.3862 3.61375 18.375 5.5825 18.375H15.4263C17.395 18.375 18.375 17.3862 18.375 15.4175V5.57375C18.375 3.605 17.395 2.625 15.4263 2.625ZM14.0263 8.92501L9.93999 13.0025C9.81749 13.1337 9.65127 13.195 9.47626 13.195C9.31001 13.195 9.14374 13.1337 9.01249 13.0025L6.97372 10.9638C6.71997 10.71 6.71997 10.29 6.97372 10.0362C7.22747 9.78247 7.64753 9.78247 7.90128 10.0362L9.47626 11.6113L13.0987 7.99751C13.3525 7.73501 13.7725 7.73501 14.0263 7.99751C14.28 8.25126 14.28 8.66251 14.0263 8.92501Z"
+                                                            fill="white"
+                                                        />
+                                                    </svg>
+                                                </div>
+                                                <div
+                                                    class="bg-[#2D663A5C] text-[#6DE474] font-medium text-[8px] px-2.5 py-1 rounded-[36px] flex items-center gap-1.5 shadow-[0_0_8px_rgba(45,102,58,0.3)] shrink-0"
+                                                >
+                                                    <div
+                                                        class="w-1.5 h-1.5 rounded-full bg-[#6DE474]"
+                                                    ></div>
+                                                    دستگاه فعلی
+                                                </div>
+                                            </div>
+
+                                            <div
+                                                class="border-b border-dashed border-[#8C8C8C] w-full"
+                                            ></div>
+
+                                            <div
+                                                class="relative z-10 flex items-center justify-between"
+                                            >
+                                                <div
+                                                    class="flex items-center gap-1 md:gap-3"
+                                                >
+                                                    <div
+                                                        class="w-8 h-8 md:w-9 md:h-9 rounded-full border border-[#4B4B4B] overflow-hidden shrink-0"
+                                                    >
+                                                        <img
+                                                            src="https://i.pravatar.cc/100?img=32"
+                                                            alt="avatar"
+                                                            class="object-cover w-full h-full"
+                                                        />
+                                                    </div>
+                                                    <span
+                                                        class="text-white font-medium text-[14px]"
+                                                        >خودم</span
+                                                    >
+                                                </div>
+                                                <div
+                                                    class="flex items-center gap-1.5 flex-row-reverse font-light text-white text-[10px] md:text-[13px]"
+                                                >
+                                                    <span dir="ltr"
+                                                        >1405/2/26 ،
+                                                        11:31:55</span
+                                                    >
+                                                    <svg
+                                                        class="w-[18px] h-[18px]"
+                                                        width="21"
+                                                        height="21"
+                                                        viewBox="0 0 21 21"
+                                                        fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                    >
+                                                        <path
+                                                            fill-rule="evenodd"
+                                                            clip-rule="evenodd"
+                                                            d="M10.5 1.75C5.66738 1.75 1.75 5.66738 1.75 10.5C1.75 15.3326 5.66738 19.25 10.5 19.25C15.3326 19.25 19.25 15.3326 19.25 10.5C19.25 5.66738 15.3326 1.75 10.5 1.75ZM13.5888 13.5888C13.461 13.7165 13.293 13.7812 13.125 13.7812C12.957 13.7812 12.789 13.7174 12.6612 13.5888L10.0362 10.9638C9.91285 10.8404 9.84375 10.6733 9.84375 10.5V6.125C9.84375 5.76275 10.1377 5.46875 10.5 5.46875C10.8623 5.46875 11.1562 5.76275 11.1562 6.125V10.2278L13.5888 12.6604C13.8452 12.9176 13.8452 13.3324 13.5888 13.5888Z"
+                                                            fill="white"
+                                                        />
+                                                    </svg>
+                                                </div>
+                                            </div>
+
+                                            <button
+                                                class="w-full rounded-[13px] cursor-pointer border border-[#FFFFFF1A] py-1.5 text-white hover:text-white text-[13px] transition-colors relative z-10"
+                                                style="
+                                                    background: linear-gradient(
+                                                        89.21deg,
+                                                        rgba(20, 19, 19, 0.74)
+                                                            23.78%,
+                                                        rgba(0, 0, 0, 0) 212.52%
+                                                    );
+                                                "
+                                            >
+                                                خروج دستگاه
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                x-data="{ open: false, selected: 'فارسی', options: ['فارسی', 'English', 'العربیه'] }"
+                                class="flex flex-col w-full border border-[#4B4B4B8A] rounded-[22px] overflow-hidden bg-[#0A0A0A]"
+                            >
+                                <div
+                                    @click="open = !open"
+                                    class="flex justify-between items-center bg-[#D9D9D908] px-4 py-4 cursor-pointer hover:bg-white/5 transition-colors relative z-10"
+                                    :class="open ? 'border-b border-[#4B4B4B8A]' : ''"
+                                >
+                                    <span
+                                        class="text-white font-bold text-[15px]"
+                                        >انتخاب زبان سایت</span
+                                    >
+                                    <div class="flex items-center gap-2">
+                                        <span
+                                            x-show="!open"
+                                            class="text-[#939393] text-[14px] ml-2"
+                                            x-text="selected"
+                                        ></span>
+                                        <svg
+                                            class="transition-transform duration-300"
+                                            :class="open ? 'rotate-90' : 'rotate-180'"
+                                            width="20"
+                                            height="20"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="#A5A5A5"
+                                            stroke-width="2"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                        >
+                                            <polyline
+                                                points="9 18 15 12 9 6"
+                                            ></polyline>
+                                        </svg>
+                                    </div>
+                                </div>
+
+                                <div x-show="open" x-collapse.duration.400ms>
+                                    <div class="flex flex-col gap-2 p-4">
+                                        <template
+                                            x-for="lang in options"
+                                            :key="lang"
+                                        >
+                                            <div
+                                                @click="selected = lang; open = false"
+                                                class="relative flex items-center justify-center w-full rounded-[22px] px-5 py-2 cursor-pointer transition-all duration-300"
+                                                :class="selected === lang ? 'bg-[#FFFFFF0D] border border-[#4B4B4B8A]' : 'border border-transparent hover:bg-white/5'"
+                                            >
+                                                <span
+                                                    class="text-[14px] font-[300] transition-colors"
+                                                    :class="selected === lang ? 'text-white' : 'text-[#A5A5A5]'"
+                                                    x-text="lang"
+                                                ></span>
+
+                                                <div
+                                                    x-show="selected === lang"
+                                                    x-transition.opacity
+                                                    class="absolute right-4"
+                                                >
+                                                    <svg
+                                                        width="22"
+                                                        height="22"
+                                                        viewBox="0 0 24 24"
+                                                        fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                    >
+                                                        <path
+                                                            d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM16.03 10.2L11.36 14.86C11.22 15.01 11.03 15.08 10.83 15.08C10.64 15.08 10.45 15.01 10.3 14.86L7.97 12.53C7.68 12.24 7.68 11.76 7.97 11.47C8.26 11.18 8.74 11.18 9.03 11.47L10.83 13.27L14.97 9.14001C15.26 8.84001 15.74 8.84001 16.03 9.14001C16.32 9.43001 16.32 9.90001 16.03 10.2Z"
+                                                            fill="#DD0202"
+                                                        />
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                x-data="{ open: false, selected: 'خودکار', options: ['خودکار', 'VeryHigh', 'High', 'Medium', 'Low'] }"
+                                class="flex flex-col w-full border border-[#4B4B4B8A] rounded-[22px] overflow-hidden bg-[#0A0A0A]"
+                            >
+                                <div
+                                    @click="open = !open"
+                                    class="flex justify-between items-center bg-[#D9D9D908] px-4 py-4 cursor-pointer hover:bg-white/5 transition-colors relative z-10"
+                                    :class="open ? 'border-b border-[#4B4B4B8A]' : ''"
+                                >
+                                    <span
+                                        class="text-white font-bold text-[15px]"
+                                        >نوع کیفیت پخش‌کننده</span
+                                    >
+                                    <div class="flex items-center gap-2">
+                                        <span
+                                            x-show="!open"
+                                            class="text-[#939393] text-[14px] ml-2"
+                                            x-text="selected"
+                                        ></span>
+                                        <svg
+                                            class="transition-transform duration-300"
+                                            :class="open ? 'rotate-90' : 'rotate-180'"
+                                            width="20"
+                                            height="20"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="#A5A5A5"
+                                            stroke-width="2"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                        >
+                                            <polyline
+                                                points="9 18 15 12 9 6"
+                                            ></polyline>
+                                        </svg>
+                                    </div>
+                                </div>
+
+                                <div x-show="open" x-collapse.duration.400ms>
+                                    <div class="flex flex-col gap-2 p-4">
+                                        <template x-for="q in options" :key="q">
+                                            <div
+                                                @click="selected = q; open = false"
+                                                class="relative flex items-center justify-center w-full rounded-[22px] px-5 py-2 cursor-pointer transition-all duration-300"
+                                                :class="selected === q ? 'bg-[#FFFFFF0D] border border-[#4B4B4B8A]' : 'border border-transparent hover:bg-white/5'"
+                                            >
+                                                <span
+                                                    class="text-[14px] font-[300] transition-colors"
+                                                    :class="selected === q ? 'text-white font-bold' : 'text-[#A5A5A5]'"
+                                                    x-text="q"
+                                                ></span>
+
+                                                <div
+                                                    x-show="selected === q"
+                                                    x-transition.opacity
+                                                    class="absolute right-4"
+                                                >
+                                                    <svg
+                                                        width="22"
+                                                        height="22"
+                                                        viewBox="0 0 24 24"
+                                                        fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                    >
+                                                        <path
+                                                            d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM16.03 10.2L11.36 14.86C11.22 15.01 11.03 15.08 10.83 15.08C10.64 15.08 10.45 15.01 10.3 14.86L7.97 12.53C7.68 12.24 7.68 11.76 7.97 11.47C8.26 11.18 8.74 11.18 9.03 11.47L10.83 13.27L14.97 9.14001C15.26 8.84001 15.74 8.84001 16.03 9.14001C16.32 9.43001 16.32 9.90001 16.03 10.2Z"
+                                                            fill="#DD0202"
+                                                        />
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col gap-6 mt-0 md:mt-0">
+                            <div
+                                class="w-full border border-[#4B4B4B8A] rounded-[22px] overflow-hidden bg-[#0A0A0A]"
+                            >
+                                <div
+                                    class="flex justify-between items-center bg-[#D9D9D908] px-6 py-4 transition-colors"
+                                >
+                                    <span
+                                        class="text-white font-bold text-[15px]"
+                                        >شماره تلفن:</span
+                                    >
+                                    <span
+                                        class="text-white font-light text-[15px] dir-ltr"
+                                        >09373050735</span
+                                    >
+                                </div>
+                            </div>
+
+                            <div
+                                x-data="{ open: window.innerWidth >= 768, showOld: false, showNew: false, showConfirm: false }"
+                                @resize.window="open = window.innerWidth >= 768"
+                                class="flex flex-col w-full border border-[#4B4B4B8A] rounded-[22px] overflow-hidden bg-[#0A0A0A] md:p-6 transition-all"
+                            >
+                                <div
+                                    @click="if (window.matchMedia('(max-width: 767px)').matches) open = !open"
+                                    class="flex justify-center items-center gap-2.5 border border-[#1A1A1A] rounded-[13px] px-6 py-4 md:py-2 relative transition-colors cursor-pointer hover:opacity-90 bg-[#D9D9D908] md:bg-[linear-gradient(89.21deg,_rgba(64,0,1,0.74)_23.78%,_rgba(0,0,0,0)_212.52%)] md:cursor-default"
+                                >
+                                    <svg
+                                        width="20"
+                                        height="20"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                        <path
+                                            d="M16.75 8.30396V7C16.75 4.381 14.619 2.25 12 2.25C9.381 2.25 7.25 4.381 7.25 7V8.30396C5.312 8.56096 4.25 9.846 4.25 12V18C4.25 20.418 5.582 21.75 8 21.75H16C18.418 21.75 19.75 20.418 19.75 18V12C19.75 9.847 18.688 8.56195 16.75 8.30396ZM12 3.75C13.792 3.75 15.25 5.208 15.25 7V8.25H8.75V7C8.75 5.208 10.208 3.75 12 3.75ZM18.25 18C18.25 19.577 17.577 20.25 16 20.25H8C6.423 20.25 5.75 19.577 5.75 18V12C5.75 10.423 6.423 9.75 8 9.75H16C17.577 9.75 18.25 10.423 18.25 12V18ZM13.27 14C13.27 14.412 13.058 14.7601 12.75 14.9871V17C12.75 17.414 12.414 17.75 12 17.75C11.586 17.75 11.25 17.414 11.25 17V14.9619C10.962 14.7329 10.7649 14.395 10.7649 14C10.7649 13.31 11.32 12.75 12.01 12.75H12.02C12.71 12.75 13.27 13.31 13.27 14Z"
+                                            fill="white"
+                                        />
+                                    </svg>
+
+                                    <span
+                                        class="text-white font-bold text-[15px] pt-0.5"
+                                    >
+                                        تغییر رمزعبور
+                                    </span>
+
+                                    <svg
+                                        class="absolute transition-transform duration-300 md:hidden left-4"
+                                        :class="open ? 'rotate-90' : 'rotate-180'"
+                                        width="20"
+                                        height="20"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="#A5A5A5"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    >
+                                        <polyline
+                                            points="9 18 15 12 9 6"
+                                        ></polyline>
+                                    </svg>
+                                </div>
+
+                                <div x-show="open" x-collapse.duration.400ms>
+                                    <div
+                                        class="flex flex-col w-full gap-3 px-3 py-6 md:pt-4 md:pb-0 md:px-0"
+                                    >
+                                        <div
+                                            class="relative flex flex-col gap-2"
+                                        >
+                                            <label
+                                                class="text-white text-[13px] font-bold text-right pr-2"
+                                                >رمز عبور قبلی</label
+                                            >
+                                            <div class="relative w-full">
+                                                <input
+                                                    :type="showOld ? 'text' : 'password'"
+                                                    placeholder="رمز عبور جدید را وارد کنید."
+                                                    dir="rtl"
+                                                    class="w-full bg-[#00000033] border border-[#2A2A2A] rounded-[12px] px-4 py-3.5 text-[#D1D1D1] text-[13px] font-light placeholder-[#555] outline-none focus:border-[#4B4B4B] transition-colors pl-12 placeholder:text-right text-left"
+                                                />
+                                                <button
+                                                    @click="showOld = !showOld"
+                                                    class="absolute cursor-pointer left-4 top-1/2 -translate-y-1/2 text-[#767676] hover:text-white transition-colors"
+                                                >
+                                                    <template x-if="!showOld">
+                                                        <svg
+                                                            class="w-[20px] h-[20px]"
+                                                            width="22"
+                                                            height="22"
+                                                            viewBox="0 0 22 22"
+                                                            fill="none"
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                        >
+                                                            <path
+                                                                d="M19.461 12.7123C18.2547 14.7253 15.5478 18.1042 11.0011 18.1042C10.1184 18.1042 9.24669 17.9703 8.41069 17.7054C8.04861 17.5908 7.84874 17.205 7.96333 16.8429C8.07699 16.4799 8.4665 16.2819 8.82584 16.3946C9.52709 16.6165 10.2586 16.7292 11.0011 16.7292C14.8713 16.7292 17.2254 13.7684 18.2832 12.0029C18.6572 11.3832 18.6572 10.6159 18.285 9.9981C17.9678 9.46368 17.58 8.91732 17.1611 8.41407C16.9182 8.12166 16.9587 7.68816 17.2511 7.44616C17.5444 7.20324 17.977 7.24351 18.2199 7.535C18.6837 8.09326 19.1145 8.701 19.4646 9.29225C20.0999 10.3437 20.1 11.6563 19.461 12.7123ZM9.22553 13.7482L3.23699 19.7368C3.10316 19.8706 2.92713 19.9384 2.75113 19.9384C2.57513 19.9384 2.3991 19.8715 2.26527 19.7368C1.99668 19.4682 1.99668 19.0328 2.26527 18.7642L5.17573 15.8537C3.9584 14.8041 3.07383 13.6006 2.53942 12.7105C1.90325 11.6563 1.90321 10.3438 2.54121 9.28867C3.74754 7.27567 6.45446 3.89676 11.0011 3.89676C12.6832 3.89676 14.2691 4.37245 15.7266 5.30287L18.7644 2.26507C19.033 1.99648 19.4684 1.99648 19.737 2.26507C20.0056 2.53365 20.0056 2.9691 19.737 3.23768L9.22732 13.7473C9.22732 13.7473 9.22735 13.7482 9.22643 13.7482C9.22551 13.7482 9.22553 13.7473 9.22553 13.7482ZM8.80927 12.2202L12.2213 8.80818C11.8528 8.60009 11.4393 8.48009 11.0011 8.48009C9.61146 8.48009 8.48119 9.61034 8.48119 11.0009C8.48119 11.4382 8.60211 11.8517 8.80927 12.2202ZM6.14924 14.8793L7.81025 13.2183C7.3565 12.5739 7.10619 11.8086 7.10619 10.9991C7.10619 8.85139 8.85338 7.1033 11.0011 7.1033C11.8115 7.1033 12.5759 7.35361 13.2203 7.80736L14.7155 6.31219C13.5559 5.63294 12.3138 5.26907 11.0011 5.26907C7.13096 5.26907 4.77688 8.22991 3.71904 9.99541C3.34504 10.6151 3.34509 11.3823 3.71725 12.0002C4.2095 12.8224 5.02724 13.9342 6.14924 14.8793ZM13.4835 11.3988C13.3185 12.4622 12.4623 13.3192 11.4008 13.4833C11.0259 13.541 10.7684 13.8921 10.8261 14.267C10.8793 14.6071 11.1717 14.85 11.5044 14.85C11.5393 14.85 11.575 14.8472 11.6099 14.8417C13.2846 14.5832 14.5834 13.2844 14.8419 11.6088C14.8997 11.2329 14.643 10.8828 14.2672 10.8241C13.9005 10.7682 13.5412 11.023 13.4835 11.3988Z"
+                                                                fill="currentColor"
+                                                            />
+                                                        </svg>
+                                                    </template>
+                                                    <template x-if="showOld">
+                                                        <svg
+                                                            class="w-[18px] h-[18px]"
+                                                            width="22"
+                                                            height="22"
+                                                            viewBox="0 0 24 24"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            stroke-width="2"
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                        >
+                                                            <path
+                                                                d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+                                                            ></path>
+                                                            <circle
+                                                                cx="12"
+                                                                cy="12"
+                                                                r="3"
+                                                            ></circle>
+                                                        </svg>
+                                                    </template>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div
+                                            class="relative flex flex-col gap-2"
+                                        >
+                                            <label
+                                                class="text-white text-[13px] font-bold text-right pr-2"
+                                                >رمز عبور جدید</label
+                                            >
+                                            <div class="relative w-full">
+                                                <input
+                                                    :type="showNew ? 'text' : 'password'"
+                                                    placeholder="رمز عبور جدید را وارد کنید."
+                                                    dir="rtl"
+                                                    class="w-full bg-[#00000033] border border-[#2A2A2A] rounded-[12px] px-4 py-3.5 text-[#D1D1D1] text-[13px] font-light placeholder-[#555] outline-none focus:border-[#4B4B4B] transition-colors pl-12 placeholder:text-right text-left"
+                                                />
+                                                <button
+                                                    @click="showNew = !showNew"
+                                                    class="absolute cursor-pointer left-4 top-1/2 -translate-y-1/2 text-[#767676] hover:text-white transition-colors"
+                                                >
+                                                    <template x-if="!showNew">
+                                                        <svg
+                                                            class="w-[20px] h-[20px]"
+                                                            width="22"
+                                                            height="22"
+                                                            viewBox="0 0 22 22"
+                                                            fill="none"
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                        >
+                                                            <path
+                                                                d="M19.461 12.7123C18.2547 14.7253 15.5478 18.1042 11.0011 18.1042C10.1184 18.1042 9.24669 17.9703 8.41069 17.7054C8.04861 17.5908 7.84874 17.205 7.96333 16.8429C8.07699 16.4799 8.4665 16.2819 8.82584 16.3946C9.52709 16.6165 10.2586 16.7292 11.0011 16.7292C14.8713 16.7292 17.2254 13.7684 18.2832 12.0029C18.6572 11.3832 18.6572 10.6159 18.285 9.9981C17.9678 9.46368 17.58 8.91732 17.1611 8.41407C16.9182 8.12166 16.9587 7.68816 17.2511 7.44616C17.5444 7.20324 17.977 7.24351 18.2199 7.535C18.6837 8.09326 19.1145 8.701 19.4646 9.29225C20.0999 10.3437 20.1 11.6563 19.461 12.7123ZM9.22553 13.7482L3.23699 19.7368C3.10316 19.8706 2.92713 19.9384 2.75113 19.9384C2.57513 19.9384 2.3991 19.8715 2.26527 19.7368C1.99668 19.4682 1.99668 19.0328 2.26527 18.7642L5.17573 15.8537C3.9584 14.8041 3.07383 13.6006 2.53942 12.7105C1.90325 11.6563 1.90321 10.3438 2.54121 9.28867C3.74754 7.27567 6.45446 3.89676 11.0011 3.89676C12.6832 3.89676 14.2691 4.37245 15.7266 5.30287L18.7644 2.26507C19.033 1.99648 19.4684 1.99648 19.737 2.26507C20.0056 2.53365 20.0056 2.9691 19.737 3.23768L9.22732 13.7473C9.22732 13.7473 9.22735 13.7482 9.22643 13.7482C9.22551 13.7482 9.22553 13.7473 9.22553 13.7482ZM8.80927 12.2202L12.2213 8.80818C11.8528 8.60009 11.4393 8.48009 11.0011 8.48009C9.61146 8.48009 8.48119 9.61034 8.48119 11.0009C8.48119 11.4382 8.60211 11.8517 8.80927 12.2202ZM6.14924 14.8793L7.81025 13.2183C7.3565 12.5739 7.10619 11.8086 7.10619 10.9991C7.10619 8.85139 8.85338 7.1033 11.0011 7.1033C11.8115 7.1033 12.5759 7.35361 13.2203 7.80736L14.7155 6.31219C13.5559 5.63294 12.3138 5.26907 11.0011 5.26907C7.13096 5.26907 4.77688 8.22991 3.71904 9.99541C3.34504 10.6151 3.34509 11.3823 3.71725 12.0002C4.2095 12.8224 5.02724 13.9342 6.14924 14.8793ZM13.4835 11.3988C13.3185 12.4622 12.4623 13.3192 11.4008 13.4833C11.0259 13.541 10.7684 13.8921 10.8261 14.267C10.8793 14.6071 11.1717 14.85 11.5044 14.85C11.5393 14.85 11.575 14.8472 11.6099 14.8417C13.2846 14.5832 14.5834 13.2844 14.8419 11.6088C14.8997 11.2329 14.643 10.8828 14.2672 10.8241C13.9005 10.7682 13.5412 11.023 13.4835 11.3988Z"
+                                                                fill="currentColor"
+                                                            />
+                                                        </svg>
+                                                    </template>
+                                                    <template x-if="showNew">
+                                                        <svg
+                                                            class="w-[18px] h-[18px]"
+                                                            width="22"
+                                                            height="22"
+                                                            viewBox="0 0 24 24"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            stroke-width="2"
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                        >
+                                                            <path
+                                                                d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+                                                            ></path>
+                                                            <circle
+                                                                cx="12"
+                                                                cy="12"
+                                                                r="3"
+                                                            ></circle>
+                                                        </svg>
+                                                    </template>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div
+                                            class="relative flex flex-col gap-2"
+                                        >
+                                            <label
+                                                class="text-white text-[13px] font-bold text-right pr-2"
+                                                >تکرار رمز عبور جدید</label
+                                            >
+                                            <div class="relative w-full">
+                                                <input
+                                                    :type="showConfirm ? 'text' : 'password'"
+                                                    placeholder="رمز عبور جدید را دوباره وارد کنید."
+                                                    dir="rtl"
+                                                    class="w-full bg-[#00000033] border border-[#2A2A2A] rounded-[12px] px-4 py-3.5 text-[#D1D1D1] text-[13px] font-light placeholder-[#555] outline-none focus:border-[#4B4B4B] transition-colors pl-12 placeholder:text-right text-left"
+                                                />
+                                                <button
+                                                    @click="showConfirm = !showConfirm"
+                                                    class="absolute cursor-pointer left-4 top-1/2 -translate-y-1/2 text-[#767676] hover:text-white transition-colors"
+                                                >
+                                                    <template
+                                                        x-if="!showConfirm"
+                                                    >
+                                                        <svg
+                                                            class="w-[20px] h-[20px]"
+                                                            width="22"
+                                                            height="22"
+                                                            viewBox="0 0 22 22"
+                                                            fill="none"
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                        >
+                                                            <path
+                                                                d="M19.461 12.7123C18.2547 14.7253 15.5478 18.1042 11.0011 18.1042C10.1184 18.1042 9.24669 17.9703 8.41069 17.7054C8.04861 17.5908 7.84874 17.205 7.96333 16.8429C8.07699 16.4799 8.4665 16.2819 8.82584 16.3946C9.52709 16.6165 10.2586 16.7292 11.0011 16.7292C14.8713 16.7292 17.2254 13.7684 18.2832 12.0029C18.6572 11.3832 18.6572 10.6159 18.285 9.9981C17.9678 9.46368 17.58 8.91732 17.1611 8.41407C16.9182 8.12166 16.9587 7.68816 17.2511 7.44616C17.5444 7.20324 17.977 7.24351 18.2199 7.535C18.6837 8.09326 19.1145 8.701 19.4646 9.29225C20.0999 10.3437 20.1 11.6563 19.461 12.7123ZM9.22553 13.7482L3.23699 19.7368C3.10316 19.8706 2.92713 19.9384 2.75113 19.9384C2.57513 19.9384 2.3991 19.8715 2.26527 19.7368C1.99668 19.4682 1.99668 19.0328 2.26527 18.7642L5.17573 15.8537C3.9584 14.8041 3.07383 13.6006 2.53942 12.7105C1.90325 11.6563 1.90321 10.3438 2.54121 9.28867C3.74754 7.27567 6.45446 3.89676 11.0011 3.89676C12.6832 3.89676 14.2691 4.37245 15.7266 5.30287L18.7644 2.26507C19.033 1.99648 19.4684 1.99648 19.737 2.26507C20.0056 2.53365 20.0056 2.9691 19.737 3.23768L9.22732 13.7473C9.22732 13.7473 9.22735 13.7482 9.22643 13.7482C9.22551 13.7482 9.22553 13.7473 9.22553 13.7482ZM8.80927 12.2202L12.2213 8.80818C11.8528 8.60009 11.4393 8.48009 11.0011 8.48009C9.61146 8.48009 8.48119 9.61034 8.48119 11.0009C8.48119 11.4382 8.60211 11.8517 8.80927 12.2202ZM6.14924 14.8793L7.81025 13.2183C7.3565 12.5739 7.10619 11.8086 7.10619 10.9991C7.10619 8.85139 8.85338 7.1033 11.0011 7.1033C11.8115 7.1033 12.5759 7.35361 13.2203 7.80736L14.7155 6.31219C13.5559 5.63294 12.3138 5.26907 11.0011 5.26907C7.13096 5.26907 4.77688 8.22991 3.71904 9.99541C3.34504 10.6151 3.34509 11.3823 3.71725 12.0002C4.2095 12.8224 5.02724 13.9342 6.14924 14.8793ZM13.4835 11.3988C13.3185 12.4622 12.4623 13.3192 11.4008 13.4833C11.0259 13.541 10.7684 13.8921 10.8261 14.267C10.8793 14.6071 11.1717 14.85 11.5044 14.85C11.5393 14.85 11.575 14.8472 11.6099 14.8417C13.2846 14.5832 14.5834 13.2844 14.8419 11.6088C14.8997 11.2329 14.643 10.8828 14.2672 10.8241C13.9005 10.7682 13.5412 11.023 13.4835 11.3988Z"
+                                                                fill="currentColor"
+                                                            />
+                                                        </svg>
+                                                    </template>
+                                                    <template
+                                                        x-if="showConfirm"
+                                                    >
+                                                        <svg
+                                                            class="w-[18px] h-[18px]"
+                                                            width="22"
+                                                            height="22"
+                                                            viewBox="0 0 24 24"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            stroke-width="2"
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                        >
+                                                            <path
+                                                                d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+                                                            ></path>
+                                                            <circle
+                                                                cx="12"
+                                                                cy="12"
+                                                                r="3"
+                                                            ></circle>
+                                                        </svg>
+                                                    </template>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <button
+                                            class="w-full cursor-pointer text-white font-bold text-sm py-3.5 rounded-[12px] transition-colors mt-2"
+                                            style="background: #dd020294"
+                                            onmouseover="
+                                                this.style.background =
+                                                    '#DD0202'
+                                            "
+                                            onmouseout="
+                                                this.style.background =
+                                                    '#DD020294'
+                                            "
+                                        >
+                                            تغییر رمز عبور
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+{% endwith %}
+{% endblock %}
+
+{% block footer_references %}
+
+{% endblock %}

@@ -1,0 +1,633 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}ورود یا ثبت‌نام{% endblock %}
+
+{% block header %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<div
+    x-data="authForm()"
+    class="relative flex items-center justify-center min-h-screen overflow-hidden bg-black selection:bg-red-500/30"
+>
+    <!-- Back Button -->
+    <a
+        href="javascript:void(0)"
+        onclick="if(window.history.length > 1){ window.history.back(); } else { window.location.href = '/'; }"
+        class="absolute z-30 transition-colors cursor-pointer top-3 right-4 sm:right-1 md:right-0 lg:right-7 lg:top-2 text-white/20 hover:text-white/60"
+    >
+        <svg
+            class="w-[16] h-16 md:w-[60px] md:h-[60px]"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+        >
+            <path d="M7 17L17 7 M7 7h10v10" />
+        </svg>
+    </a>
+
+    <!-- Background overlay -->
+    <div class="absolute inset-0 z-0 w-screen h-screen overflow-hidden pointer-events-none">
+        <div class="absolute inset-0 z-[1]"></div>
+        <img
+            src="{% static 'public/assets/img/account/login_background_mobile.webp' %}"
+            alt="Background Mobile"
+            class="absolute inset-0 w-full h-full block sm:hidden z-[0]"
+        />
+        <img
+            src="{% static 'public/assets/img/account/login_background_desktop.webp' %}"
+            alt="Background Desktop"
+            class="absolute inset-0 w-full h-full hidden sm:block z-[0]"
+        />
+    </div>
+
+    <div class="relative z-20 w-full max-w-[450px] px-6 py-10 flex flex-col items-center">
+        <!-- DIASTOMY Logo Container -->
+        <div class="flex items-center gap-2 mb-8">
+            <svg
+                width="183"
+                height="30"
+                viewBox="0 0 183 30"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <g clip-path="url(#clip0_1_198)">
+                    <path d="M12.5039 0.00410799C16.2024 0.00410799 19.9009 0.0219254 23.5993 0.00410799C27.163 -0.0151942 30.3935 0.985549 33.1984 3.10879C36.3789 5.52007 38.3553 8.69008 38.9945 12.6114C39.6593 16.6916 38.7506 20.4228 36.2895 23.7576C34.0102 26.8445 30.9342 28.8059 27.113 29.6285C25.8854 29.8788 24.6335 29.9973 23.3797 29.9818C20.9565 29.9818 18.5226 30.0353 16.0964 29.9655C13.7019 29.8972 11.309 29.9462 8.91601 29.9269C8.56615 29.9269 8.49497 29.8185 8.49951 29.4993C8.51668 28.1135 8.51668 26.7277 8.49951 25.3419C8.49951 25.0197 8.60098 24.9544 8.91449 24.9558C13.9124 24.9558 18.9104 24.993 23.9174 24.9484C28.8865 24.9039 32.95 21.5587 33.9132 16.8074C34.7826 12.5401 32.4684 8.02193 28.4079 6.05162C27.0254 5.37157 25.5005 5.01577 23.9537 5.01228C17.8108 4.99891 11.6679 5.01228 5.52498 4.99891C5.17513 4.99891 5.10243 5.10433 5.10698 5.42356C5.13727 7.92096 5.14181 10.4184 5.17816 12.9158C5.17816 13.287 5.09637 13.3968 4.70411 13.385C3.26077 13.3434 1.8144 13.3285 0.369543 13.33C0.0530076 13.33 0 13.2246 0 12.9514C0.0060581 8.75442 0.0060581 4.55645 0 0.357487C0 -0.0552825 0.228693 -0.0033141 0.489191 -0.0033141C4.49359 -0.0033141 8.498 -0.0033141 12.5024 -0.0033141L12.5039 0.00410799Z" fill="#DD0202"></path>
+                    <path d="M154.747 12.8359L149.069 21.9377C148.692 22.5405 148.323 22.5316 147.944 21.9287C146.136 19.0324 144.329 16.1346 142.523 13.2353C142.457 13.1284 142.386 13.0245 142.301 12.8953C142.149 13.0438 142.214 13.2264 142.213 13.3779C142.213 17.3868 142.202 21.3957 142.222 25.4046C142.222 25.8322 142.102 25.9243 141.686 25.9169C140.223 25.8901 138.758 25.8976 137.294 25.9169C136.977 25.9169 136.852 25.8649 136.852 25.513C136.864 18.2009 136.864 10.8889 136.852 3.57685C136.852 3.2502 136.933 3.1522 137.274 3.15665C138.77 3.17447 140.265 3.17744 141.762 3.15665C141.902 3.14517 142.042 3.17584 142.164 3.24455C142.285 3.31326 142.383 3.41675 142.443 3.54121C144.362 6.62955 146.288 9.71344 148.221 12.7929C148.303 12.9221 148.389 13.0483 148.477 13.1819C148.668 13.0794 148.718 12.9042 148.807 12.7632C150.739 9.68276 152.666 6.59887 154.588 3.51152C154.647 3.39469 154.74 3.29823 154.857 3.23507C154.973 3.17191 155.106 3.14507 155.238 3.15814C156.734 3.17497 158.23 3.17497 159.725 3.15814C160.043 3.15814 160.169 3.2101 160.168 3.56051C160.157 10.8726 160.157 18.1846 160.168 25.4967C160.168 25.8233 160.081 25.9228 159.739 25.9183C158.244 25.9005 156.748 25.8976 155.253 25.9183C154.882 25.9183 154.799 25.8129 154.799 25.4729C154.812 21.4313 154.812 17.3903 154.799 13.3497C154.836 13.1773 154.818 12.9979 154.747 12.8359Z" fill="white"></path>
+                    <path d="M133.9 14.5732C133.886 21.2117 128.516 26.3995 121.674 26.3817C120.092 26.3808 118.525 26.0729 117.064 25.4758C115.603 24.8786 114.278 24.0041 113.163 22.9025C112.049 21.8009 111.167 20.494 110.57 19.0571C109.973 17.6202 109.672 16.0817 109.684 14.5302C109.704 7.56657 115.426 2.56137 122.08 2.71282C128.626 2.8613 133.924 7.94518 133.9 14.5732ZM121.836 7.80562C117.879 7.80562 115.032 10.6074 115.021 14.5198C115.011 18.4322 117.884 21.3008 121.796 21.2934C125.708 21.2859 128.555 18.4411 128.559 14.5599C128.572 10.6505 125.735 7.8071 121.836 7.80562Z" fill="white"></path>
+                    <path d="M71.0159 25.9093C70.2117 25.9093 69.4075 25.893 68.6032 25.9093C68.2655 25.9182 68.0989 25.8336 67.9974 25.4921C67.7172 24.5418 67.375 23.6094 67.0887 22.6606C67.0084 22.3963 66.8873 22.3251 66.6177 22.3266C63.9794 22.3355 61.3416 22.3355 58.7043 22.3266C58.4226 22.3266 58.3196 22.4231 58.2424 22.6755C57.947 23.6391 57.6169 24.5908 57.3155 25.553C57.2398 25.7935 57.1459 25.9123 56.8611 25.9108C55.1578 25.896 53.4529 25.896 51.7466 25.9108C51.4149 25.9108 51.3725 25.8306 51.4755 25.5366C53.723 19.1026 55.966 12.6656 58.2045 6.22559C58.515 5.33472 58.8436 4.44385 59.1299 3.54555C59.2314 3.22929 59.3874 3.14912 59.713 3.15209C61.6909 3.16693 63.6694 3.16693 65.6484 3.15209C65.9892 3.15209 66.1164 3.2679 66.2194 3.56486C68.5699 10.3473 70.9265 17.1278 73.2892 23.9064C73.4755 24.4424 73.6466 24.9843 73.8541 25.5114C73.9722 25.8084 73.948 25.9212 73.5784 25.9123C72.7243 25.893 71.8716 25.9093 71.0159 25.9093ZM59.9674 17.4283H65.3667C64.4731 14.6859 63.5947 11.9776 62.6678 9.15654L59.9674 17.4283Z" fill="white"></path>
+                    <path d="M83.598 26.38C81.1005 26.3265 78.7515 25.8143 76.772 24.2048C75.7369 23.3491 74.9261 22.2626 74.4079 21.0362C74.3064 20.8046 74.3336 20.6903 74.5593 20.5611C75.9163 19.8098 77.2658 19.0471 78.6076 18.2731C78.8484 18.1335 78.9257 18.1944 79.0287 18.4112C80.31 21.1164 82.921 21.6435 85.3897 21.0838C86.5801 20.815 87.1556 19.9093 86.8406 18.9293C86.6452 18.3354 86.1606 17.991 85.6184 17.7252C84.5476 17.2025 83.395 16.913 82.2516 16.5982C81.1323 16.3137 80.045 15.9197 79.0059 15.4223C76.6524 14.2434 75.2848 12.4408 75.2605 9.78012C75.2333 6.99764 76.4994 4.962 78.9893 3.65391C82.4257 1.84693 88.6065 2.23595 91.4266 7.51434C91.578 7.792 91.528 7.8989 91.266 8.04589C89.9953 8.75413 88.7307 9.47128 87.4797 10.2122C87.1692 10.3978 87.0541 10.3681 86.8739 10.0533C85.8849 8.28939 84.4234 7.56928 82.4424 7.82615C81.2777 7.97463 80.5568 8.68435 80.5917 9.62867C80.6159 10.2597 80.9779 10.6769 81.4867 10.9991C82.4424 11.6064 83.5192 11.9316 84.5945 12.2567C85.8062 12.6235 87.0178 12.9694 88.1825 13.4891C90.0756 14.3399 91.5583 15.5678 92.0521 17.6465C92.9471 21.4134 91.0101 24.6799 87.198 25.841C86.7103 25.9913 86.2136 26.1118 85.7107 26.2018C85.0141 26.3288 84.3065 26.3885 83.598 26.38Z" fill="white"></path>
+                    <path d="M172.613 11.8948L173.251 10.6224C174.43 8.28534 175.619 5.95275 176.781 3.60679C176.957 3.25193 177.166 3.15096 177.55 3.16136C179.368 3.18066 181.185 3.17027 182.994 3.17027C183.04 3.39595 182.895 3.52365 182.815 3.66767C180.403 7.99729 177.985 12.3254 175.563 16.6521C175.358 17.0045 175.253 17.4045 175.26 17.8102C175.276 20.3566 175.26 22.9045 175.276 25.4509C175.276 25.8102 175.2 25.932 174.808 25.9245C173.329 25.9008 171.85 25.9008 170.37 25.9245C169.993 25.9245 169.926 25.8132 169.928 25.4791C169.943 22.854 169.928 20.2274 169.94 17.6023C169.945 17.3375 169.878 17.076 169.746 16.8451C167.279 12.4353 164.816 8.02402 162.357 3.61125C162.114 3.17918 162.114 3.17621 162.625 3.17621C164.33 3.17621 166.034 3.18363 167.738 3.16878C168.068 3.16878 168.244 3.25193 168.395 3.5578C169.701 6.18586 171.029 8.80352 172.351 11.4271C172.422 11.5504 172.493 11.681 172.613 11.8948Z" fill="white"></path>
+                    <path d="M103.731 17.0395C103.731 19.8398 103.722 22.6386 103.742 25.4374C103.742 25.8472 103.609 25.9229 103.224 25.9185C101.778 25.8962 100.33 25.8932 98.8819 25.9185C98.473 25.9185 98.3821 25.8056 98.3821 25.4196C98.3957 19.8531 98.3821 14.2837 98.4018 8.71726C98.4018 8.29261 98.3018 8.16493 97.852 8.17384C96.186 8.20205 94.5064 8.17384 92.8344 8.19165C92.4906 8.19165 92.4058 8.09366 92.4103 7.76998C92.4265 6.35448 92.4265 4.93899 92.4103 3.5235C92.4103 3.23397 92.4876 3.15527 92.7859 3.15527C98.2867 3.16418 103.789 3.16418 109.294 3.15527C109.649 3.15527 109.715 3.27109 109.711 3.58586C109.696 4.98601 109.691 6.38616 109.711 7.78482C109.711 8.13672 109.587 8.19314 109.268 8.19017C107.563 8.1768 105.858 8.19017 104.154 8.1768C103.818 8.1768 103.722 8.25847 103.725 8.59255C103.74 11.4092 103.731 14.2243 103.731 17.0395Z" fill="white"></path>
+                    <path d="M49.3856 14.5491C49.3856 18.1794 49.3856 21.8096 49.3856 25.4414C49.3856 25.7992 49.313 25.9255 48.9161 25.918C47.4016 25.8943 45.8947 25.9032 44.3847 25.918C44.0984 25.918 44 25.8586 44 25.5557C44.0091 18.215 44.0091 10.8752 44 3.53644C44 3.19643 44.1287 3.15782 44.4165 3.16079C45.931 3.17119 47.438 3.17861 48.9495 3.16079C49.3326 3.16079 49.3887 3.28403 49.3872 3.61662C49.3811 7.25582 49.3856 10.9024 49.3856 14.5491Z" fill="white"></path>
+                    <path d="M4.98673 29.9834C4.36123 29.3242 3.79782 28.708 3.20867 28.117C2.28078 27.1846 1.34026 26.2625 0.387114 25.3509C0.262551 25.2459 0.164097 25.1144 0.0992645 24.9665C0.0344322 24.8185 0.00493664 24.658 0.0130279 24.4971C0.0342313 22.0453 0.0342313 19.5929 0.0130279 17.1401C0.0130279 16.7555 0.10087 16.6323 0.523422 16.6367C1.93496 16.6545 3.34952 16.6248 4.76409 16.6011C5.02459 16.6011 5.12606 16.6501 5.12606 16.9337C5.11092 21.2079 5.10284 25.4835 5.10183 29.7607C5.06882 29.8375 5.03036 29.9119 4.98673 29.9834Z" fill="#DD0202"></path>
+                    <path d="M18.4931 8.26562C18.7824 8.33244 18.8627 8.54773 18.9172 8.7853C19.0262 9.25894 19.1383 9.73259 19.2443 10.2077C19.7487 12.4676 21.2041 13.7712 23.485 14.2627C23.9712 14.3666 24.4558 14.4809 24.9435 14.5745C25.1843 14.6205 25.3267 14.7229 25.3191 14.9754C25.3115 15.2278 25.1676 15.3258 24.9283 15.3658C24.2801 15.4757 23.6425 15.6346 23.0064 15.8009C21.0572 16.3117 19.8471 17.5277 19.3291 19.4178C19.1777 19.9776 19.0626 20.5477 18.9293 21.1134C18.8718 21.3614 18.8218 21.6465 18.4901 21.645C18.1584 21.6435 18.1084 21.348 18.0645 21.103C17.9315 20.4395 17.7611 19.7837 17.5541 19.1387C17.021 17.3866 15.826 16.3176 14.0525 15.8276C13.4361 15.6583 12.8106 15.5158 12.1836 15.3822C11.9322 15.3302 11.7171 15.3094 11.7111 14.9783C11.705 14.6472 11.8853 14.6012 12.1533 14.5522C12.9107 14.4132 13.6584 14.2272 14.3918 13.9954C16.1986 13.4208 17.2118 12.1617 17.6692 10.4156C17.8207 9.86919 17.9343 9.31685 18.063 8.766C18.1236 8.52843 18.2084 8.31611 18.4931 8.26562Z" fill="white"></path>
+                </g>
+                <defs>
+                    <clipPath id="clip0_1_198">
+                        <rect width="183" height="30" fill="white"></rect>
+                    </clipPath>
+                </defs>
+            </svg>
+        </div>
+
+        <!-- PHONE STEP -->
+        <div x-show="step === 'phone'" style="display: none;" class="w-full rounded-3xl p-[1px] bg-[linear-gradient(164.36deg,rgba(255,255,255,0.18)_5.68%,rgba(255,255,255,0)_74.28%)] shadow-2xl">
+            <div class="w-full rounded-3xl bg-[#0a0a0a]/95 backdrop-blur-xl p-6 sm:p-6">
+                <div class="flex items-center justify-start mb-6">
+                    <a href="/" class="flex items-center gap-2 text-sm font-medium text-white transition-colors hover:text-white group">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18.0766 10.2393C18.0449 10.3159 17.9992 10.385 17.9417 10.4425L12.1084 16.2758C11.9867 16.3975 11.8267 16.4592 11.6667 16.4592C11.5067 16.4592 11.3466 16.3983 11.225 16.2758C10.9808 16.0317 10.9808 15.6358 11.225 15.3917L15.9916 10.625H2.5C2.155 10.625 1.875 10.345 1.875 10C1.875 9.65501 2.155 9.37501 2.5 9.37501H15.9908L11.2242 4.60837C10.98 4.3642 10.98 3.96834 11.2242 3.72417C11.4683 3.48 11.8642 3.48 12.1084 3.72417L17.9417 9.5575C17.9992 9.615 18.0449 9.68408 18.0766 9.76075C18.1399 9.91408 18.1399 10.0859 18.0766 10.2393Z" fill="white"></path>
+                        </svg>
+                        <span class="font-light">{% trans "بازگشت" %}</span>
+                    </a>
+                </div>
+
+                <h1 class="text-white text-[20px] sm:text-[20px] font-semibold text-center mb-8">{% trans "ورود یا ثبت‌نام" %}</h1>
+
+                <div class="relative mb-3">
+                    <input x-model="phone" @keydown.enter="checkPhone" type="tel" placeholder="{% trans '.موبایل خود را وارد کنید' %}" class="w-full h-12 rounded-xl border border-[#ffffff15] bg-[#111111]/50 text-white placeholder:text-[#666] text-right text-sm pr-14 pl-4 focus:outline-none focus:border-red-600 focus:bg-[#1a1a1a] transition-all">
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M16.5521 21.752C16.0931 21.752 15.6311 21.69 15.1751 21.565C9.01111 19.873 4.12909 14.995 2.43609 8.83402C2.05109 7.43302 2.26204 5.97301 3.03204 4.72501C3.80504 3.47101 5.0761 2.58701 6.5191 2.29801C7.4721 2.10701 8.4281 2.53301 8.9151 3.35501L10.4781 5.99399C11.2371 7.27599 10.86 8.92799 9.61896 9.75299L8.4881 10.505C9.5451 12.676 11.3229 14.458 13.4839 15.514L14.2462 14.377C15.0752 13.138 16.7281 12.767 18.0091 13.53L20.6522 15.106C21.4702 15.594 21.8941 16.548 21.7071 17.481C21.4191 18.924 20.5341 20.195 19.2811 20.968C18.4391 21.487 17.5021 21.752 16.5521 21.752ZM6.97809 3.75C6.92909 3.75 6.87911 3.75502 6.83111 3.76502C5.77711 3.97602 4.86512 4.611 4.31012 5.512C3.76112 6.402 3.61009 7.44101 3.88409 8.43601C5.43709 14.09 9.91608 18.566 15.5721 20.118C16.5671 20.391 17.605 20.239 18.493 19.691C19.393 19.136 20.0291 18.222 20.2361 17.186C20.2981 16.875 20.1571 16.556 19.8841 16.394L17.241 14.818C16.643 14.463 15.876 14.637 15.492 15.212L14.377 16.877C14.177 17.175 13.7911 17.289 13.4651 17.151C10.5021 15.913 8.09213 13.496 6.85113 10.522C6.71313 10.19 6.82999 9.80801 7.12799 9.60901L8.78912 8.504C9.36512 8.121 9.54007 7.35401 9.18707 6.75901L7.62408 4.12C7.48708 3.887 7.23909 3.75 6.97809 3.75Z" fill="white"></path>
+                        </svg>
+                        <div class="w-[1px] h-5 bg-[#FFFFFFB2] mr-2 ml-3"></div>
+                    </div>
+                </div>
+
+                <div class="w-full h-12 pr-[1px] pt-[1px] bg-[linear-gradient(to_bottom_left,#FFF_10%,#D40000_30%)] rounded-xl">
+                    <button @click="checkPhone" :disabled="isSending" class="w-full h-full rounded-xl bg-[#D40000] hover:bg-[#c1111afb] transition-colors text-white text-sm font-bold shadow-[0_4px_14px_rgba(229,9,20,0.3)] disabled:opacity-50">
+                        <span x-show="!isSending">{% trans "ادامه" %}</span>
+                        <span x-show="isSending">{% trans "درحال بررسی..." %}</span>
+                    </button>
+                </div>
+
+                <div class="flex items-center w-full gap-4 my-3">
+                    <div class="flex-1 h-[1px] bg-white/10"></div>
+                    <span class="text-white/40 text-sm font-light">{% trans "یا" %}</span>
+                    <div class="flex-1 h-[1px] bg-white/10"></div>
+                </div>
+
+                <button @click="triggerGoogleLogin" type="button" class="w-full h-12 rounded-xl bg-[#141414] hover:bg-[#1f1f1f] transition-colors flex items-center justify-center gap-3 text-white/90 text-sm font-medium shadow-sm border border-white/5">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.13v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.13C1.43 8.55 1 10.22 1 12s.43 3.45 1.13 4.93l3.71-2.84z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.13 7.07l3.71 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                    {% trans "ادامه با گوگل" %}
+                </button>
+            </div>
+        </div>
+
+        <!-- PASSWORD STEP -->
+        <div x-show="step === 'password'" style="display: none;" class="w-full rounded-3xl p-[1px] bg-[linear-gradient(164.36deg,rgba(255,255,255,0.18)_5.68%,rgba(255,255,255,0)_74.28%)]">
+            <div class="w-full rounded-3xl bg-[#000] backdrop-blur-xl border border-white/10 p-6 sm:p-6">
+                <div class="flex items-center justify-start mb-6">
+                    <a href="#" @click.prevent="step = 'phone'" class="flex items-center gap-2 text-sm font-medium text-white transition-colors hover:text-white group">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18.0766 10.2393C18.0449 10.3159 17.9992 10.385 17.9417 10.4425L12.1084 16.2758C11.9867 16.3975 11.8267 16.4592 11.6667 16.4592C11.5067 16.4592 11.3466 16.3983 11.225 16.2758C10.9808 16.0317 10.9808 15.6358 11.225 15.3917L15.9916 10.625H2.5C2.155 10.625 1.875 10.345 1.875 10C1.875 9.65501 2.155 9.37501 2.5 9.37501H15.9908L11.2242 4.60837C10.98 4.3642 10.98 3.96834 11.2242 3.72417C11.4683 3.48 11.8642 3.48 12.1084 3.72417L17.9417 9.5575C17.9992 9.615 18.0449 9.68408 18.0766 9.76075C18.1399 9.91408 18.1399 10.0859 18.0766 10.2393Z" fill="white"></path>
+                        </svg>
+                        <span class="font-light">{% trans "بازگشت" %}</span>
+                    </a>
+                </div>
+
+                <h1 class="text-white text-[20px] sm:text-[20px] font-semibold text-center mb-8">{% trans "رمز عبور خود را وارد کنید." %}</h1>
+
+                <div class="relative mb-3">
+                    <input x-model="password" @keydown.enter="loginPassword" :type="showPassword ? 'text' : 'password'" placeholder="{% trans 'رمز عبور' %}" class="w-full h-12 rounded-xl border border-[#ffffff23] bg-[#111111]/50 text-white placeholder:text-[#666] text-right text-sm pl-14 pr-4 focus:outline-none focus:border-red-600 focus:bg-[#1a1a1a] transition-all shadow-inner">
+                    <button type="button" @click="showPassword = !showPassword" class="absolute inset-y-0 left-0 flex items-center pl-4 text-white transition cursor-pointer hover:text-white/80">
+                        <svg x-show="!showPassword" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21.229 13.8679C19.913 16.0639 16.96 19.75 12 19.75C11.037 19.75 10.0861 19.604 9.17408 19.315C8.77908 19.19 8.56105 18.769 8.68605 18.374C8.81005 17.978 9.23496 17.762 9.62696 17.885C10.392 18.127 11.19 18.25 12 18.25C16.222 18.25 18.7901 15.02 19.9441 13.094C20.3521 12.418 20.3521 11.581 19.9461 10.907C19.6001 10.324 19.177 9.72798 18.72 9.17898C18.455 8.85998 18.4991 8.38707 18.8181 8.12307C19.1381 7.85807 19.61 7.90199 19.875 8.21999C20.381 8.82899 20.8509 9.49199 21.2329 10.137C21.9259 11.284 21.926 12.7159 21.229 13.8679ZM10.063 14.9981L3.53004 21.531C3.38404 21.677 3.19201 21.751 3.00001 21.751C2.80801 21.751 2.61598 21.678 2.46998 21.531C2.17698 21.238 2.17698 20.763 2.46998 20.47L5.64503 17.2949C4.31703 16.1499 3.35205 14.837 2.76905 13.866C2.07505 12.716 2.07501 11.2841 2.77101 10.1331C4.08701 7.93708 7.04001 4.251 12 4.251C13.835 4.251 15.565 4.76994 17.155 5.78494L20.469 2.47097C20.762 2.17797 21.237 2.17797 21.53 2.47097C21.823 2.76397 21.823 3.23901 21.53 3.53201L10.065 14.9971C10.065 14.9971 10.065 14.9981 10.064 14.9981C10.063 14.9981 10.063 14.9971 10.063 14.9981ZM9.6089 13.3311L13.3311 9.60891C12.9291 9.38191 12.478 9.251 12 9.251C10.484 9.251 9.25099 10.484 9.25099 12.001C9.25099 12.478 9.3829 12.9291 9.6089 13.3311ZM6.70704 16.232L8.51905 14.4199C8.02405 13.7169 7.75099 12.882 7.75099 11.999C7.75099 9.65605 9.65701 7.74905 12 7.74905C12.884 7.74905 13.7179 8.02211 14.4209 8.51711L16.052 6.88601C14.787 6.14501 13.432 5.74807 12 5.74807C7.77801 5.74807 5.20992 8.97808 4.05592 10.9041C3.64792 11.5801 3.64797 12.4171 4.05397 13.0911C4.59097 13.9881 5.48304 15.201 6.70704 16.232ZM14.708 12.4351C14.528 13.5951 13.594 14.53 12.436 14.709C12.027 14.772 11.7461 15.155 11.8091 15.564C11.8671 15.935 12.1861 16.2 12.5491 16.2C12.5871 16.2 12.6261 16.1969 12.6641 16.1909C14.4911 15.9089 15.908 14.4921 16.19 12.6641C16.253 12.2541 15.973 11.8721 15.563 11.8081C15.163 11.7471 14.771 12.0251 14.708 12.4351Z" fill="currentColor"></path>
+                        </svg>
+                        <svg x-show="showPassword" style="display: none;" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 4.251C7.04001 4.251 4.08701 7.93708 2.77101 10.1331C2.07501 11.2841 2.07505 12.716 2.76905 13.866C4.08705 16.062 7.04005 19.748 12 19.748C16.96 19.748 19.913 16.062 21.229 13.8659C21.926 12.7139 21.9259 11.282 21.2329 10.135C19.9169 7.939 16.96 4.251 12 4.251ZM12 17.749C7.75099 17.749 4.88404 14.9451 4.05397 13.0911C3.64797 12.4171 3.64792 11.5801 4.05592 10.9041C4.88602 9.05011 7.75303 6.24807 12 6.24807C16.247 6.24807 19.114 9.05011 19.9441 10.9041C20.3521 11.5801 20.3521 12.4171 19.9461 13.0911C19.116 14.9451 16.249 17.749 12 17.749Z" fill="currentColor"></path>
+                            <path d="M12 9.251C10.482 9.251 9.25099 10.482 9.25099 12C9.25099 13.518 10.482 14.749 12 14.749C13.518 14.749 14.749 13.518 14.749 12C14.749 10.482 13.518 9.251 12 9.251ZM12 13.249C11.311 13.249 10.751 12.689 10.751 12C10.751 11.311 11.311 10.751 12 10.751C12.689 10.751 13.249 11.311 13.249 12C13.249 12.689 12.689 13.249 12 13.249Z" fill="currentColor"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="w-full h-12 pr-[1px] pt-[1px] bg-[linear-gradient(to_bottom_left,#FFF_10%,#D40000_30%)] rounded-xl">
+                    <button @click="loginPassword" :disabled="isSending" class="w-full h-full rounded-xl bg-[#D40000] hover:bg-[#c1111afb] transition-colors text-white text-sm font-bold shadow-[0_4px_14px_rgba(229,9,20,0.3)] disabled:opacity-50">
+                        <span x-show="!isSending">{% trans "ادامه" %}</span>
+                        <span x-show="isSending">{% trans "درحال بررسی..." %}</span>
+                    </button>
+                </div>
+
+                <div class="flex items-center justify-end gap-4 my-3">
+                    <a href="{% url 'accounts:forgot_password' %}" class="text-white/40 text-[15px] hover:text-white transition-colors">{% trans "فراموشی رمز عبور" %}</a>
+                </div>
+
+                <a href="#" @click.prevent="sendOTP" class="w-full h-12 rounded-xl bg-[#141414] hover:bg-[#1f1f1f] transition-colors flex items-center justify-between gap-3 text-white/90 text-sm font-medium shadow-sm px-3 mt-4">
+                    <div class="flex items-center gap-2">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 20.75H6C3.582 20.75 2.25 19.418 2.25 17V8C2.25 5.582 3.582 4.25 6 4.25H18C20.418 4.25 21.75 5.582 21.75 8V17C21.75 19.418 20.418 20.75 18 20.75ZM6 5.75C4.423 5.75 3.75 6.423 3.75 8V17C3.75 18.577 4.423 19.25 6 19.25H18C19.577 19.25 20.25 18.577 20.25 17V8C20.25 6.423 19.577 5.75 18 5.75H6ZM13.0291 13.179L17.9409 9.60699C18.2759 9.36399 18.35 8.89401 18.106 8.55901C17.863 8.22501 17.3951 8.149 17.0581 8.394L12.146 11.966C12.058 12.03 11.941 12.03 11.853 11.966L6.94092 8.394C6.60292 8.149 6.13607 8.22601 5.89307 8.55901C5.64907 8.89401 5.72311 9.36299 6.05811 9.60699L10.97 13.18C11.278 13.404 11.639 13.515 11.999 13.515C12.359 13.515 12.7221 13.403 13.0291 13.179Z" fill="#888888"></path>
+                        </svg>
+                        {% trans "دریافت کد ورود از طریق پیامک" %}
+                    </div>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M14 16.75C13.808 16.75 13.616 16.6771 13.47 16.5301L9.46999 12.5301C9.17699 12.2371 9.17699 11.762 9.46999 11.469L13.47 7.46902C13.763 7.17602 14.238 7.17602 14.531 7.46902C14.824 7.76202 14.824 8.23705 14.531 8.53005L11.0611 12L14.531 15.47C14.824 15.763 14.824 16.238 14.531 16.531C14.384 16.677 14.192 16.75 14 16.75Z" fill="#9D9D9D"></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
+
+        <!-- OTP STEP -->
+        <div x-show="step === 'otp'" style="display: none;" class="w-full rounded-3xl p-[1px] bg-[linear-gradient(164.36deg,rgba(255,255,255,0.18)_5.68%,rgba(255,255,255,0)_74.28%)]">
+            <div class="w-full rounded-3xl bg-[#000] backdrop-blur-xl border border-white/10 p-6 sm:p-6">
+                <div class="flex items-center justify-start mb-6">
+                    <a href="#" @click.prevent="step = authType === 'google' ? 'google_completion' : 'phone'" class="flex items-center gap-2 text-sm font-medium text-white transition-colors hover:text-white group">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18.0766 10.2393C18.0449 10.3159 17.9992 10.385 17.9417 10.4425L12.1084 16.2758C11.9867 16.3975 11.8267 16.4592 11.6667 16.4592C11.5067 16.4592 11.3466 16.3983 11.225 16.2758C10.9808 16.0317 10.9808 15.6358 11.225 15.3917L15.9916 10.625H2.5C2.155 10.625 1.875 10.345 1.875 10C1.875 9.65501 2.155 9.37501 2.5 9.37501H15.9908L11.2242 4.60837C10.98 4.3642 10.98 3.96834 11.2242 3.72417C11.4683 3.48 11.8642 3.48 12.1084 3.72417L17.9417 9.5575C17.9992 9.615 18.0449 9.68408 18.0766 9.76075C18.1399 9.91408 18.1399 10.0859 18.0766 10.2393Z" fill="white"></path>
+                        </svg>
+                        <span class="font-light">{% trans "بازگشت" %}</span>
+                    </a>
+                </div>
+
+                <h1 class="text-white text-[20px] sm:text-[20px] font-semibold text-center mb-8">{% trans "کد ارسال شده را وارد کنید." %}</h1>
+
+                <div class="flex flex-col items-center w-full gap-4 px-8 mt-6">
+                    <div class="flex items-center justify-center gap-2 px-6 sm:gap-2" dir="ltr" @paste="onOtpPaste($event)">
+                        <template x-for="i in [0, 1, 2, 3, 4, 5]" :key="i">
+                            <input
+                                type="text"
+                                inputmode="numeric"
+                                pattern="[0-9]*"
+                                maxlength="1"
+                                :class="'otp-input-' + i"
+                                @input="onOtpInput(i, $event)"
+                                @keydown.backspace="onOtpBackspace(i, $event)"
+                                class="code-input w-11 h-11 sm:w-12 sm:h-12 md:w-13 md:h-13 rounded-xl border border-[#ffffff23] bg-[#000] text-white text-center text-xl focus:outline-none focus:border-red-600 transition-all shadow-inner"
+                                placeholder="—"
+                                :value="otp[i]"
+                            />
+                        </template>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-center gap-4 my-3 mt-6">
+                    <span class="text-white/40 text-[15px]" x-show="countdown > 0" x-text="formattedCountdown + ' ' + '{% trans 'مانده تا دریافت مجدد کد تایید' %}'"></span>
+                    <a href="#" x-show="countdown <= 0 && !isSending" @click.prevent="authType === 'google' ? sendGoogleOTP() : sendOTP()" class="text-red-500 hover:text-red-400 text-[15px] font-medium transition-colors">{% trans "ارسال مجدد کد" %}</a>
+                    <span x-show="countdown <= 0 && isSending" class="text-red-500/50 text-[15px] font-medium">{% trans "درحال ارسال..." %}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- REGISTER INFO STEP -->
+        <div x-show="step === 'register_info'" style="display: none;" class="w-full rounded-3xl p-[1px] bg-[linear-gradient(164.36deg,rgba(255,255,255,0.18)_5.68%,rgba(255,255,255,0)_74.28%)]">
+            <div class="w-full rounded-3xl bg-[#000] backdrop-blur-xl border border-white/10 p-6 sm:p-6">
+                <div class="flex items-center justify-start mb-6">
+                    <a href="#" @click.prevent="step = 'phone'" class="flex items-center gap-2 text-sm font-medium text-white transition-colors hover:text-white group">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18.0766 10.2393C18.0449 10.3159 17.9992 10.385 17.9417 10.4425L12.1084 16.2758C11.9867 16.3975 11.8267 16.4592 11.6667 16.4592C11.5067 16.4592 11.3466 16.3983 11.225 16.2758C10.9808 16.0317 10.9808 15.6358 11.225 15.3917L15.9916 10.625H2.5C2.155 10.625 1.875 10.345 1.875 10C1.875 9.65501 2.155 9.37501 2.5 9.37501H15.9908L11.2242 4.60837C10.98 4.3642 10.98 3.96834 11.2242 3.72417C11.4683 3.48 11.8642 3.48 12.1084 3.72417L17.9417 9.5575C17.9992 9.615 18.0449 9.68408 18.0766 9.76075C18.1399 9.91408 18.1399 10.0859 18.0766 10.2393Z" fill="white"></path>
+                        </svg>
+                        <span class="font-light">{% trans "بازگشت" %}</span>
+                    </a>
+                </div>
+
+                <h1 class="text-white text-[20px] sm:text-[20px] font-semibold text-center mb-8">{% trans "تکمیل اطلاعات حساب" %}</h1>
+
+                <div class="relative mb-3">
+                    <input x-model="regData.full_name" @keydown.enter="completeRegistration" type="text" placeholder="{% trans 'نام و نام خانوادگی' %}" class="w-full h-12 rounded-xl border border-[#ffffff23] bg-[#111111]/50 text-white placeholder:text-[#666] text-right text-sm px-4 focus:outline-none focus:border-red-600 focus:bg-[#1a1a1a] transition-all shadow-inner">
+                </div>
+                
+                <div class="relative mb-3">
+                    <input x-model="regData.username" @keydown.enter="completeRegistration" type="text" placeholder="{% trans 'نام کاربری (انگلیسی)' %}" dir="ltr" class="w-full h-12 rounded-xl border border-[#ffffff23] bg-[#111111]/50 text-white placeholder:text-[#666] placeholder:text-right text-left text-sm px-4 focus:outline-none focus:border-red-600 focus:bg-[#1a1a1a] transition-all shadow-inner">
+                </div>
+                
+                <div class="relative mb-3">
+                    <input x-model="regData.email" @keydown.enter="completeRegistration" type="email" placeholder="{% trans 'ایمیل' %}" dir="ltr" class="w-full h-12 rounded-xl border border-[#ffffff23] bg-[#111111]/50 text-white placeholder:text-[#666] placeholder:text-right text-left text-sm px-4 focus:outline-none focus:border-red-600 focus:bg-[#1a1a1a] transition-all shadow-inner">
+                </div>
+                
+                <div class="relative mb-6">
+                    <input x-model="regData.password" @keydown.enter="completeRegistration" :type="showPassword ? 'text' : 'password'" placeholder="{% trans 'رمز عبور' %}" dir="ltr" class="w-full h-12 rounded-xl border border-[#ffffff23] bg-[#111111]/50 text-white placeholder:text-[#666] placeholder:text-right text-left text-sm pl-14 pr-4 focus:outline-none focus:border-red-600 focus:bg-[#1a1a1a] transition-all shadow-inner">
+                    <button type="button" @click="showPassword = !showPassword" class="absolute inset-y-0 left-0 flex items-center pl-4 text-white transition cursor-pointer hover:text-white/80">
+                        <svg x-show="!showPassword" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21.229 13.8679C19.913 16.0639 16.96 19.75 12 19.75C11.037 19.75 10.0861 19.604 9.17408 19.315C8.77908 19.19 8.56105 18.769 8.68605 18.374C8.81005 17.978 9.23496 17.762 9.62696 17.885C10.392 18.127 11.19 18.25 12 18.25C16.222 18.25 18.7901 15.02 19.9441 13.094C20.3521 12.418 20.3521 11.581 19.9461 10.907C19.6001 10.324 19.177 9.72798 18.72 9.17898C18.455 8.85998 18.4991 8.38707 18.8181 8.12307C19.1381 7.85807 19.61 7.90199 19.875 8.21999C20.381 8.82899 20.8509 9.49199 21.2329 10.137C21.9259 11.284 21.926 12.7159 21.229 13.8679ZM10.063 14.9981L3.53004 21.531C3.38404 21.677 3.19201 21.751 3.00001 21.751C2.80801 21.751 2.61598 21.678 2.46998 21.531C2.17698 21.238 2.17698 20.763 2.46998 20.47L5.64503 17.2949C4.31703 16.1499 3.35205 14.837 2.76905 13.866C2.07505 12.716 2.07501 11.2841 2.77101 10.1331C4.08701 7.93708 7.04001 4.251 12 4.251C13.835 4.251 15.565 4.76994 17.155 5.78494L20.469 2.47097C20.762 2.17797 21.237 2.17797 21.53 2.47097C21.823 2.76397 21.823 3.23901 21.53 3.53201L10.065 14.9971C10.065 14.9971 10.065 14.9981 10.064 14.9981C10.063 14.9981 10.063 14.9971 10.063 14.9981ZM9.6089 13.3311L13.3311 9.60891C12.9291 9.38191 12.478 9.251 12 9.251C10.484 9.251 9.25099 10.484 9.25099 12.001C9.25099 12.478 9.3829 12.9291 9.6089 13.3311ZM6.70704 16.232L8.51905 14.4199C8.02405 13.7169 7.75099 12.882 7.75099 11.999C7.75099 9.65605 9.65701 7.74905 12 7.74905C12.884 7.74905 13.7179 8.02211 14.4209 8.51711L16.052 6.88601C14.787 6.14501 13.432 5.74807 12 5.74807C7.77801 5.74807 5.20992 8.97808 4.05592 10.9041C3.64792 11.5801 3.64797 12.4171 4.05397 13.0911C4.59097 13.9881 5.48304 15.201 6.70704 16.232ZM14.708 12.4351C14.528 13.5951 13.594 14.53 12.436 14.709C12.027 14.772 11.7461 15.155 11.8091 15.564C11.8671 15.935 12.1861 16.2 12.5491 16.2C12.5871 16.2 12.6261 16.1969 12.6641 16.1909C14.4911 15.9089 15.908 14.4921 16.19 12.6641C16.253 12.2541 15.973 11.8721 15.563 11.8081C15.163 11.7471 14.771 12.0251 14.708 12.4351Z" fill="currentColor"></path>
+                        </svg>
+                        <svg x-show="showPassword" style="display: none;" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 4.251C7.04001 4.251 4.08701 7.93708 2.77101 10.1331C2.07501 11.2841 2.07505 12.716 2.76905 13.866C4.08705 16.062 7.04005 19.748 12 19.748C16.96 19.748 19.913 16.062 21.229 13.8659C21.926 12.7139 21.9259 11.282 21.2329 10.135C19.9169 7.939 16.96 4.251 12 4.251ZM12 17.749C7.75099 17.749 4.88404 14.9451 4.05397 13.0911C3.64797 12.4171 3.64792 11.5801 4.05592 10.9041C4.88602 9.05011 7.75303 6.24807 12 6.24807C16.247 6.24807 19.114 9.05011 19.9441 10.9041C20.3521 11.5801 20.3521 12.4171 19.9461 13.0911C19.116 14.9451 16.249 17.749 12 17.749Z" fill="currentColor"></path>
+                            <path d="M12 9.251C10.482 9.251 9.25099 10.482 9.25099 12C9.25099 13.518 10.482 14.749 12 14.749C13.518 14.749 14.749 13.518 14.749 12C14.749 10.482 13.518 9.251 12 9.251ZM12 13.249C11.311 13.249 10.751 12.689 10.751 12C10.751 11.311 11.311 10.751 12 10.751C12.689 10.751 13.249 11.311 13.249 12C13.249 12.689 12.689 13.249 12 13.249Z" fill="currentColor"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="w-full h-12 pr-[1px] pt-[1px] bg-[linear-gradient(to_bottom_left,#FFF_10%,#D40000_30%)] rounded-xl">
+                    <button @click="completeRegistration" :disabled="isSending" class="w-full h-full rounded-xl bg-[#D40000] hover:bg-[#c1111afb] transition-colors text-white text-sm font-bold shadow-[0_4px_14px_rgba(229,9,20,0.3)] disabled:opacity-50">
+                        <span x-show="!isSending">{% trans "تکمیل ثبت‌نام" %}</span>
+                        <span x-show="isSending">{% trans "درحال بررسی..." %}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- GOOGLE COMPLETION STEP -->
+        <div x-show="step === 'google_completion'" style="display: none;" class="w-full rounded-3xl p-[1px] bg-[linear-gradient(164.36deg,rgba(255,255,255,0.18)_5.68%,rgba(255,255,255,0)_74.28%)]">
+            <div class="w-full rounded-3xl bg-[#000] backdrop-blur-xl border border-white/10 p-6 sm:p-6">
+                <div class="flex items-center justify-start mb-6">
+                    <a href="#" @click.prevent="step = 'phone'; authType = 'normal'" class="flex items-center gap-2 text-sm font-medium text-white transition-colors hover:text-white group">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18.0766 10.2393C18.0449 10.3159 17.9992 10.385 17.9417 10.4425L12.1084 16.2758C11.9867 16.3975 11.8267 16.4592 11.6667 16.4592C11.5067 16.4592 11.3466 16.3983 11.225 16.2758C10.9808 16.0317 10.9808 15.6358 11.225 15.3917L15.9916 10.625H2.5C2.155 10.625 1.875 10.345 1.875 10C1.875 9.65501 2.155 9.37501 2.5 9.37501H15.9908L11.2242 4.60837C10.98 4.3642 10.98 3.96834 11.2242 3.72417C11.4683 3.48 11.8642 3.48 12.1084 3.72417L17.9417 9.5575C17.9992 9.615 18.0449 9.68408 18.0766 9.76075C18.1399 9.91408 18.1399 10.0859 18.0766 10.2393Z" fill="white"></path>
+                        </svg>
+                        <span class="font-light">{% trans "بازگشت" %}</span>
+                    </a>
+                </div>
+
+                <h1 class="text-white text-[20px] sm:text-[20px] font-semibold text-center mb-2">{% trans "تکمیل پروفایل" %}</h1>
+                <p class="text-[#888] text-sm text-center mb-8">{% trans "برای تکمیل ثبت‌نام با گوگل، لطفاً شماره موبایل و نام کاربری خود را وارد کنید." %}</p>
+
+                <div class="relative mb-3">
+                    <input x-model="regData.username" @keydown.enter="sendGoogleOTP" type="text" placeholder="{% trans 'نام کاربری (انگلیسی)' %}" dir="ltr" class="w-full h-12 rounded-xl border border-[#ffffff23] bg-[#111111]/50 text-white placeholder:text-[#666] placeholder:text-right text-left text-sm px-4 focus:outline-none focus:border-red-600 focus:bg-[#1a1a1a] transition-all shadow-inner">
+                </div>
+                
+                <div class="relative mb-6">
+                    <input x-model="phone" @keydown.enter="sendGoogleOTP" type="tel" placeholder="{% trans '.موبایل خود را وارد کنید' %}" class="w-full h-12 rounded-xl border border-[#ffffff15] bg-[#111111]/50 text-white placeholder:text-[#666] text-right text-sm px-4 focus:outline-none focus:border-red-600 focus:bg-[#1a1a1a] transition-all shadow-inner">
+                </div>
+                
+                <div class="w-full h-12 pr-[1px] pt-[1px] bg-[linear-gradient(to_bottom_left,#FFF_10%,#D40000_30%)] rounded-xl">
+                    <button @click="sendGoogleOTP" :disabled="isSending" class="w-full h-full rounded-xl bg-[#D40000] hover:bg-[#c1111afb] transition-colors text-white text-sm font-bold shadow-[0_4px_14px_rgba(229,9,20,0.3)] disabled:opacity-50">
+                        <span x-show="!isSending">{% trans "ارسال کد تایید" %}</span>
+                        <span x-show="isSending">{% trans "درحال بررسی..." %}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer_references %}
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+    let tokenClient;
+    
+    async function handleGoogleCredentialResponse(response) {
+        if (!response.access_token) return;
+        
+        try {
+            const res = await fetch('/accounts/api/google-login/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                body: JSON.stringify({ credential: response.access_token })
+            });
+            const data = await res.json();
+            
+            if (res.ok) {
+                if (data.needs_google_completion) {
+                    if (window.authFormContext) {
+                        window.authFormContext.authType = 'google';
+                        window.authFormContext.step = 'google_completion';
+                    }
+                } else {
+                    window.location.href = data.redirect_url || '/';
+                }
+            } else {
+                Alpine.store('globalModal').show('error', '{% trans 'خطا' %}', data.error || '{% trans 'خطایی رخ داد' %}');
+            }
+        } catch (e) {
+            console.error(e);
+            Alpine.store('globalModal').show('error', '{% trans 'خطا' %}', '{% trans 'مشکل در ارتباط با سرور' %}');
+        }
+    }
+
+    window.onload = function () {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: "{{ GOOGLE_CLIENT_ID }}",
+            scope: 'email profile openid',
+            callback: handleGoogleCredentialResponse
+        });
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('authForm', () => ({
+            init() {
+                window.authFormContext = this;
+            },
+            authType: 'normal',
+            step: 'phone',
+            phone: '',
+            password: '',
+            showPassword: false,
+            otp: ['', '', '', '', '', ''],
+            regData: {
+                full_name: '',
+                username: '',
+                email: '',
+                password: ''
+            },
+            countdown: 0,
+            countdownInterval: null,
+            isSending: false,
+            isVerifying: false,
+            
+            triggerGoogleLogin() {
+                if(typeof tokenClient !== 'undefined') {
+                    tokenClient.requestAccessToken();
+                } else {
+                    Alpine.store('globalModal').show('error', '{% trans 'خطا' %}', '{% trans 'سرویس گوگل در حال بارگذاری است. لحظاتی بعد مجدد تلاش کنید.' %}');
+                }
+            },
+            
+            get formattedCountdown() {
+                if (this.countdown <= 0) return '00:00';
+                let m = Math.floor(this.countdown / 60);
+                let s = this.countdown % 60;
+                return (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
+            },
+
+            startCountdown(seconds) {
+                this.countdown = seconds;
+                if (this.countdownInterval) clearInterval(this.countdownInterval);
+                this.countdownInterval = setInterval(() => {
+                    if (this.countdown > 0) {
+                        this.countdown--;
+                    } else {
+                        clearInterval(this.countdownInterval);
+                    }
+                }, 1000);
+            },
+
+            async checkPhone() {
+                if (!this.phone) return;
+                const phonePattern = /^(09\d{9}|9\d{9})$/;
+                if (!phonePattern.test(this.phone)) {
+                    Alpine.store('globalModal').show('error', '{% trans 'خطا' %}', '{% trans 'شماره موبایل نامعتبر است!' %}');
+                    return;
+                }
+                if (this.isSending) return;
+                this.isSending = true;
+                try {
+                    const res = await fetch('/accounts/api/check-phone/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                        body: JSON.stringify({ phone: this.phone })
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        if (data.exists) {
+                            this.step = 'password';
+                        } else {
+                            await this.sendOTP();
+                        }
+                    } else {
+                        Alpine.store('globalModal').show('error', '{% trans 'خطا' %}', data.error || '{% trans 'خطایی رخ داد' %}');
+                    }
+                } catch (e) {
+                    console.error(e);
+                    Alpine.store('globalModal').show('error', '{% trans 'خطا' %}', '{% trans 'مشکل در ارتباط با سرور' %}');
+                } finally {
+                    this.isSending = false;
+                }
+            },
+
+            async sendOTP() {
+                try {
+                    this.isSending = true;
+                    const res = await fetch('/accounts/api/send-otp/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                        body: JSON.stringify({ phone: this.phone })
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        this.step = 'otp';
+                        this.otp = ['', '', '', '', '', ''];
+                        this.startCountdown(120);
+                        setTimeout(() => {
+                            const firstInput = document.querySelector('.otp-input-0');
+                            if(firstInput) firstInput.focus();
+                        }, 100);
+                    } else {
+                        Alpine.store('globalModal').show('error', '{% trans 'خطا' %}', data.error || '{% trans 'خطا در ارسال کد' %}');
+                    }
+                } catch (e) {
+                    console.error(e);
+                } finally {
+                    this.isSending = false;
+                }
+            },
+
+            async loginPassword() {
+                if (!this.password || this.isSending) return;
+                this.isSending = true;
+                try {
+                    const res = await fetch('/accounts/api/login-password/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                        body: JSON.stringify({ phone: this.phone, password: this.password })
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        window.location.href = data.redirect_url || '/';
+                    } else {
+                        Alpine.store('globalModal').show('error', '{% trans 'خطا' %}', data.error || '{% trans 'خطایی رخ داد' %}');
+                    }
+                } catch (e) {
+                    console.error(e);
+                    Alpine.store('globalModal').show('error', '{% trans 'خطا' %}', '{% trans 'مشکل در ارتباط با سرور' %}');
+                } finally {
+                    this.isSending = false;
+                }
+            },
+
+            async sendGoogleOTP() {
+                if (!this.phone || !this.regData.username || this.isSending) return;
+                
+                const phonePattern = /^(09\d{9}|9\d{9})$/;
+                if (!phonePattern.test(this.phone)) {
+                    Alpine.store('globalModal').show('error', '{% trans 'خطا' %}', '{% trans 'شماره موبایل نامعتبر است!' %}');
+                    return;
+                }
+                
+                try {
+                    this.isSending = true;
+                    const res = await fetch('/accounts/api/google-request-otp/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                        body: JSON.stringify({ phone: this.phone, username: this.regData.username })
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        this.step = 'otp';
+                        this.otp = ['', '', '', '', '', ''];
+                        this.startCountdown(120);
+                        setTimeout(() => {
+                            const firstInput = document.querySelector('.otp-input-0');
+                            if(firstInput) firstInput.focus();
+                        }, 100);
+                    } else {
+                        Alpine.store('globalModal').show('error', '{% trans 'خطا' %}', data.error || '{% trans 'خطا در ارسال کد' %}');
+                    }
+                } catch (e) {
+                    console.error(e);
+                } finally {
+                    this.isSending = false;
+                }
+            },
+
+            async submitOTP() {
+                const fullOtp = this.otp.join('');
+                if (fullOtp.length === 6 && !this.isVerifying) {
+                    this.isVerifying = true;
+                    try {
+                        const url = this.authType === 'google' ? '/accounts/api/google-verify-otp/' : '/accounts/api/verify-otp/';
+                        const res = await fetch(url, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                            body: JSON.stringify({ phone: this.phone, code: fullOtp })
+                        });
+                        const data = await res.json();
+                        if (res.ok) {
+                            if (data.needs_registration) {
+                                this.step = 'register_info';
+                            } else {
+                                window.location.href = data.redirect_url || '/';
+                            }
+                        } else {
+                            Alpine.store('globalModal').show('error', '{% trans 'خطا' %}', data.error || '{% trans 'کد نامعتبر است' %}');
+                            this.otp = ['', '', '', '', '', ''];
+                            setTimeout(() => {
+                                const firstInput = document.querySelector('.otp-input-0');
+                                if(firstInput) firstInput.focus();
+                            }, 50);
+                        }
+                    } catch (e) {
+                        console.error(e);
+                    } finally {
+                        this.isVerifying = false;
+                    }
+                }
+            },
+
+            async completeRegistration() {
+                if (!this.regData.full_name || !this.regData.username || !this.regData.email || !this.regData.password) {
+                    Alpine.store('globalModal').show('error', '{% trans 'خطا' %}', '{% trans 'لطفا تمامی فیلدها را پر کنید' %}');
+                    return;
+                }
+                this.isSending = true;
+                try {
+                    const res = await fetch('/accounts/api/complete-registration/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                        body: JSON.stringify(this.regData)
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        window.location.href = data.redirect_url || '/';
+                    } else {
+                        Alpine.store('globalModal').show('error', '{% trans 'خطا' %}', data.error || '{% trans 'خطایی رخ داد' %}');
+                    }
+                } catch (e) {
+                    console.error(e);
+                    Alpine.store('globalModal').show('error', '{% trans 'خطا' %}', '{% trans 'مشکل در ارتباط با سرور' %}');
+                } finally {
+                    this.isSending = false;
+                }
+            },
+
+            onOtpInput(index, event) {
+                let val = event.target.value.replace(/[^0-9]/g, '');
+                this.otp[index] = val;
+
+                if (val && index < 5) {
+                    const nextInput = document.querySelector('.otp-input-' + (index + 1));
+                    if (nextInput) nextInput.focus();
+                }
+
+                if (this.otp.join('').length === 6) {
+                    this.submitOTP();
+                }
+            },
+
+            onOtpBackspace(index, event) {
+                if (!event.target.value && index > 0) {
+                    const prevInput = document.querySelector('.otp-input-' + (index - 1));
+                    if (prevInput) prevInput.focus();
+                } else {
+                    this.otp[index] = '';
+                }
+            },
+
+            onOtpPaste(event) {
+                let pasteData = (event.clipboardData || window.clipboardData).getData('text');
+                let numbers = pasteData.replace(/[^0-9]/g, '');
+
+                if (numbers.length > 0) {
+                    for (let i = 0; i < 6; i++) {
+                        if (i < numbers.length) {
+                            this.otp[i] = numbers[i];
+                        }
+                    }
+                    let focusIndex = Math.min(numbers.length, 5);
+                    const nextInput = document.querySelector('.otp-input-' + focusIndex);
+                    if (nextInput) nextInput.focus();
+
+                    if (this.otp.join('').length === 6) {
+                        this.submitOTP();
+                    }
+                }
+            }
+        }));
+    });
+</script>
+{% endblock %}

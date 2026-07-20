@@ -1,0 +1,115 @@
+{% load i18n static %}
+<style>
+    /* Styling select2 search box to match the dark admin theme seamlessly */
+    .select2-container--default .select2-selection--single {
+        background-color: #1a1a1a !important;
+        color: #fff !important;
+        border: 1px solid #444 !important;
+        height: 34px !important;
+        border-radius: 6px !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #fff !important;
+        line-height: 32px !important;
+        text-align: right !important;
+        padding-right: 12px !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 32px !important;
+    }
+    .select2-dropdown {
+        background-color: #1a1a1a !important;
+        color: #fff !important;
+        border: 1px solid #444 !important;
+        border-radius: 6px !important;
+    }
+    .select2-search__field {
+        background-color: #2b2b2b !important;
+        color: #fff !important;
+        border: 1px solid #555 !important;
+        border-radius: 4px !important;
+        padding: 6px !important;
+    }
+    .select2-results__option {
+        text-align: right !important;
+        padding: 8px 12px !important;
+    }
+    .select2-results__option--highlighted[aria-selected] {
+        background-color: #e41a1a !important;
+        color: #fff !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__placeholder {
+        color: #888 !important;
+    }
+</style>
+
+<!-- Re-expose django.jQuery temporarily so select2 script can bind to it -->
+<script type="text/javascript">
+    if (typeof window.jQuery === 'undefined' && typeof django !== 'undefined' && django.jQuery) {
+        window.jQuery = window.$ = django.jQuery;
+    }
+</script>
+
+<link rel="stylesheet" type="text/css" href="{% static 'admin/css/vendor/select2/select2.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'admin/css/autocomplete.css' %}">
+<script type="text/javascript" src="{% static 'admin/js/vendor/select2/select2.full.min.js' %}"></script>
+
+<h3>{% translate title %}</h3>
+<div style="padding: 5px 10px;">
+    {% with choices|first as choice %}
+    <form method="get" action="" id="filter-form-{{ spec.parameter_name }}">
+        {% for k, v in choice.all_params.items %}
+            {% if k != spec.parameter_name %}
+                <input type="hidden" name="{{ k }}" value="{{ v }}">
+            {% endif %}
+        {% endfor %}
+        
+        <select name="{{ spec.parameter_name }}" id="select-{{ spec.parameter_name }}" style="width: 100%;">
+            {% if choice.current_value %}
+                <option value="{{ choice.current_value }}" selected="selected">{{ choice.current_text }}</option>
+            {% else %}
+                <option value="" selected="selected">---------</option>
+            {% endif %}
+        </select>
+    </form>
+    {% endwith %}
+</div>
+
+<script type="text/javascript">
+    (function($) {
+        $(document).ready(function() {
+            var $select = $('#select-{{ spec.parameter_name }}');
+            if ($.fn.select2) {
+                $select.select2({
+                    ajax: {
+                        url: '/admin/autocomplete/',
+                        dataType: 'json',
+                        delay: 250,
+                        data: function (params) {
+                            return {
+                                term: params.term,
+                                app_label: 'movie',
+                                model_name: '{{ spec.target_model_name }}',
+                                field_name: '{{ spec.target_field_name }}'
+                            };
+                        },
+                        processResults: function (data) {
+                            return {
+                                results: data.results
+                            };
+                        },
+                        cache: true
+                    },
+                    minimumInputLength: 0,
+                    placeholder: '{{ spec.placeholder|escapejs }}',
+                    allowClear: true
+                });
+
+                // Auto-submit form when option changes
+                $select.on('change', function() {
+                    $('#filter-form-{{ spec.parameter_name }}').submit();
+                });
+            }
+        });
+    })(django.jQuery);
+</script>
