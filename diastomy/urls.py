@@ -6,12 +6,13 @@ from django.conf.urls.i18n import i18n_patterns
 from core.views import home
 
 urlpatterns = [
+    path('admin/', admin.site.urls),
     path('i18n/', include('django.conf.urls.i18n')),
     path('rosetta/', include('rosetta.urls')),
+    path('accounts/api/', include('accounts.api_urls')),
 ]
 
 urlpatterns += i18n_patterns(
-    path('admin/', admin.site.urls),
     path('', home, name='home'),
     path('', include('core.urls')),
     path('movie/', include('movie.urls')),
@@ -21,5 +22,4 @@ urlpatterns += i18n_patterns(
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT or settings.STATICFILES_DIRS[0])
-    # Also add media support
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

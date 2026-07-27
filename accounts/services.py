@@ -1,4 +1,5 @@
 from django.utils.translation import gettext as _
+from django.utils import translation
 import random
 import logging
 import re
@@ -6,7 +7,10 @@ from django.core.cache import cache
 from django.conf import settings
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
-from .models import User
+from .models import User, Notification
+from django.utils import timezone
+from subscriptions.models import Subscription
+from core.models import DashboardSetting, ProfileImage, FooterSetting
 
 logger = logging.getLogger(__name__)
 
@@ -132,3 +136,163 @@ def verify_google_token(token):
     except Exception as e:
         logger.error(f"Google Login error: {e}")
         return None, _("خطا در ارتباط با سرورهای گوگل.")
+
+def get_user_dashboard_info(user):
+    active_sub = Subscription.objects.filter(user=user, is_active=True, end_date__gte=timezone.now()).first()
+    
+    return {
+        "full_name": user.full_name,
+        "username": user.username,
+        "email": user.email,
+        "phone": user.phone,
+        "user_number": user.user_number,
+        "date_joined": user.date_joined,
+        "avatar": user.avatar.url if user.avatar else None,
+        "has_active_subscription": bool(active_sub),
+        "subscription_name": active_sub.plan.name if active_sub and active_sub.plan else None,
+        "subscription_end_date": active_sub.end_date if active_sub else None,
+    }
+
+def get_default_avatars():
+    setting = DashboardSetting.objects.first()
+    if setting:
+        return setting.default_avatars.all()
+    return []
+
+def update_user_username_and_avatar(user, username=None, email=None, avatar_file=None, default_avatar_id=None):
+    updated = False
+    if username and username != user.username:
+        if User.objects.filter(username=username).exclude(pk=user.pk).exists():
+            return False, _("این نام کاربری قبلاً استفاده شده است.")
+        user.username = username
+        updated = True
+        
+    if email and email != user.email:
+        if User.objects.filter(email=email).exclude(pk=user.pk).exists():
+            return False, _("این ایمیل قبلاً استفاده شده است.")
+        user.email = email
+        updated = True
+        
+    if avatar_file:
+        user.avatar = avatar_file
+        updated = True
+    elif default_avatar_id:
+        try:
+            profile_img = ProfileImage.objects.get(id=default_avatar_id)
+            user.avatar = profile_img.image.name
+            updated = True
+        except ProfileImage.DoesNotExist:
+            pass
+
+    if updated:
+        user.save()
+        return True, _("پروفایل با موفقیت بروزرسانی شد.")
+    return False, _("تغییری اعمال نشد.")
+
+def get_social_medias():
+    setting = FooterSetting.objects.first()
+    if setting:
+        return setting.social_medias.all()
+    return []
+
+
+def change_user_password(user, old_password, new_password, confirm_password):
+    """
+    Validates and changes the user's password.
+    """
+    if user.has_usable_password():
+        if not old_password:
+            return False, _("لطفاً رمز عبور فعلی را وارد کنید.")
+        if not user.check_password(old_password):
+            return False, _("رمز عبور فعلی نادرست است.")
+
+    if not new_password:
+        return False, _("لطفاً رمز عبور جدید را وارد کنید.")
+
+    if len(new_password) < 6:
+        return False, _("رمز عبور جدید باید حداقل ۶ کاراکتر باشد.")
+
+    if new_password != confirm_password:
+        return False, _("رمز عبور جدید و تکرار آن یکسان نیستند.")
+
+    user.set_password(new_password)
+    user.save()
+    return True, _("رمز عبور با موفقیت تغییر یافت.")
+
+
+def get_user_notifications(user):
+    """
+    Returns queryset of active notifications excluding those dismissed by the given user.
+    """
+    return Notification.objects.filter(
+        is_active=True
+    ).exclude(
+        dismissed_users=user
+    ).order_by('-created_at')
+
+
+def dismiss_user_notification(user, notification_id):
+    """
+    Dismisses a notification for a user by adding them to dismissed_users.
+    """
+    try:
+        notification = Notification.objects.get(pk=notification_id, is_active=True)
+        notification.dismissed_users.add(user)
+        return True, _("اعلان بسته‌شد.")
+    except Notification.DoesNotExist:
+        return False, _("اعلان یافت نشد.")
+
+
+def update_player_quality(user, quality):
+    """
+    Updates the user's preferred player quality.
+    """
+    valid_qualities = ['AUTO', 'VeryHigh', 'High', 'Medium', 'Low']
+    if quality not in valid_qualities:
+        return False, _("کیفیت انتخاب شده نامعتبر است.")
+    user.preferred_quality = quality
+    user.save()
+    return True, _("کیفیت پخش‌کننده با موفقیت بروزرسانی شد.")
+
+
+def update_user_language(user, lang_code, session=None):
+    """
+    Updates the user's preferred language and session/translation.
+    """
+    from core.models import SiteLanguage
+    valid_languages = list(SiteLanguage.objects.filter(is_active=True).values_list('code', flat=True))
+    if not valid_languages:
+        valid_languages = ['fa', 'en', 'ar', 'ru', 'tr']
+
+    if lang_code not in valid_languages:
+        return False, _("زبان انتخاب شده نامعتبر است.")
+
+    user.preferred_language = lang_code
+    user.save()
+
+    if session is not None:
+        session['django_language'] = lang_code
+
+    translation.activate(lang_code)
+    return True, _("زبان با موفقیت بروزرسانی شد.")
+
+
+def sync_user_language_from_session(user, session):
+    """
+    Called upon user registration or login to save the session language to the user's profile.
+    """
+    from core.models import SiteLanguage
+    valid_languages = list(SiteLanguage.objects.filter(is_active=True).values_list('code', flat=True))
+    if not valid_languages:
+        valid_languages = ['fa', 'en', 'ar', 'ru', 'tr']
+
+    if session and 'django_language' in session:
+        session_lang = session.get('django_language')
+        if session_lang in valid_languages and user.preferred_language != session_lang:
+            user.preferred_language = session_lang
+            user.save()
+
+
+
+
+

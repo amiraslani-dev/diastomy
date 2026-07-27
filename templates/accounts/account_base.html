@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
 {% block header %}{% endblock %}
 {% block footer %}{% endblock %}
@@ -82,7 +83,7 @@
                 class="md:hidden fixed top-0 left-0 w-full flex items-center justify-between px-5 py-5 bg-gradient-to-b from-[#1a0000] to-transparent z-50"
             >
                 <h1 class="text-[17px] font-bold text-white tracking-wide">
-                    اطلاعات کاربری
+                    {% block dashboard_title %}{% trans "اطلاعات کاربری" %}{% endblock %}
                 </h1>
                 <button class="text-white transition-transform hover:scale-110">
                     <svg
@@ -205,7 +206,8 @@
                     </div>
 
                     <div
-                        class="relative z-10 flex flex-col items-center py-10 px-5 h-full overflow-y-auto [&::-webkit-scrollbar]:hidden"
+                        class="relative z-10 flex flex-col items-center py-10 px-5 h-full overflow-y-auto custom-scrollbar [&::-webkit-scrollbar]:w-[4px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/25 [&::-webkit-scrollbar-thumb]:rounded-full"
+                        style="scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.25) transparent;"
                     >
                         <div class="flex justify-center w-full mb-10">
                             <svg
@@ -232,7 +234,7 @@
                                     fill="white"
                                 />
                                 <path
-                                    d="M78.1167 24.6213C75.783 24.5714 73.588 24.0933 71.7383 22.5911C70.771 21.7925 70.0134 20.7784 69.5292 19.6338C69.4343 19.4176 69.4598 19.3109 69.6707 19.1904C70.9387 18.4892 72.1997 17.7773 73.4535 17.0549C73.6786 16.9246 73.7507 16.9814 73.847 17.1837C75.0442 19.7087 77.4841 20.2006 79.7909 19.6782C80.9032 19.4273 81.441 18.582 81.1466 17.6674C80.9641 17.1131 80.5112 16.7916 80.0046 16.5435C79.004 16.0557 77.927 15.7855 76.8585 15.4917C75.8127 15.2261 74.7966 14.8584 73.8257 14.3941C71.6265 13.2938 70.3486 11.6115 70.3259 9.12811C70.3005 6.53113 71.4836 4.6312 73.8102 3.41031C77.0213 1.7238 82.7968 2.08688 85.4319 7.01338C85.5734 7.27253 85.5267 7.3723 85.2819 7.5095C84.0945 8.17052 82.9128 8.83986 81.7438 9.53137C81.4537 9.7046 81.3462 9.67688 81.1778 9.38309C80.2536 7.73676 78.888 7.06466 77.0369 7.3044C75.9486 7.44298 75.2749 8.10539 75.3075 8.98675C75.3301 9.57572 75.6683 9.96512 76.1439 10.2658C77.0369 10.8326 78.0431 11.1361 79.0479 11.4396C80.18 11.7819 81.3122 12.1048 82.4005 12.5898C84.1695 13.3839 85.555 14.5299 86.0164 16.4701C86.8528 19.9858 85.0427 23.0346 81.4806 24.1183C81.0249 24.2585 80.5608 24.371 80.0909 24.455C79.44 24.5736 78.7787 24.6293 78.1167 24.6213Z"
+                                    d="M78.1167 24.6213C75.783 24.5714 73.588 24.0933 71.7383 22.5911C70.771 21.7925 70.0134 20.7784 69.5292 19.6338C69.4343 19.4176 69.4598 19.3109 69.6707 19.1904C70.9387 18.4892 72.1997 17.7773 73.4535 17.0549C73.6786 16.9246 73.7507 16.9814 73.847 17.1837C75.0442 19.7087 77.4841 20.2006 79.7909 19.6782C80.9032 19.4273 81.441 18.582 81.1466 17.6674C80.9641 17.1131 80.5112 16.7916 80.0046 16.5435C79.004 16.0557 77.927 15.7855 76.8585 15.4917C75.8127 15.2261 74.7966 14.8584 73.8257 14.3941C71.6265 13.2938 70.3486 11.6115 70.3259 9.1281C70.3005 6.53113 71.4836 4.6312 73.8102 3.41031C77.0213 1.7238 82.7968 2.08688 85.4319 7.01338C85.5734 7.27253 85.5267 7.3723 85.2819 7.5095C84.0945 8.17052 82.9128 8.83986 81.7438 9.53137C81.4537 9.7046 81.3462 9.67688 81.1778 9.38309C80.2536 7.73676 78.888 7.06466 77.0369 7.3044C75.9486 7.44298 75.2749 8.10539 75.3075 8.98675C75.3301 9.57572 75.6683 9.96512 76.1439 10.2658C77.0369 10.8326 78.0431 11.1361 79.0479 11.4396C80.18 11.7819 81.3122 12.1048 82.4005 12.5898C84.1695 13.3839 85.555 14.5299 86.0164 16.4701C86.8528 19.9858 85.0427 23.0346 81.4806 24.1183C81.0249 24.2585 80.5608 24.371 80.0909 24.455C79.44 24.5736 78.7787 24.6293 78.1167 24.6213Z"
                                     fill="white"
                                 />
                                 <path
@@ -263,26 +265,33 @@
                                 class="w-[85px] h-[85px] rounded-full border-[4px] border-[#4E4E4E6E] mb-1"
                             >
                                 <img
-                                    :src="currentAvatar"
+                                    :src="currentAvatar || '{% if request.user.avatar %}{{ request.user.avatar.url }}{% else %}https://ui-avatars.com/api/?name={{ request.user.full_name|default:request.user.phone }}&background=random{% endif %}'"
                                     alt="avatar"
                                     class="object-cover w-full h-full rounded-full"
                                 />
                             </div>
                             <h2 class="mb-1 text-lg font-bold text-white">
-                                یلدا حضرتی
+                                {{ request.user.full_name|default:request.user.phone }}
                             </h2>
                             <span
                                 class="text-[#939393] text-sm font-light dir-ltr tracking-wider"
-                                >09373050735</span
+                                >{{ request.user.phone }}</span
                             >
                         </div>
 
                         <div
-                            class="flex items-center justify-between gap-1 bg-[#27272775] rounded-[50px] py-1 px-2 mb-8"
+                            class="flex items-center justify-between gap-1 bg-[#27272775] rounded-[50px] py-1 px-2 mb-8 flex-row-reverse"
                         >
+                            {% if request.user.has_active_subscription %}
+                            <span class="text-white text-[10px] font-medium">{% trans "اشتراک فعال دارید." %}</span>
+                            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M10 0C4.477 0 0 4.477 0 10C0 15.523 4.477 20 10 20C15.523 20 20 15.523 20 10C20 4.477 15.523 0 10 0ZM14.707 7.707L8.707 13.707C8.512 13.902 8.256 14 8 14C7.744 14 7.488 13.902 7.293 13.707L4.293 10.707C3.902 10.316 3.902 9.684 4.293 9.293C4.684 8.902 5.316 8.902 5.707 9.293L8 11.586L13.293 6.293C13.684 5.902 14.316 5.902 14.707 6.293C15.098 6.684 15.098 7.316 14.707 7.707Z" fill="#6DE474"/>
+                            </svg>
+                            {% else %}
+                            <span class="text-white text-[10px] font-medium">{% trans "اشتراک فعالی ندارید." %}</span>
                             <svg
-                                width="20"
-                                height="20"
+                                width="18"
+                                height="18"
                                 viewBox="0 0 20 20"
                                 fill="none"
                                 xmlns="http://www.w3.org/2000/svg"
@@ -292,19 +301,17 @@
                                     fill="#DD0202"
                                 />
                             </svg>
-                            <span class="text-white text-[10px] font-medium"
-                                >اشتراک فعالی ندارید.</span
-                            >
+                            {% endif %}
                         </div>
 
                         <ul class="w-full flex flex-col gap-0.5 px-4">
                             <li>
                                 <a
-                                    href="#"
-                                    class="flex flex-row-reverse items-center justify-end px-2.5 py-1 text-white transition-colors hover:text-white"
+                                    href="{% url 'accounts:user_info' %}"
+                                    class="{% if active_tab == 'user-info' %}flex flex-row-reverse items-center justify-end px-2.5 py-1 text-white transition-colors hover:text-white{% else %}flex flex-row-reverse items-center justify-end gap-3 px-5 py-3 text-white transition-colors hover:text-white{% endif %}"
                                 >
                                     <span class="{% if active_tab == 'user-info' %}bg-[linear-gradient(-89.27deg,rgba(99,26,26,0.8)_36%,rgba(80,11,11,0.61)_48.07%,rgba(9,29,31,0)_92.1%)] py-2.5 px-2 rounded-3xl font-medium text-[15px]{% else %}font-light text-[15px]{% endif %}"
-                                        >اطلاعات کاربری</span
+                                        >{% trans "اطلاعات کاربری" %}</span
                                     >
 {% if active_tab == 'user-info' %}
                                 <div class="relative w-[42px] h-[42px] flex items-center justify-center rounded-full">
@@ -369,8 +376,8 @@
 
                             <li>
                                 <a
-                                    href="#"
-                                    class="flex flex-row-reverse items-center justify-end gap-3 px-5 py-3 text-white transition-colors hover:text-white"
+                                    href="{% url 'accounts:subscriptions:subscription' %}"
+                                    class="{% if active_tab == 'subscription' %}flex flex-row-reverse items-center justify-end px-2.5 py-1 text-white transition-colors hover:text-white{% else %}flex flex-row-reverse items-center justify-end gap-3 px-5 py-3 text-white transition-colors hover:text-white{% endif %}"
                                 >
                                     <span class="{% if active_tab == 'subscription' %}bg-[linear-gradient(-89.27deg,rgba(99,26,26,0.8)_36%,rgba(80,11,11,0.61)_48.07%,rgba(9,29,31,0)_92.1%)] py-2.5 px-2 rounded-3xl font-medium text-[15px]{% else %}font-light text-[15px]{% endif %}"
                                         >اشتراک</span
@@ -435,8 +442,8 @@
 
                             <li>
                                 <a
-                                    href="#"
-                                    class="flex flex-row-reverse items-center justify-end gap-3 px-5 py-3 text-white transition-colors hover:text-white"
+                                    href="{% url 'accounts:subscriptions:payment_info' %}"
+                                    class="{% if active_tab == 'payment-info' %}flex flex-row-reverse items-center justify-end px-2.5 py-1 text-white transition-colors hover:text-white{% else %}flex flex-row-reverse items-center justify-end gap-3 px-5 py-3 text-white transition-colors hover:text-white{% endif %}"
                                 >
                                     <span class="{% if active_tab == 'payment-info' %}bg-[linear-gradient(-89.27deg,rgba(99,26,26,0.8)_36%,rgba(80,11,11,0.61)_48.07%,rgba(9,29,31,0)_92.1%)] py-2.5 px-2 rounded-3xl font-medium text-[15px]{% else %}font-light text-[15px]{% endif %}"
                                         >اطلاعات پرداخت</span
@@ -501,8 +508,8 @@
 
                             <li>
                                 <a
-                                    href="#"
-                                    class="flex flex-row-reverse items-center justify-end gap-3 px-5 py-3 text-white transition-colors hover:text-white"
+                                    href="{% url 'accounts:notifications' %}"
+                                    class="{% if active_tab == 'notifications' %}flex flex-row-reverse items-center justify-end px-2.5 py-1 text-white transition-colors hover:text-white{% else %}flex flex-row-reverse items-center justify-end gap-3 px-5 py-3 text-white transition-colors hover:text-white{% endif %}"
                                 >
                                     <span class="{% if active_tab == 'notifications' %}bg-[linear-gradient(-89.27deg,rgba(99,26,26,0.8)_36%,rgba(80,11,11,0.61)_48.07%,rgba(9,29,31,0)_92.1%)] py-2.5 px-2 rounded-3xl font-medium text-[15px]{% else %}font-light text-[15px]{% endif %}"
                                         >اعلان‌ها</span
@@ -567,11 +574,11 @@
 
                             <li>
                                 <a
-                                    href="#"
-                                    class="flex flex-row-reverse items-center justify-end gap-3 px-5 py-3 text-white transition-colors hover:text-white"
+                                    href="{% url 'accounts:settings' %}"
+                                    class="{% if active_tab == 'settings' %}flex flex-row-reverse items-center justify-end px-2.5 py-1 text-white transition-colors hover:text-white{% else %}flex flex-row-reverse items-center justify-end gap-3 px-5 py-3 text-white transition-colors hover:text-white{% endif %}"
                                 >
                                     <span class="{% if active_tab == 'settings' %}bg-[linear-gradient(-89.27deg,rgba(99,26,26,0.8)_36%,rgba(80,11,11,0.61)_48.07%,rgba(9,29,31,0)_92.1%)] py-2.5 px-2 rounded-3xl font-medium text-[15px]{% else %}font-light text-[15px]{% endif %}"
-                                        >تنظیمات</span
+                                        >{% trans "تنظیمات" %}</span
                                     >
 {% if active_tab == 'settings' %}
                                 <div class="relative w-[42px] h-[42px] flex items-center justify-center rounded-full">
@@ -633,8 +640,8 @@
 
                             <li>
                                 <a
-                                    href="#"
-                                    class="flex flex-row-reverse items-center justify-end gap-3 px-5 py-3 text-white transition-colors hover:text-white"
+                                    href="{% url 'accounts:support:support' %}"
+                                    class="{% if active_tab == 'support' %}flex flex-row-reverse items-center justify-end px-2.5 py-1 text-white transition-colors hover:text-white{% else %}flex flex-row-reverse items-center justify-end gap-3 px-5 py-3 text-white transition-colors hover:text-white{% endif %}"
                                 >
                                     <span class="{% if active_tab == 'support' %}bg-[linear-gradient(-89.27deg,rgba(99,26,26,0.8)_36%,rgba(80,11,11,0.61)_48.07%,rgba(9,29,31,0)_92.1%)] py-2.5 px-2 rounded-3xl font-medium text-[15px]{% else %}font-light text-[15px]{% endif %}"
                                         >پشتیبانی</span
@@ -700,7 +707,7 @@
                             </svg>
 
                             <a
-                                href="#"
+                                href="{% url 'accounts:logout' %}"
                                 class="flex items-center justify-end flex-row-reverse gap-3 px-5 py-3 text-[#E36464] hover:bg-white/5 rounded-[18px] transition-colors"
                             >
                                 <span class="font-light text-[15px]"
@@ -729,6 +736,6 @@
             </div>
         </div>
 
-        <script src="{% static 'public/assets/js/user-info.js' %}"></script>
+        <script src="{% static 'public/assets/js/user-info.js' %}?v=1.7"></script>
     
 {% endblock %}

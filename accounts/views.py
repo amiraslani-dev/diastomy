@@ -1,11 +1,13 @@
 from django.utils.translation import gettext as _
 import json
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from django.contrib.auth import login, logout, get_user_model
+from django.contrib.auth import login, logout, get_user_model, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from .models import Notification, UserDevice
 from . import services
 
 def login_view(request):
@@ -19,7 +21,47 @@ def login_view(request):
 
 @login_required
 def user_info_view(request):
-    return render(request, 'accounts/user-info.html', {'active_tab': 'user-info'})
+    dashboard_info = services.get_user_dashboard_info(request.user)
+    default_avatars = services.get_default_avatars()
+    social_medias = services.get_social_medias()
+    
+    return render(request, 'accounts/user-info.html', {
+        'active_tab': 'user-info',
+        'dashboard_info': dashboard_info,
+        'default_avatars': default_avatars,
+        'social_medias': social_medias,
+    })
+
+@login_required
+@require_POST
+def api_update_profile_view(request):
+    try:
+        if request.content_type == 'application/json':
+            data = json.loads(request.body)
+            username = data.get('username')
+            email = data.get('email')
+            default_avatar_id = data.get('default_avatar_id')
+            avatar_file = None
+        else:
+            username = request.POST.get('username')
+            email = request.POST.get('email')
+            default_avatar_id = request.POST.get('default_avatar_id')
+            avatar_file = request.FILES.get('avatar')
+
+        success, message = services.update_user_username_and_avatar(
+            request.user, 
+            username=username,
+            email=email,
+            avatar_file=avatar_file, 
+            default_avatar_id=default_avatar_id
+        )
+
+        if success:
+            return JsonResponse({'message': message})
+        else:
+            return JsonResponse({'error': message}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': _("خطای سرور")}, status=500)
 
 def logout_view(request):
     if request.user.is_authenticated:
@@ -40,6 +82,168 @@ def check_phone_view(request):
         
     except json.JSONDecodeError:
         return JsonResponse({'error': _('داده‌های نامعتبر')}, status=400)
+
+
+@login_required
+def notifications_view(request):
+    notifications_list = services.get_user_notifications(request.user)
+
+    total_count = notifications_list.count()
+
+    paginator = Paginator(notifications_list, 20)  # 20 per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'active_tab': 'notifications',
+        'page_obj': page_obj,
+        'notifications': page_obj.object_list,
+        'total_count': total_count,
+    }
+    return render(request, 'accounts/notifications.html', context)
+
+
+@login_required
+@require_POST
+def dismiss_notification_view(request, pk):
+    success, message = services.dismiss_user_notification(request.user, pk)
+    if success:
+        return JsonResponse({'success': True, 'message': message})
+    return JsonResponse({'error': message}, status=404)
+
+
+@login_required
+def api_notifications_list_view(request):
+    notifications = services.get_user_notifications(request.user)
+    data = []
+    for n in notifications:
+        data.append({
+            'id': n.id,
+            'title': n.title,
+            'message': n.message,
+            'type': n.notification_type,
+            'created_at': n.created_at.strftime('%Y-%m-%d %H:%M'),
+        })
+    return JsonResponse({'success': True, 'count': len(data), 'notifications': data})
+
+
+
+from jalali_date import datetime2jalali
+
+@login_required
+def settings_view(request):
+    devices = UserDevice.objects.filter(user=request.user).order_by('-last_activity')
+    current_key = request.session.session_key
+
+    active_devices = []
+    for d in devices:
+        jalali_time = datetime2jalali(d.last_activity).strftime('%Y/%m/%d ، %H:%M:%S') if d.last_activity else ''
+        active_devices.append({
+            'id': d.id,
+            'device_name': d.device_name,
+            'ip_address': d.ip_address,
+            'last_activity': jalali_time,
+            'is_current': (d.session_key == current_key),
+        })
+
+    return render(request, 'accounts/settings.html', {
+        'active_tab': 'settings',
+        'active_devices': active_devices,
+    })
+
+
+@login_required
+@require_POST
+def api_terminate_device_view(request, pk):
+    try:
+        device = get_object_or_404(UserDevice, pk=pk, user=request.user)
+        from django.contrib.sessions.models import Session
+        Session.objects.filter(session_key=device.session_key).delete()
+        device.delete()
+        return JsonResponse({'success': True, 'message': _('نشست دستگاه با موفقیت خاتمه یافت.')})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+@require_POST
+def api_terminate_other_devices_view(request):
+    try:
+        current_key = request.session.session_key
+        other_devices = UserDevice.objects.filter(user=request.user).exclude(session_key=current_key)
+        other_keys = list(other_devices.values_list('session_key', flat=True))
+        from django.contrib.sessions.models import Session
+        Session.objects.filter(session_key__in=other_keys).delete()
+        other_devices.delete()
+        return JsonResponse({'success': True, 'message': _('تمام نشست‌های غیرفعلی با موفقیت خاتمه یافتند.')})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+
+@login_required
+@require_POST
+def api_change_password_view(request):
+    try:
+        data = json.loads(request.body)
+        old_password = data.get('old_password', '')
+        new_password = data.get('new_password', '')
+        confirm_password = data.get('confirm_password', '')
+
+        success, message = services.change_user_password(
+            request.user, old_password, new_password, confirm_password
+        )
+        if success:
+            update_session_auth_hash(request, request.user)
+            return JsonResponse({'success': True, 'message': message})
+        else:
+            return JsonResponse({'error': message}, status=400)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': _('داده‌های نامعتبر')}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+@require_POST
+def api_update_player_quality_view(request):
+    try:
+        data = json.loads(request.body)
+        quality = data.get('quality', 'AUTO')
+        success, message = services.update_player_quality(request.user, quality)
+        if success:
+            return JsonResponse({'success': True, 'message': message, 'quality': request.user.preferred_quality})
+        return JsonResponse({'error': message}, status=400)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': _('داده‌های نامعتبر')}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+@require_POST
+def api_set_language_view(request):
+    try:
+        data = json.loads(request.body)
+        lang_code = data.get('language', 'fa')
+        success, message = services.update_user_language(request.user, lang_code, request.session)
+        if success:
+            referer = request.META.get('HTTP_REFERER', '/')
+            try:
+                from accounts.middleware import get_localized_url
+                from urllib.parse import urlparse
+                path = urlparse(referer).path or '/'
+                redirect_url = get_localized_url(path, lang_code)
+            except Exception:
+                redirect_url = '/'
+            return JsonResponse({'success': True, 'message': message, 'language': request.user.preferred_language, 'redirect_url': redirect_url})
+        return JsonResponse({'error': message}, status=400)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': _('داده‌های نامعتبر')}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
 
 
 @require_POST

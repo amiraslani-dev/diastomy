@@ -1,4 +1,4 @@
-from .models import HeaderSetting, FooterSetting
+from .models import HeaderSetting, FooterSetting, SiteLanguage
 
 def header_settings(request):
     fallback_menu = [
@@ -19,9 +19,18 @@ def header_settings(request):
         
         if request.user.is_staff:
             from core.models import AdminNotification
-            # Query last 10 unread notifications
             admin_notifications = AdminNotification.objects.filter(is_read=False)[:10]
             admin_unread_count = AdminNotification.objects.filter(is_read=False).count()
+
+    active_langs = list(SiteLanguage.objects.filter(is_active=True).order_by('order', 'id').values('code', 'name'))
+    if not active_langs:
+        active_langs = [
+            {'code': 'fa', 'name': 'فارسی'},
+            {'code': 'en', 'name': 'English'},
+            {'code': 'ar', 'name': 'العربیه'},
+            {'code': 'ru', 'name': 'Русский'},
+            {'code': 'tr', 'name': 'Türkçe'},
+        ]
         
     return {
         'header_settings': HeaderSetting.objects.first(),
@@ -30,4 +39,6 @@ def header_settings(request):
         'admin_notifications': admin_notifications,
         'admin_unread_count': admin_unread_count,
         'total_saved_count': total_saved_count,
+        'site_languages': active_langs,
     }
+

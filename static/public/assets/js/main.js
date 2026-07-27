@@ -99,37 +99,41 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // تعریف استور سراسری مودال برای آلپاین
+window.showModal = function(type, title, message) {
+    window.dispatchEvent(new CustomEvent('show-modal', {
+        detail: { type, title, message }
+    }));
+};
+
 function registerGlobalModal() {
+
+    // Keep store for backward compatibility, but make it use the event
     Alpine.store('globalModal', {
         isOpen: false,
-        type: 'success', // 'success' | 'error'
+        type: 'success',
         title: '',
         message: '',
         show(type, title, message) {
-            this.type = type;
-            this.title = title;
-            this.message = message;
-            this.isOpen = true;
+            window.showModal(type, title, message);
         },
-        close() {
-            this.isOpen = false;
-        }
+        close() {} // Handled internally by modals.html now
     });
 }
 
 // تعریف استور سراسری توست برای آلپاین
+window.showToast = function(type, title, message, duration = 3000) {
+    window.dispatchEvent(new CustomEvent('show-toast', {
+        detail: { id: Date.now() + Math.random(), type, title, message, duration }
+    }));
+};
+
 function registerGlobalToast() {
+    
+    // Keep store for backward compatibility if needed, but it won't be used by our new toasts.html
     Alpine.store('globalToast', {
         toasts: [],
         show(type, title, message, duration = 3000) {
-            const id = Date.now();
-            this.toasts = [...this.toasts, { id, type, title, message }];
-            setTimeout(() => {
-                this.remove(id);
-            }, duration);
-        },
-        remove(id) {
-            this.toasts = this.toasts.filter(t => t.id !== id);
+            window.showToast(type, title, message, duration);
         }
     });
 }

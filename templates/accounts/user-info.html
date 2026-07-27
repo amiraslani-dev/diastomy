@@ -1,5 +1,5 @@
 {% extends 'accounts/account_base.html' %}
-{% load static %}
+{% load static i18n humanize %}
 
 {% block dashboard_title %}اطلاعات کاربری{% endblock %}
 
@@ -13,15 +13,18 @@
                         >
                             <div class="flex items-center gap-2">
                                 <span class="text-white text-[13px] font-bold"
-                                    >وضعیت اشتراک:</span
+                                    >{% trans "وضعیت اشتراک:" %}</span
                                 >
                                 <div
                                     class="flex items-center gap-1 bg-[#27272775] rounded-[50px] p-1.5 flex-row-reverse"
                                 >
-                                    <span
-                                        class="text-white text-[11px] font-light"
-                                        >اشتراک فعالی ندارید.</span
-                                    >
+                                    {% if request.user.has_active_subscription %}
+                                    <span class="text-white text-[11px] font-light">{% trans "اشتراک فعال دارید." %}</span>
+                                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M10 0C4.477 0 0 4.477 0 10C0 15.523 4.477 20 10 20C15.523 20 20 15.523 20 10C20 4.477 15.523 0 10 0ZM14.707 7.707L8.707 13.707C8.512 13.902 8.256 14 8 14C7.744 14 7.488 13.902 7.293 13.707L4.293 10.707C3.902 10.316 3.902 9.684 4.293 9.293C4.684 8.902 5.316 8.902 5.707 9.293L8 11.586L13.293 6.293C13.684 5.902 14.316 5.902 14.707 6.293C15.098 6.684 15.098 7.316 14.707 7.707Z" fill="#6DE474"/>
+                                    </svg>
+                                    {% else %}
+                                    <span class="text-white text-[11px] font-light">{% trans "اشتراک فعالی ندارید." %}</span>
                                     <svg
                                         width="18"
                                         height="18"
@@ -34,6 +37,7 @@
                                             fill="#DD0202"
                                         />
                                     </svg>
+                                    {% endif %}
                                 </div>
                             </div>
 
@@ -120,16 +124,17 @@
                                     </svg>
                                 </button>
 
-                                <button
-                                    class="bg-[#D40000] cursor-pointer hover:bg-red-700 transition-colors text-white font-bold text-sm px-6 py-2.5 rounded-[15px]"
+                                <a
+                                    href="{% url 'accounts:subscriptions:subscription' %}"
+                                    class="bg-[#D40000] inline-flex items-center justify-center cursor-pointer hover:bg-red-700 transition-colors text-white font-bold text-sm px-6 py-2.5 rounded-[15px]"
                                 >
-                                    تمدید اشتراک
-                                </button>
+                                    {% trans "تمدید اشتراک" %}
+                                </a>
                             </div>
                         </div>
 
                         <a
-                            href="#"
+                            href="{% url 'home' %}"
                             class="flex items-center gap-2 border border-[#4B4B4B] rounded-[50px] px-5 py-4 text-white hover:bg-white/5 transition-colors shrink-0"
                         >
                             <svg
@@ -145,7 +150,7 @@
                                 />
                             </svg>
                             <span class="text-sm font-medium pt-0.5"
-                                >بازگشت به سایت</span
+                                >{% trans "بازگشت به سایت" %}</span
                             >
                         </a>
                     </div>
@@ -256,13 +261,13 @@
                                 <h2
                                     class="text-white font-bold text-xl md:text-[18px] mb-3"
                                 >
-                                    یلدا حضرتی
+                                    {{ dashboard_info.full_name }}
                                 </h2>
 
                                 <div
                                     class="bg-[#10420B75] text-[#2CB820] font-medium text-xs md:text-[13px] px-5 py-1.5 rounded-full mb-4 shadow-[0_0_10px_rgba(16,66,11,0.5)]"
                                 >
-                                    عضویت از دی 1404
+                                    {% trans "عضویت از" %} {{ dashboard_info.date_joined|naturaltime }}
                                 </div>
 
                                 <div
@@ -282,13 +287,20 @@
                                     </svg>
 
                                     <span>شماره کاربری:</span>
-                                    <span>7056125052</span>
+                                    <span>{{ dashboard_info.user_number }}</span>
                                 </div>
 
                                 <div
                                     class="md:hidden w-full flex items-center justify-between bg-[#27272775] border border-[#4B4B4B8A] rounded-[50px] px-2 py-2 mt-2"
                                 >
-                                    <div class="flex items-center gap-1.5 pl-3">
+                                    <div class="flex items-center gap-1.5 pl-3 flex-row-reverse">
+                                        {% if request.user.has_active_subscription %}
+                                        <span class="text-xs font-medium text-white">{% trans "اشتراک فعال دارید." %}</span>
+                                        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M10 0C4.477 0 0 4.477 0 10C0 15.523 4.477 20 10 20C15.523 20 20 15.523 20 10C20 4.477 15.523 0 10 0ZM14.707 7.707L8.707 13.707C8.512 13.902 8.256 14 8 14C7.744 14 7.488 13.902 7.293 13.707L4.293 10.707C3.902 10.316 3.902 9.684 4.293 9.293C4.684 8.902 5.316 8.902 5.707 9.293L8 11.586L13.293 6.293C13.684 5.902 14.316 5.902 14.707 6.293C15.098 6.684 15.098 7.316 14.707 7.707Z" fill="#6DE474"/>
+                                        </svg>
+                                        {% else %}
+                                        <span class="text-xs font-medium text-white">{% trans "اشتراک فعالی ندارید." %}</span>
                                         <svg
                                             width="18"
                                             height="18"
@@ -301,17 +313,15 @@
                                                 fill="#DD0202"
                                             />
                                         </svg>
-                                        <span
-                                            class="text-xs font-medium text-white"
-                                            >اشتراک فعالی ندارید.</span
-                                        >
+                                        {% endif %}
                                     </div>
 
-                                    <button
-                                        class="bg-[#D40000] hover:bg-red-700 transition-colors text-white font-bold text-xs px-5 py-2.5 rounded-[50px]"
+                                    <a
+                                        href="{% url 'accounts:subscriptions:subscription' %}"
+                                        class="bg-[#D40000] inline-flex items-center justify-center hover:bg-red-700 transition-colors text-white font-bold text-xs px-5 py-2.5 rounded-[50px]"
                                     >
-                                        تمدید اشتراک
-                                    </button>
+                                        {% trans "تمدید اشتراک" %}
+                                    </a>
                                 </div>
 
                                 <div
@@ -402,44 +412,9 @@
                                             :class="fields.phone.edit ? 'text-white' : 'text-[#939393]'"
                                             class="w-full bg-transparent text-[15px] font-light outline-none disabled:bg-transparent transition-colors text-right"
                                         />
-                                        <button
-                                            @click="toggleEdit('phone', true)"
-                                            class="absolute left-2 w-[36px] h-[36px] rounded-full bg-[#151515] flex items-center justify-center hover:bg-white/10 transition-colors"
-                                        >
-                                            <svg
-                                                width="16"
-                                                height="16"
-                                                viewBox="0 0 20 20"
-                                                fill="none"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                            >
-                                                <path
-                                                    d="M17.4534 4.40338L15.5967 2.54669C15.1626 2.11336 14.6201 1.87417 13.9734 1.875C13.3601 1.87584 12.7842 2.11588 12.3525 2.55005L2.0575 12.8925C1.94 13.01 1.875 13.1683 1.875 13.3333V17.5C1.875 17.845 2.155 18.125 2.5 18.125H6.66667C6.83167 18.125 6.99088 18.0592 7.10754 17.9433L17.45 7.6475C17.8841 7.215 18.1242 6.63922 18.125 6.02672C18.1258 5.41338 17.8876 4.83672 17.4534 4.40338ZM6.40828 16.875H3.125V13.5917L10.6191 6.06334L13.9376 9.3808L6.40828 16.875ZM16.5684 6.76168L14.8234 8.49915L11.5009 5.17751L13.2383 3.4317C13.435 3.2342 13.6967 3.12584 13.9758 3.125H13.9766C14.255 3.125 14.5167 3.23331 14.7142 3.42997L16.5708 5.28666C16.7675 5.48416 16.8758 5.74582 16.8758 6.02499C16.875 6.30332 16.7659 6.56501 16.5684 6.76168Z"
-                                                    fill="white"
-                                                />
-                                            </svg>
-                                        </button>
+                                        
                                     </div>
-                                    <button
-                                        @click="toggleEdit('phone')"
-                                        class="hidden cursor-pointer md:flex shrink-0 bg-[#151515] border border-[#2A2A2A] hover:border-[#777] transition-colors rounded-[38px] px-5 py-2.5 items-center justify-center gap-2"
-                                    >
-                                        <svg
-                                            width="14"
-                                            height="14"
-                                            viewBox="0 0 20 20"
-                                            fill="none"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                            <path
-                                                d="M17.4534 4.40338L15.5967 2.54669C15.1626 2.11336 14.6201 1.87417 13.9734 1.875C13.3601 1.87584 12.7842 2.11588 12.3525 2.55005L2.0575 12.8925C1.94 13.01 1.875 13.1683 1.875 13.3333V17.5C1.875 17.845 2.155 18.125 2.5 18.125H6.66667C6.83167 18.125 6.99088 18.0592 7.10754 17.9433L17.45 7.6475C17.8841 7.215 18.1242 6.63922 18.125 6.02672C18.1258 5.41338 17.8876 4.83672 17.4534 4.40338ZM6.40828 16.875H3.125V13.5917L10.6191 6.06334L13.9376 9.3808L6.40828 16.875ZM16.5684 6.76168L14.8234 8.49915L11.5009 5.17751L13.2383 3.4317C13.435 3.2342 13.6967 3.12584 13.9758 3.125H13.9766C14.255 3.125 14.5167 3.23331 14.7142 3.42997L16.5708 5.28666C16.7675 5.48416 16.8758 5.74582 16.8758 6.02499C16.875 6.30332 16.7659 6.56501 16.5684 6.76168Z"
-                                                fill="white"
-                                            />
-                                        </svg>
-                                        <span class="text-white text-[13px]"
-                                            >ویرایش</span
-                                        >
-                                    </button>
+                                    
                                 </div>
                                 <svg
                                     class="hidden md:block w-full h-[1px]"
@@ -507,26 +482,10 @@
                                             :class="fields.email.edit ? 'text-white' : 'text-[#939393]'"
                                             class="w-full bg-transparent text-[15px] font-light outline-none disabled:bg-transparent transition-colors"
                                         />
-                                        <button
-                                            @click="toggleEdit('email', true)"
-                                            class="absolute left-2 w-[36px] h-[36px] rounded-full bg-[#151515] flex items-center justify-center hover:bg-white/10 transition-colors"
-                                        >
-                                            <svg
-                                                width="16"
-                                                height="16"
-                                                viewBox="0 0 20 20"
-                                                fill="none"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                            >
-                                                <path
-                                                    d="M17.4534 4.40338L15.5967 2.54669C15.1626 2.11336 14.6201 1.87417 13.9734 1.875C13.3601 1.87584 12.7842 2.11588 12.3525 2.55005L2.0575 12.8925C1.94 13.01 1.875 13.1683 1.875 13.3333V17.5C1.875 17.845 2.155 18.125 2.5 18.125H6.66667C6.83167 18.125 6.99088 18.0592 7.10754 17.9433L17.45 7.6475C17.8841 7.215 18.1242 6.63922 18.125 6.02672C18.1258 5.41338 17.8876 4.83672 17.4534 4.40338ZM6.40828 16.875H3.125V13.5917L10.6191 6.06334L13.9376 9.3808L6.40828 16.875ZM16.5684 6.76168L14.8234 8.49915L11.5009 5.17751L13.2383 3.4317C13.435 3.2342 13.6967 3.12584 13.9758 3.125H13.9766C14.255 3.125 14.5167 3.23331 14.7142 3.42997L16.5708 5.28666C16.7675 5.48416 16.8758 5.74582 16.8758 6.02499C16.875 6.30332 16.7659 6.56501 16.5684 6.76168Z"
-                                                    fill="white"
-                                                />
-                                            </svg>
-                                        </button>
+                                        
                                     </div>
                                     <button
-                                        @click="toggleEdit('lastName')"
+                                        @click="toggleEdit('email')"
                                         class="hidden cursor-pointer md:flex shrink-0 bg-[#151515] border border-[#2A2A2A] hover:border-[#777] transition-colors rounded-[38px] px-5 py-2.5 items-center justify-center gap-2"
                                     >
                                         <svg
@@ -642,7 +601,7 @@
                             </div>
 
                             <div class="w-full px-5 md:px-0">
-                                <button
+                                <button @click="saveProfile()" :disabled="isSaving"
                                     class="w-full cursor-pointer bg-[linear-gradient(179deg,#ED1C24_0.86%,rgba(153,0,6,0.76)_99.14%)] hover:scale-[1.02] transition-transform text-white font-bold text-[17px] py-4 rounded-[50px] shadow-[0_0_20px_rgba(237,28,36,0.3)] mt-6 md:mt-0"
                                 >
                                     ذخیره تغییرات
@@ -662,6 +621,12 @@
                             >پشتیبانی</span
                         >
                         <div class="flex items-center gap-3">
+    {% for social in social_medias %}
+    <a href="{{ social.link }}" class="w-[42px] h-[42px] bg-[#FFFFFF12] rounded-[14.55px] flex items-center justify-center hover:bg-white/20 transition-colors">
+        {{ social.svg|safe }}
+    </a>
+    {% empty %}
+    
                             <a
                                 href="#"
                                 class="w-[42px] h-[42px] bg-[#FFFFFF12] rounded-[14.55px] flex items-center justify-center hover:bg-white/20 transition-colors"
@@ -734,8 +699,10 @@
                                     ></polygon>
                                 </svg>
                             </a>
-                        </div>
-                    </div>
+                        
+    {% endfor %}
+</div>
+</div>
 
                     <div
                         x-show="isAvatarModalOpen"
@@ -798,20 +765,20 @@
                             <div class="grid w-full grid-cols-2 gap-4 mb-8">
                                 <template
                                     x-for="avatar in predefinedAvatars"
-                                    :key="avatar"
+                                    :key="avatar.id"
                                 >
                                     <button
                                         @click="selectAvatar(avatar)"
                                         class="relative aspect-square rounded-[20px] border-[3px] overflow-hidden transition-all duration-300 focus:outline-none group"
-                                        :class="currentAvatar === avatar ? 'border-[#DD0202] shadow-[0_0_15px_rgba(221,2,2,0.3)]' : 'border-transparent hover:border-[#DD0202]/50'"
+                                        :class="currentAvatar === avatar.url ? 'border-[#DD0202] shadow-[0_0_15px_rgba(221,2,2,0.3)]' : 'border-transparent hover:border-[#DD0202]/50'"
                                     >
                                         <img
-                                            :src="avatar"
+                                            :src="avatar.url"
                                             class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-110"
                                             alt="Predefined Avatar"
                                         />
                                         <div
-                                            x-show="currentAvatar === avatar"
+                                            x-show="currentAvatar === avatar.url"
                                             class="absolute top-2 right-2 w-6 h-6 bg-[#DD0202] rounded-full flex items-center justify-center"
                                         >
                                             <svg
@@ -864,4 +831,22 @@
                         </div>
                     </div>
                 </main>
+
+{% csrf_token %}
+<script>
+window.DASHBOARD_DATA = {
+    full_name: "{{ dashboard_info.full_name|default:''|escapejs }}",
+    username: "{{ dashboard_info.username|default:''|escapejs }}",
+    email: "{{ dashboard_info.email|default:''|escapejs }}",
+    phone: "{{ dashboard_info.phone|default:''|escapejs }}",
+    avatar: "{% if dashboard_info.avatar %}{{ dashboard_info.avatar }}{% else %}{% static 'public/assets/images/default-avatar.png' %}{% endif %}",
+    update_url: "{% url 'accounts:api_update_profile' %}",
+    default_avatars: [
+        {% for av in default_avatars %}
+        { id: {{ av.id }}, url: "{{ av.image.url }}" }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ]
+};
+</script>
+
 {% endblock %}

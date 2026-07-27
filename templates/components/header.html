@@ -366,11 +366,15 @@
                     <div class="relative order-2 hidden md:flex group shrink-0 md:order-none">
                         {% if request.user.is_authenticated %}
                         <button class="flex items-center gap-3 bg-[#111] md:bg-transparent hover:bg-white/5 transition-colors md:pl-3 md:pr-1 md:py-2 p-0 rounded-full border border-[#FFFFFF33] w-[3.25rem] h-[3.25rem] md:w-auto md:h-[3.25rem] justify-center md:justify-start">
-                            <div class="w-[43px] h-[43px] md:bg-[#58585833] rounded-full flex items-center justify-center bg-transparent shrink-0">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="12" cy="6" r="4" stroke="white" stroke-width="1.5" />
-                                    <ellipse opacity="0.5" cx="12" cy="17" rx="7" ry="4" stroke="white" stroke-width="1.5" />
-                                </svg>
+                            <div class="w-[43px] h-[43px] md:bg-[#58585833] rounded-full flex items-center justify-center bg-transparent shrink-0 overflow-hidden">
+                                {% if request.user.avatar %}
+                                    <img src="{{ request.user.avatar.url }}" alt="avatar" class="w-full h-full object-cover">
+                                {% else %}
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="12" cy="6" r="4" stroke="white" stroke-width="1.5" />
+                                        <ellipse opacity="0.5" cx="12" cy="17" rx="7" ry="4" stroke="white" stroke-width="1.5" />
+                                    </svg>
+                                {% endif %}
                             </div>
                             <div class="flex-col justify-center hidden text-right md:flex">
                                 <p class="text-[11px] font-medium text-white mb-[2px]">

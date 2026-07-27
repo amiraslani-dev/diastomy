@@ -1,0 +1,647 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{% trans "پنل اپراتور پشتیبانی آنلاین" %}</title>
+    <link rel="stylesheet" href="{% static 'dist/assets/css/main.css' %}">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        html, body {
+            background-color: #050505 !important;
+            color: #ffffff !important;
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px !important; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #2A2A30; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #ed1c24; }
+    </style>
+    <script>
+        window.OPERATOR_AVATAR = "{% if request.user.avatar %}{{ request.user.avatar.url }}{% else %}https://ui-avatars.com/api/?name={{ request.user.get_full_name|default:request.user.username|urlencode }}&background=3B0709&color=fff{% endif %}";
+    </script>
+</head>
+<body class="h-screen flex flex-col font-sans overflow-hidden" style="background-color: #050505; color: #ffffff;" x-data="operatorApp({{ rooms_data_json }})">
+    
+    <!-- Top Header Bar -->
+    <header class="px-3 md:px-8 py-2.5 md:py-3.5 flex items-center justify-between shadow-2xl shrink-0 h-[56px] md:h-[65px]" style="background-color: #0A0A0A; border-bottom: 1px solid #1F1F1F;">
+        <div class="flex items-center gap-2 md:gap-3 min-w-0">
+            <span class="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-[#ed1c24] animate-pulse shrink-0 shadow-[0_0_10px_#ed1c24]"></span>
+            <h1 class="text-sm md:text-xl font-bold text-white tracking-wide truncate">
+                {% trans "پنل مدیریت پشتیبانی آنلاین" %}
+            </h1>
+        </div>
+
+        <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            <span class="hidden lg:inline text-sm text-gray-400">
+                {% trans "خوش آمدید" %}، <strong class="text-white">{{ request.user.get_full_name|default:request.user.username }}</strong>
+            </span>
+            <a href="{% url 'home' %}" class="flex items-center gap-1.5 px-3 md:px-4 py-1 md:py-1.5 text-[11px] md:text-xs font-bold rounded-full text-white hover:bg-white/10 transition-colors" style="background-color: #141414; border: 1px solid #2A2A2A;">
+                <svg class="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                <span class="hidden sm:inline">{% trans "بازگشت به سایت" %}</span>
+                <span class="sm:hidden">{% trans "سایت" %}</span>
+            </a>
+            <a href="{% url 'admin:index' %}" class="flex items-center gap-1.5 px-3 md:px-4 py-1 md:py-1.5 text-[11px] md:text-xs font-bold bg-[#ed1c24] text-white rounded-full hover:bg-red-700 transition-colors shadow-md">
+                <span>{% trans "پنل ادمین" %}</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Live Chat Dashboard -->
+    <div class="flex-1 flex overflow-hidden p-2 sm:p-3 md:p-5 gap-2 sm:gap-4 md:gap-5 max-w-[1600px] w-full mx-auto relative h-[calc(100vh-56px)] md:h-[calc(100vh-65px)] min-h-0" style="background-color: #050505;">
+        
+        <!-- Sidebar: User Room List -->
+        <aside 
+            :class="selectedRoomId ? 'hidden md:flex' : 'flex'"
+            class="w-full md:w-1/3 lg:w-1/4 rounded-[16px] md:rounded-[24px] flex flex-col overflow-hidden shadow-2xl h-full shrink-0"
+            style="background-color: #0A0A0A; border: 1px solid #1F1F1F;"
+        >
+            <div class="p-3 md:p-4 shrink-0 flex flex-col gap-2.5" style="background-color: #0E0E0E; border-bottom: 1px solid #1F1F1F;">
+                <div class="flex items-center justify-between px-1">
+                    <h2 class="text-xs md:text-sm font-bold text-gray-200">{% trans "گفتگوهای آنلاین" %}</h2>
+                    <span class="text-[11px] text-gray-400 font-medium" x-text="filteredRooms.length + ' کاربر'"></span>
+                </div>
+                <div class="relative flex items-center">
+                    <input 
+                        type="text" 
+                        x-model="searchQuery" 
+                        placeholder="{% trans 'جستجوی کاربر...' %}"
+                        class="w-full rounded-full py-2 text-xs md:text-sm text-white placeholder-gray-500 focus:outline-none transition-all"
+                        style="background-color: #161616; border: 1px solid #2A2A2A; padding-right: 42px !important; padding-left: 14px !important;"
+                    />
+                    <svg class="w-4 h-4 text-gray-400 absolute pointer-events-none" style="right: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-2.5 md:p-3.5 space-y-2.5 md:space-y-3 min-h-0" style="background-color: #070707;">
+                <template x-for="room in filteredRooms" :key="room.id + '_' + room.updated_at + '_' + (room.unread_by_admin || 0)">
+                    <div 
+                        @click="selectRoom(room.id, room.display_name, room.username, room.avatar)"
+                        :style="selectedRoomId === room.id ? 'background-color: #1F080A; border: 1px solid #ed1c24; box-shadow: 0 0 15px rgba(237,28,36,0.25);' : 'background-color: #111111; border: 1px solid #1A1A1A;'"
+                        class="p-3 md:p-4 rounded-2xl transition-all cursor-pointer flex items-center justify-between gap-3 relative group"
+                    >
+                        <div class="flex items-center gap-2.5 md:gap-3 min-w-0">
+                            <!-- Avatar Ring -->
+                            <div class="relative w-9 h-9 md:w-11 md:h-11 rounded-full p-[1.5px] bg-gradient-to-tr from-[#ed1c24] to-transparent shrink-0">
+                                <div class="w-full h-full rounded-full bg-[#111] overflow-hidden">
+                                    <img :src="room.avatar" class="w-full h-full object-cover" />
+                                </div>
+                            </div>
+
+                            <div class="min-w-0 flex-1">
+                                <div class="font-bold text-xs md:text-sm text-white group-hover:text-red-400 transition-colors truncate" x-text="room.display_name"></div>
+                                <div class="text-[11px] md:text-xs text-gray-400 truncate" x-text="'@' + room.username"></div>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col items-end gap-1 shrink-0">
+                            <span class="text-[10px] text-gray-500 font-medium" x-text="room.updated_at"></span>
+                            
+                            <!-- Red Notification Badge for Unread Admin Messages -->
+                            <template x-if="room.unread_by_admin > 0">
+                                <span 
+                                    style="background-color: #ed1c24;"
+                                    class="w-4 h-4 md:w-5 md:h-5 rounded-full text-white text-[9px] md:text-[10px] font-extrabold flex items-center justify-center shadow-[0_0_12px_rgba(237,28,36,1)] animate-pulse"
+                                    x-text="room.unread_by_admin"
+                                ></span>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                <template x-if="filteredRooms.length === 0">
+                    <div class="text-center text-gray-500 text-sm py-12">
+                        {% trans "هیچ گفتگویی یافت نشد." %}
+                    </div>
+                </template>
+            </div>
+        </aside>
+
+        <!-- Right Main Chat Area -->
+        <main 
+            :class="selectedRoomId ? 'flex' : 'hidden md:flex'"
+            class="flex-1 rounded-[16px] md:rounded-[24px] flex flex-col overflow-hidden shadow-2xl relative h-full min-w-0"
+            style="background-color: #0A0A0A; border: 1px solid #1F1F1F;"
+        >
+            <template x-if="!selectedRoomId">
+                <div class="flex-1 flex flex-col items-center justify-center p-8 text-center text-gray-500" style="background-color: #0A0A0A;">
+                    <div class="w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center mb-4 shadow-xl" style="background-color: #141414; border: 1px solid #2A2A2A;">
+                        <svg class="w-8 h-8 md:w-10 md:h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-base md:text-lg font-bold text-gray-300 mb-1">{% trans "یک گفتگو را انتخاب کنید" %}</h3>
+                    <p class="text-xs text-gray-500 max-w-sm">{% trans "از پنل سمت راست روی کاربر مورد نظر کلیک کنید تا تاریخچه چت لود شود." %}</p>
+                </div>
+            </template>
+
+            <template x-if="selectedRoomId">
+                <div class="flex-1 flex flex-col h-full overflow-hidden" style="background-color: #0A0A0A;">
+                    <!-- Chat Header -->
+                    <div class="p-2.5 md:p-3.5 px-4 md:px-6 flex items-center justify-between shadow-md shrink-0 h-[52px] md:h-[60px]" style="background-color: #0E0E0E; border-bottom: 1px solid #1F1F1F;">
+                        <div class="flex items-center gap-2.5 md:gap-3 min-w-0">
+                            <!-- Close Chat Button (Right Arrow) -->
+                            <button 
+                                @click="selectedRoomId = null" 
+                                title="{% trans 'بستن چت' %}"
+                                class="flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full text-gray-300 hover:text-white hover:bg-white/10 transition-colors shrink-0"
+                                style="background-color: #161616; border: 1px solid #2A2A2A;"
+                            >
+                                <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                                </svg>
+                            </button>
+
+                            <div class="w-8 h-8 md:w-9 md:h-9 rounded-full overflow-hidden shrink-0" style="background-color: #1A1A1A; border: 1px solid #2A2A2A;">
+                                <img :src="selectedUserAvatar" class="w-full h-full object-cover" />
+                            </div>
+                            <div class="min-w-0">
+                                <h2 class="font-bold text-white text-xs md:text-base truncate" x-text="selectedUserName"></h2>
+                                <span class="text-[11px] md:text-xs text-gray-400 truncate block" x-text="'@' + selectedUserHandle"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Scrollable Messages List Area -->
+                    <div 
+                        x-ref="messagesContainer"
+                        class="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 space-y-3 md:space-y-4 custom-scrollbar min-h-0"
+                        style="background-color: #050505;"
+                    >
+                        <template x-for="(msg, index) in messages" :key="msg.id">
+                            <div class="flex flex-col w-full">
+                                <!-- Telegram-style Sticky Date Badge -->
+                                <template x-if="index === 0 || msg.date_display !== messages[index - 1].date_display">
+                                    <div class="flex justify-center my-2 sticky top-2 z-10">
+                                        <span class="text-gray-300 px-3 md:px-4 py-0.5 md:py-1 rounded-full text-[10px] md:text-[11px] font-bold shadow-lg backdrop-blur-md opacity-95" style="background-color: #181818; border: 1px solid #2A2A2A;" x-text="msg.date_display || '{% trans "امروز" %}'"></span>
+                                    </div>
+                                </template>
+
+                                <!-- 
+                                    DIRECTION FOR ADMIN OPERATOR PANEL:
+                                    msg.is_operator === true (Admin's message) -> RIGHT SIDE (self-start flex gap-2.5)
+                                    msg.is_operator === false (Customer's message) -> LEFT SIDE (self-end flex flex-row-reverse gap-2.5)
+                                -->
+                                <div 
+                                    :class="msg.is_operator ? 'self-start flex gap-2 md:gap-3 w-[90%] sm:w-[85%] md:w-[70%] mt-1' : 'self-end flex flex-row-reverse gap-2 md:gap-3 w-[90%] sm:w-[85%] md:w-[70%] mt-1'"
+                                >
+                                    <img :src="msg.sender_avatar" class="w-7 h-7 md:w-9 md:h-9 rounded-full object-cover shrink-0 mt-1" style="border: 1px solid #2A2A2A;" />
+
+                                    <div :class="msg.is_operator ? 'items-start' : 'items-end'" class="flex flex-col gap-1 w-full min-w-0">
+                                        <!-- Text Content -->
+                                        <template x-if="msg.content">
+                                            <div 
+                                                :style="msg.is_operator ? 'background-color: #3B0709; border: 1px solid #520000;' : 'background-color: #121216; border: 1px solid #26262C;'"
+                                                :class="msg.is_operator ? 'text-white rounded-[16px] md:rounded-[20px] rounded-tr-sm' : 'text-[#D1D1D1] rounded-[16px] md:rounded-[20px] rounded-tl-sm'"
+                                                class="text-[12px] md:text-[14px] p-3 md:p-4 leading-6 md:leading-8 text-justify w-full shadow-md break-words"
+                                                x-text="msg.content"
+                                            ></div>
+                                        </template>
+
+                                        <!-- Attachment Content -->
+                                        <template x-if="msg.attachment_url">
+                                            <div class="mt-1 w-full max-w-xs md:max-w-sm">
+                                                <!-- Image Attachment -->
+                                                <template x-if="msg.attachment_type === 'image'">
+                                                    <a :href="msg.attachment_url" target="_blank" class="block rounded-2xl overflow-hidden border border-[#2A2A2A] shadow-md group">
+                                                        <img :src="msg.attachment_url" class="w-full max-h-64 object-cover group-hover:scale-105 transition-transform duration-300" />
+                                                    </a>
+                                                </template>
+
+                                                <!-- Audio Attachment -->
+                                                <template x-if="msg.attachment_type === 'audio'">
+                                                    <div class="bg-[#151515] border border-[#2A2A2A] p-3 rounded-2xl flex flex-col gap-2">
+                                                        <div class="flex items-center gap-2 text-xs text-gray-300">
+                                                            <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12 0c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg>
+                                                            <span class="truncate font-semibold" x-text="msg.attachment_name"></span>
+                                                        </div>
+                                                        <audio :src="msg.attachment_url" controls class="w-full h-8 custom-scrollbar"></audio>
+                                                    </div>
+                                                </template>
+
+                                                <!-- Document / File Attachment -->
+                                                <template x-if="msg.attachment_type === 'document' || msg.attachment_type === 'video'">
+                                                    <a :href="msg.attachment_url" target="_blank" download class="hover:bg-[#18181D] rounded-2xl flex items-center justify-between gap-4 transition-all shadow-md group my-1 w-full max-w-[320px] outline-none" style="background-color: #111114; border: 1px solid #222228; padding: 12px 20px;">
+                                                        <div class="flex items-center gap-3 min-w-0">
+                                                            <div class="w-8 h-8 rounded-xl bg-red-950/60 border border-red-800/40 flex items-center justify-center text-red-500 shrink-0">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                                            </div>
+                                                            <div class="min-w-0 flex flex-col">
+                                                                <div class="text-xs font-bold text-gray-200 truncate" x-text="msg.attachment_name"></div>
+                                                                <div class="text-[10px] text-gray-400 font-normal">{% trans "دانلود فایل" %}</div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="w-7 h-7 rounded-full bg-[#1C1C22] group-hover:bg-red-600 flex items-center justify-center text-gray-400 group-hover:text-white transition-all shrink-0 border border-[#2A2A32]">
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                                        </div>
+                                                    </a>
+                                                </template>
+                                            </div>
+                                        </template>
+
+                                        <span 
+                                            :class="msg.is_operator ? 'self-end pl-1' : 'self-start pr-1'"
+                                            class="text-white text-[10px] md:text-[11px] font-light" 
+                                            x-text="msg.created_at"
+                                        ></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- User Typing Indicator -->
+                        <div x-show="isUserTyping" x-transition class="self-end flex flex-row-reverse gap-2 md:gap-3 w-auto mt-2">
+                            <img :src="selectedUserAvatar" class="w-7 h-7 md:w-9 md:h-9 rounded-full object-cover shrink-0" style="border: 1px solid #2A2A2A;" />
+                            <div class="text-gray-300 px-3 md:px-4 py-2.5 md:py-3 rounded-[16px] md:rounded-[20px] rounded-tl-sm flex items-center gap-1.5 shadow-lg" style="background-color: #121216; border: 1px solid #26262C;">
+                                <span class="text-[11px] md:text-xs text-gray-400 ml-1">{% trans "کاربر در حال تایپ است" %}</span>
+                                <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-bounce" style="animation-delay: 0ms;"></span>
+                                <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-bounce" style="animation-delay: 150ms;"></span>
+                                <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-bounce" style="animation-delay: 300ms;"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Input Bar -->
+                    <div class="p-3 md:p-4 flex flex-col gap-2 shrink-0 relative" style="background-color: #0E0E0E; border-top: 1px solid #1F1F1F;">
+                        <!-- Staged File Attachment Preview Chip -->
+                        <div x-show="selectedFile" x-transition class="flex items-center gap-2.5 rounded-full text-white text-xs shadow-md my-1 outline-none" style="background-color: #141417; border: 1px solid #222228; padding: 6px 16px; width: fit-content; max-width: 320px;">
+                            <svg class="w-4 h-4 text-[#ed1c24] transform -rotate-45 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                            <span class="truncate font-semibold text-gray-200" x-text="selectedFileName"></span>
+                            <button @click="removeSelectedFile()" type="button" title="{% trans 'حذف فایل انتخاب شده' %}" class="text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10 shrink-0 cursor-pointer">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+
+                        <div class="flex items-center gap-2.5 md:gap-3 w-full">
+                            <input type="file" x-ref="operatorFileInput" @change="handleOperatorFileSelect($event)" class="hidden" />
+
+                        <button
+                            @click="$refs.operatorFileInput.click()"
+                            title="{% trans 'پیوست فایل' %}"
+                            class="flex items-center justify-center w-10 h-10 rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-colors shrink-0 cursor-pointer"
+                            style="background-color: #161616; border: 1px solid #2A2A2A;"
+                        >
+                            <svg class="w-5 h-5 transform -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                            </svg>
+                        </button>
+
+                        <!-- Emoji Picker Button -->
+                        <button
+                            type="button"
+                            x-ref="emojiBtnOp"
+                            @click="showEmoji = !showEmoji; if(showEmoji){ $nextTick(() => { const r = $refs.emojiBtnOp.getBoundingClientRect(); $refs.emojiPopoverOp.style.left = r.right - 280 + 'px'; $refs.emojiPopoverOp.style.top = (r.top - 240) + 'px'; }) }"
+                            title="{% trans 'ارسال ایموجی' %}"
+                            class="flex items-center justify-center w-10 h-10 rounded-full text-gray-400 hover:text-yellow-400 hover:bg-white/10 transition-colors shrink-0 cursor-pointer"
+                            style="background-color: #161616; border: 1px solid #2A2A2A;"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </button>
+
+                        <!-- Emoji Picker Popover (fixed to escape overflow-hidden) -->
+                        <div
+                            x-show="showEmoji"
+                            x-ref="emojiPopoverOp"
+                            @click.away="showEmoji = false"
+                            x-transition
+                            class="fixed shadow-2xl z-[99999] cursor-default rounded-2xl overflow-hidden p-3"
+                            style="background-color: #141416; border: 1px solid #2A2A30; box-shadow: 0 10px 40px rgba(0,0,0,0.95); width: 280px;"
+                            @click.stop
+                            dir="rtl"
+                        >
+                            <!-- Category Tabs -->
+                            <div class="flex items-center justify-between border-b border-[#2A2A30] pb-2 mb-2 gap-1 overflow-x-auto custom-scrollbar">
+                                <template x-for="cat in window.NativeEmojiPicker.categories" :key="cat.id">
+                                    <button 
+                                        type="button"
+                                        @click="activeEmojiTab = cat.id"
+                                        :class="activeEmojiTab === cat.id ? 'bg-red-600/30 text-red-500 border border-red-500/50' : 'text-gray-400 hover:text-white border border-transparent'"
+                                        class="px-2 py-1 rounded-xl transition-all font-bold text-[11px] shrink-0 cursor-pointer"
+                                        x-text="cat.name.split(' ')[0]"
+                                        :title="cat.name"
+                                    ></button>
+                                </template>
+                            </div>
+
+                            <!-- Emoji Grid -->
+                            <div class="h-36 overflow-y-auto overflow-x-hidden custom-scrollbar p-1">
+                                <template x-for="cat in window.NativeEmojiPicker.categories" :key="cat.id">
+                                    <template x-if="activeEmojiTab === cat.id">
+                                        <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; justify-items: center;">
+                                            <template x-for="emoji in cat.emojis" :key="emoji">
+                                                <button 
+                                                    type="button"
+                                                    @click="selectEmoji(emoji)" 
+                                                    class="w-8 h-8 flex items-center justify-center text-lg hover:bg-[#222228] rounded-lg transition-colors cursor-pointer active:scale-125"
+                                                    x-text="emoji"
+                                                ></button>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </template>
+                            </div>
+                        </div>
+
+                        <textarea
+                            x-model="newMessage"
+                            @input="handleInput()"
+                            @keydown.enter.prevent="sendMessage()"
+                            rows="2"
+                            placeholder="{% trans 'پاسخ خود را بنویسید (Enter برای ارسال)...' %}"
+                            class="flex-1 min-w-0 rounded-[20px] px-4 md:px-5 py-3 text-xs md:text-sm text-white placeholder-gray-500 focus:outline-none transition-colors resize-none leading-6 max-h-[120px] custom-scrollbar"
+                            style="background-color: #161616; border: 1px solid #2A2A2A; min-height: 52px;"
+                        ></textarea>
+
+                        <button
+                            @click="sendMessage()"
+                            class="text-white font-bold px-5 md:px-6 py-3 rounded-full text-xs md:text-sm transition-all flex items-center gap-1.5 shrink-0 cursor-pointer hover:opacity-90 active:scale-95"
+                            style="background: linear-gradient(135deg, #ed1c24 0%, #a80000 100%); box-shadow: 0 4px 15px rgba(237, 28, 36, 0.45); height: 52px;"
+                        >
+                            <span>{% trans "ارسال" %}</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </template>
+        </main>
+    </div>
+
+    <script>
+        function operatorApp(initialRoomsData) {
+            return {
+                searchQuery: '',
+                rooms: initialRoomsData || [],
+                selectedRoomId: null,
+                selectedUserName: '',
+                selectedUserHandle: '',
+                selectedUserAvatar: '',
+                messages: [],
+                newMessage: '',
+                showEmoji: false,
+                activeEmojiTab: 'smileys',
+                selectEmoji(char) {
+                    this.newMessage += char;
+                },
+                socket: null,
+                globalSocket: null,
+                isUserTyping: false,
+                typingTimeout: null,
+
+                init() {
+                    this.connectGlobalSocket();
+                },
+
+                get filteredRooms() {
+                    if (!this.searchQuery.trim()) return this.rooms;
+                    const q = this.searchQuery.toLowerCase();
+                    return this.rooms.filter(r => 
+                        (r.display_name && r.display_name.toLowerCase().includes(q)) ||
+                        (r.username && r.username.toLowerCase().includes(q))
+                    );
+                },
+
+                connectGlobalSocket() {
+                    const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+                    const wsUrl = wsProtocol + window.location.host + '/ws/support/chat/';
+                    
+                    try {
+                        this.globalSocket = new WebSocket(wsUrl);
+                        this.globalSocket.onmessage = (event) => {
+                            const data = JSON.parse(event.data);
+                            if (data.type === 'chat_message' && data.message) {
+                                const msg = data.message;
+                                const rId = parseInt(msg.room_id);
+
+                                // Real-time room list update in sidebar
+                                const roomIndex = this.rooms.findIndex(r => parseInt(r.id) === rId);
+                                if (roomIndex !== -1) {
+                                    let existingRoom = this.rooms[roomIndex];
+                                    existingRoom.updated_at = msg.created_at;
+                                    if (parseInt(this.selectedRoomId) !== rId && !msg.is_operator) {
+                                        existingRoom.unread_by_admin = (existingRoom.unread_by_admin || 0) + 1;
+                                    }
+                                    // Move room with new message to top of sidebar list
+                                    this.rooms.splice(roomIndex, 1);
+                                    this.rooms.unshift(existingRoom);
+                                } else {
+                                    // Brand new user room -> Add to top of list!
+                                    this.rooms.unshift({
+                                        id: msg.room_id,
+                                        username: msg.user_username || 'user',
+                                        display_name: msg.user_display_name || 'کاربر جدید',
+                                        avatar: msg.sender_avatar,
+                                        unread_by_admin: msg.is_operator ? 0 : 1,
+                                        updated_at: msg.created_at
+                                    });
+                                }
+
+                                // Force Alpine JS deep reactive update
+                                this.rooms = this.rooms.map(r => ({ ...r }));
+
+                                // If this room is currently open, also append message directly
+                                if (parseInt(this.selectedRoomId) === rId) {
+                                    const tempIdx = this.messages.findIndex(m => String(m.id).startsWith('temp_') && m.content === msg.content);
+                                    if (tempIdx !== -1) {
+                                        this.messages[tempIdx] = msg;
+                                    } else {
+                                        const exists = this.messages.some(m => m.id === msg.id);
+                                        if (!exists) {
+                                            this.messages.push(msg);
+                                        }
+                                    }
+                                    this.isUserTyping = false;
+                                    this.scrollToBottom();
+                                }
+                            }
+                        };
+                        this.globalSocket.onclose = () => {
+                            setTimeout(() => { this.connectGlobalSocket(); }, 3000);
+                        };
+                    } catch (e) {
+                        console.error("Global WebSocket error:", e);
+                    }
+                },
+
+                selectRoom(id, name, handle, avatar) {
+                    this.selectedRoomId = id;
+                    this.selectedUserName = name;
+                    this.selectedUserHandle = handle;
+                    this.selectedUserAvatar = avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(name) + '&background=DD0202&color=fff';
+                    this.messages = [];
+                    this.isUserTyping = false;
+
+                    let room = this.rooms.find(r => parseInt(r.id) === parseInt(id));
+                    if (room) {
+                        room.unread_by_admin = 0;
+                    }
+
+                    if (this.socket) {
+                        this.socket.close();
+                    }
+
+                    const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+                    const wsUrl = wsProtocol + window.location.host + '/ws/support/chat/' + id + '/';
+                    
+                    this.socket = new WebSocket(wsUrl);
+
+                    this.socket.onmessage = (event) => {
+                        const data = JSON.parse(event.data);
+                        if (data.type === 'history') {
+                            this.messages = data.messages || [];
+                        } else if (data.type === 'chat_message' && data.message) {
+                            if (parseInt(data.message.room_id) === parseInt(this.selectedRoomId)) {
+                                const newMsg = data.message;
+                                const tempIndex = this.messages.findIndex(m => String(m.id).startsWith('temp_') && m.content === newMsg.content);
+                                if (tempIndex !== -1) {
+                                    this.messages[tempIndex] = newMsg;
+                                } else {
+                                    const exists = this.messages.some(m => m.id === newMsg.id);
+                                    if (!exists) {
+                                        this.messages.push(newMsg);
+                                    }
+                                }
+                                this.isUserTyping = false;
+                            }
+                        } else if (data.type === 'typing_status') {
+                            if (!data.is_operator && parseInt(data.room_id) === parseInt(this.selectedRoomId)) {
+                                this.isUserTyping = data.is_typing;
+                            }
+                        }
+                        this.scrollToBottom();
+                    };
+                },
+
+                handleInput() {
+                    if (!this.socket || this.socket.readyState !== WebSocket.OPEN) return;
+                    this.socket.send(JSON.stringify({
+                        type: 'typing',
+                        is_typing: true
+                    }));
+
+                    if (this.typingTimeout) clearTimeout(this.typingTimeout);
+                    this.typingTimeout = setTimeout(() => {
+                        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                            this.socket.send(JSON.stringify({
+                                type: 'typing',
+                                is_typing: false
+                            }));
+                        }
+                    }, 2000);
+                },
+
+                selectedFile: null,
+                selectedFileName: "",
+
+                handleOperatorFileSelect(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    this.selectedFile = file;
+                    this.selectedFileName = file.name;
+                },
+
+                removeSelectedFile() {
+                    this.selectedFile = null;
+                    this.selectedFileName = "";
+                    if (this.$refs.operatorFileInput) {
+                        this.$refs.operatorFileInput.value = "";
+                    }
+                },
+
+                sendMessage() {
+                    const text = this.newMessage.trim();
+
+                    if (this.selectedFile && this.selectedRoomId) {
+                        const formData = new FormData();
+                        formData.append('file', this.selectedFile);
+                        formData.append('room_id', this.selectedRoomId);
+                        if (text) {
+                            formData.append('content', text);
+                        }
+
+                        function getCookie(name) {
+                            let cookieValue = null;
+                            if (document.cookie && document.cookie !== '') {
+                                const cookies = document.cookie.split(';');
+                                for (let i = 0; i < cookies.length; i++) {
+                                    const cookie = cookies[i].trim();
+                                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                        break;
+                                    }
+                                }
+                            }
+                            return cookieValue;
+                        }
+
+                        fetch('/accounts/support/upload/', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': getCookie('csrftoken') || ''
+                            },
+                            body: formData
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.status === 'ok') {
+                                this.newMessage = '';
+                                this.removeSelectedFile();
+                            } else {
+                                alert(data.error || 'خطا در آپلود فایل');
+                            }
+                        })
+                        .catch(err => {
+                            console.error("Operator upload error:", err);
+                            alert('خطایی در شبکه هنگام آپلود فایل رخ داد.');
+                        });
+                        return;
+                    }
+
+                    if (!text) return;
+
+                    // Optimistic UI push for operator with real operator avatar
+                    const now = new Date();
+                    const timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+                    const opAvatar = window.OPERATOR_AVATAR || "https://ui-avatars.com/api/?name=Support&background=3B0709&color=fff";
+                    
+                    const tempMsg = {
+                        id: 'temp_' + Date.now(),
+                        content: text,
+                        is_operator: true,
+                        sender_avatar: opAvatar,
+                        created_at: timeStr,
+                        room_id: this.selectedRoomId
+                    };
+                    this.messages.push(tempMsg);
+
+                    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                        this.socket.send(JSON.stringify({
+                            type: 'chat_message',
+                            message: text
+                        }));
+                    }
+                    this.newMessage = '';
+                    this.scrollToBottom();
+                },
+
+                scrollToBottom() {
+                    this.$nextTick(() => {
+                        const container = this.$refs.messagesContainer;
+                        if (container) {
+                            container.scrollTop = container.scrollHeight;
+                        }
+                    });
+                }
+            }
+        }
+    </script>
+    <script src="{% static 'public/assets/js/native-emoji.js' %}"></script>
+</body>
+</html>

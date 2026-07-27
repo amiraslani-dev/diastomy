@@ -1,10 +1,40 @@
 {% extends 'accounts/account_base.html' %}
-{% load static %}
+{% load static i18n %}
 
 {% block dashboard_title %}اشتراک{% endblock %}
 
 {% block profile_content %}
 {% with active_tab='subscription' %}
+<main class="flex flex-col flex-1 w-full mx-auto md:pb-10" x-data="subscriptionController()">
+
+                    <div
+                        class="items-center justify-between hidden w-full mb-6 md:flex"
+                    >
+                        <h1 class="text-white text-[22px] font-bold">
+                            {% trans "خرید اشتراک" %}
+                        </h1>
+
+                        <div class="flex flex-row-reverse items-center gap-3">
+                            <a
+                                href="{% url 'home' %}"
+                                class="flex items-center gap-2 border border-[#4B4B4B] rounded-[50px] px-5 py-4 text-white hover:bg-white/5 transition-colors shrink-0"
+                            >
+                                <svg
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
+                                    <path
+                                        d="M17.6919 12.2871C17.6539 12.3791 17.599 12.462 17.53 12.531L12.53 17.531C12.384 17.677 12.192 17.751 12 17.751C11.808 17.751 11.616 17.678 11.47 17.531C11.177 17.238 11.177 16.763 11.47 16.47L15.1899 12.75H3C2.586 12.75 2.25 12.414 2.25 12C2.25 11.586 2.586 11.25 3 11.25H15.189L11.469 7.53003C11.176 7.23703 11.176 6.76199 11.469 6.46899C11.762 6.17599 12.237 6.17599 12.53 6.46899L17.53 11.469C17.599 11.538 17.6539 11.6209 17.6919 11.7129C17.7679 11.8969 17.7679 12.1031 17.6919 12.2871ZM21 5.25C20.586 5.25 20.25 5.586 20.25 6V18C20.25 18.414 20.586 18.75 21 18.75C21.414 18.75 21.75 18.414 21.75 18V6C21.75 5.586 21.414 5.25 21 5.25Z"
+                                        fill="white"
+                                    ></path>
+                                </svg>
+                                <span class="text-sm font-medium pt-0.5"
+                                    >{% trans "بازگشت به سایت" %}</span
+                                >
+                            </a>
                             <button
                                 class="w-[56px] cursor-pointer h-[56px] rounded-full border border-[#4B4B4B] flex items-center justify-center hover:bg-white/5 transition-colors"
                             >
@@ -25,9 +55,9 @@
                         </div>
                     </div>
 
-                    <div
-                        class="relative z-10 flex flex-col items-start w-full gap-4 md:flex-row lg:gap-6"
-                    >
+    <div
+        class="relative z-10 flex flex-col items-start w-full gap-4 md:flex-row lg:gap-6"
+    >
                         <div
                             class="flex flex-col w-full md:w-[62%] lg:w-[66%] gap-4"
                         >
@@ -59,7 +89,7 @@
                                             class="flex items-center gap-4 md:gap-6"
                                         >
                                             <div
-                                                class="text-[#5E5E5E] line-through decoration-[#4B4B4B]"
+                                                x-show="plan.newPrice" class="text-[#5E5E5E] line-through decoration-[#4B4B4B]"
                                             >
                                                 <span
                                                     class="text-[14px] md:text-[15px] font-medium"
@@ -75,7 +105,7 @@
                                             >
                                                 <span
                                                     class="text-[14px] md:text-[15px] font-bold pt-0.5"
-                                                    x-text="plan.newPrice"
+                                                    x-text="plan.newPrice ? plan.newPrice : plan.oldPrice"
                                                 ></span>
                                                 <span
                                                     class="text-[14px] md:text-[15px] font-bold"
@@ -90,8 +120,7 @@
                             <div
                                 class="text-right text-[#787878] mt-1 w-full md:pr-2"
                             >
-                                به تمامی مبالغ 10% مالیات بر ارزش افزوده اضافه
-                                خواهد شد.
+                                {% trans "به تمامی مبالغ 10% مالیات بر ارزش افزوده اضافه خواهد شد." %}
                             </div>
 
                             <div
@@ -110,7 +139,7 @@
                                     />
                                 </svg>
                                 <span
-                                    >پشتیبانی:
+                                    >{% trans "پشتیبانی:" %}
                                     <span class="pt-0.5 text-white"
                                         >90002542</span
                                     ></span
@@ -127,16 +156,14 @@
                                 <input
                                     type="text"
                                     x-model="discountCode"
-                                    placeholder="کد تخفیف یا هدیه"
+                                    placeholder="{% trans "کد تخفیف یا هدیه" %}"
                                     class="flex-1 min-w-0 bg-transparent border-none outline-none text-white px-4 placeholder-[#4B4B4B]"
                                 />
 
                                 <button
                                     type="button"
                                     class="shrink-0 cursor-pointer bg-white hover:bg-gray-200 transition-colors text-black font-bold text-[14px] px-7 py-3 rounded-[18px]"
-                                >
-                                    ثبت
-                                </button>
+                                 @click="applyDiscount">{% trans "ثبت" %}</button>
                             </div>
 
                             <div
@@ -147,24 +174,11 @@
                                 >
                                     <span
                                         class="text-white text-[13px] md:text-[14px]"
-                                        >قیمت:</span
+                                        >{% trans "قیمت:" %}</span
                                     >
                                     <span
-                                        class="text-white text-[13px] md:text-[14px] font-medium"
-                                        >171.000 تومان</span
-                                    >
-                                </div>
-
-                                <div
-                                    class="flex justify-between items-center w-full pb-2 mb-4.5"
-                                >
-                                    <span
-                                        class="text-white text-[13px] md:text-[14px]"
-                                        >مبلغ کد تخفیف:</span
-                                    >
-                                    <span
-                                        class="text-[#28C76F] text-[13px] md:text-[14px] font-medium"
-                                        >0 تومان</span
+                                        class="text-white text-[13px] md:text-[14px] font-medium" x-text="formatPrice(basePrice) + ' {% trans "تومان" %}'"
+                                        ></span
                                     >
                                 </div>
 
@@ -173,11 +187,24 @@
                                 >
                                     <span
                                         class="text-white text-[13px] md:text-[14px]"
-                                        >مالیات برارزش افزوده:</span
+                                        >{% trans "مبلغ کد تخفیف:" %}</span
                                     >
                                     <span
-                                        class="text-white text-[13px] md:text-[14px] font-medium"
-                                        >17.100 تومان</span
+                                        class="text-[#28C76F] text-[13px] md:text-[14px] font-medium" x-text="formatPrice(discountAmount) + ' {% trans "تومان" %}'"
+                                        ></span
+                                    >
+                                </div>
+
+                                <div
+                                    class="flex justify-between items-center w-full pb-2 mb-4.5"
+                                >
+                                    <span
+                                        class="text-white text-[13px] md:text-[14px]"
+                                        >{% trans "مالیات برارزش افزوده:" %}</span
+                                    >
+                                    <span
+                                        class="text-white text-[13px] md:text-[14px] font-medium" x-text="formatPrice(vatAmount) + ' {% trans "تومان" %}'"
+                                        ></span
                                     >
                                 </div>
 
@@ -186,19 +213,22 @@
                                 >
                                     <span
                                         class="text-white font-bold text-[14px] md:text-[15px]"
-                                        >جمع مبلغ قابل پرداخت:</span
+                                        >{% trans "جمع مبلغ قابل پرداخت:" %}</span
                                     >
                                     <span
-                                        class="text-white text-[13px] md:text-[14px]"
-                                        >188.100 تومان</span
+                                        class="text-white text-[13px] md:text-[14px] font-bold" x-text="formatPrice(totalAmount) + ' {% trans "تومان" %}'"
+                                        ></span
                                     >
                                 </div>
 
                                 <button
                                     type="button"
-                                    class="w-full cursor-pointer bg-[#8C0000] hover:bg-red-700 transition-colors text-white font-bold text-[15px] py-4 rounded-[14px] shadow-[0_4px_15px_rgba(140,0,0,0.2)] outline-none"
+                                    @click="processPayment"
+                                    :disabled="isProcessingPayment"
+                                    class="w-full cursor-pointer bg-[#8C0000] hover:bg-red-700 transition-colors text-white font-bold text-[15px] py-4 rounded-[14px] shadow-[0_4px_15px_rgba(140,0,0,0.2)] outline-none disabled:opacity-50"
                                 >
-                                    پرداخت
+                                    <span x-show="!isProcessingPayment">{% trans "پرداخت" %}</span>
+                                    <span x-show="isProcessingPayment">در حال پردازش...</span>
                                 </button>
                             </div>
                         </div>
@@ -221,17 +251,19 @@
                                 ></path>
                             </svg>
                             <span
-                                >پشتیبانی:
+                                >{% trans "پشتیبانی:" %}
                                 <span class="text-white">90002542</span></span
                             >
                         </div>
                     </div>
+</main>
 
 {% endwith %}
-{% endblock %}
+{% endblock %} 
 
 {% block footer_references %}
-
-                <script src="{% static 'public/assets/js/subscription.js' %}"></script>
-
+<script>
+    window.SUBSCRIPTION_PLANS = {{ plans_data|safe }};
+</script>
+<script src="{% static 'public/assets/js/subscription.js' %}?v=1.1"></script>
 {% endblock %}

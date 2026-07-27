@@ -1,5 +1,20 @@
 from django.db import models
 
+class SiteLanguage(models.Model):
+    code = models.CharField(max_length=10, unique=True, verbose_name="کد زبان")
+    name = models.CharField(max_length=50, verbose_name="نام زبان")
+    is_active = models.BooleanField(default=True, verbose_name="فعال")
+    order = models.PositiveIntegerField(default=0, verbose_name="ترتیب")
+
+    class Meta:
+        verbose_name = "زبان سایت"
+        verbose_name_plural = "زبان‌های سایت"
+        ordering = ['order', 'id']
+
+    def __str__(self):
+        return f"{self.name} ({self.code})"
+
+
 class SiteSettings(models.Model):
     title = models.CharField(max_length=255, verbose_name="عنوان سایت")
     logo = models.ImageField(upload_to='site/', verbose_name="لوگوی سایت", blank=True, null=True)
@@ -151,3 +166,38 @@ class UserTasteSettings(models.Model):
             total_count = self.movies.count() + self.series.count()
             if total_count > 10:
                 raise ValidationError(_("مجموع تعداد فیلم‌ها و سریال‌های انتخاب شده نمی‌تواند بیشتر از 10 باشد."))
+
+class DashboardSetting(models.Model):
+    class Meta:
+        verbose_name = _("تنظیمات داشبورد")
+        verbose_name_plural = _("تنظیمات داشبورد")
+
+    def __str__(self):
+        return str(_("تنظیمات داشبورد"))
+
+class ProfileImage(models.Model):
+    dashboard_setting = models.ForeignKey(DashboardSetting, on_delete=models.CASCADE, related_name='default_avatars', verbose_name=_("تنظیمات داشبورد"))
+    image = models.ImageField(upload_to='dashboard/avatars/', verbose_name=_("تصویر پروفایل"))
+    order = models.PositiveIntegerField(default=0, verbose_name=_("ترتیب"))
+
+    class Meta:
+        verbose_name = _("عکس پروفایل پیش‌فرض")
+        verbose_name_plural = _("عکس‌های پروفایل پیش‌فرض")
+        ordering = ['order']
+
+    def __str__(self):
+        return f"عکس پروفایل {self.id}"
+
+class SupportAvatar(models.Model):
+    dashboard_setting = models.ForeignKey(DashboardSetting, on_delete=models.CASCADE, related_name='support_avatars', verbose_name=_("تنظیمات داشبورد"))
+    name = models.CharField(max_length=100, blank=True, verbose_name=_("نام پشتیبان"))
+    image = models.ImageField(upload_to='dashboard/support_avatars/', verbose_name=_("تصویر آواتار"))
+    order = models.PositiveIntegerField(default=0, verbose_name=_("ترتیب"))
+
+    class Meta:
+        verbose_name = _("آواتار پشتیبان")
+        verbose_name_plural = _("آواتارهای پشتیبانان (صفحه پشتیبانی)")
+        ordering = ['order']
+
+    def __str__(self):
+        return self.name or f"آواتار پشتیبان {self.id}"

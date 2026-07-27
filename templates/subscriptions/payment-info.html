@@ -1,10 +1,42 @@
 {% extends 'accounts/account_base.html' %}
 {% load static %}
+{% load i18n %}
+{% load jalali_tags %}
+{% load humanize %}
 
-{% block dashboard_title %}اطلاعات پرداخت{% endblock %}
+{% block dashboard_title %}{% trans "رسید پرداخت" %}{% endblock %}
 
 {% block profile_content %}
 {% with active_tab='payment-info' %}
+<main class="flex flex-col flex-1 w-full mx-auto md:pb-10">
+                    <div
+                        class="items-center justify-between hidden w-full mb-8 md:flex"
+                    >
+                        <h1 class="text-white text-[22px] font-bold">
+                            {% trans "اطلاعات پرداخت" %}
+                        </h1>
+
+                        <div class="flex flex-row-reverse items-center gap-3">
+                            <a
+                                href="{% url 'home' %}"
+                                class="flex items-center gap-2 border border-[#4B4B4B] rounded-[50px] px-5 py-4 text-white hover:bg-white/5 transition-colors shrink-0"
+                            >
+                                <svg
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
+                                    <path
+                                        d="M17.6919 12.2871C17.6539 12.3791 17.599 12.462 17.53 12.531L12.53 17.531C12.384 17.677 12.192 17.751 12 17.751C11.808 17.751 11.616 17.678 11.47 17.531C11.177 17.238 11.177 16.763 11.47 16.47L15.1899 12.75H3C2.586 12.75 2.25 12.414 2.25 12C2.25 11.586 2.586 11.25 3 11.25H15.189L11.469 7.53003C11.176 7.23703 11.176 6.76199 11.469 6.46899C11.762 6.17599 12.237 6.17599 12.53 6.46899L17.53 11.469C17.599 11.538 17.6539 11.6209 17.6919 11.7129C17.7679 11.8969 17.7679 12.1031 17.6919 12.2871ZM21 5.25C20.586 5.25 20.25 5.586 20.25 6V18C20.25 18.414 20.586 18.75 21 18.75C21.414 18.75 21.75 18.414 21.75 18V6C21.75 5.586 21.414 5.25 21 5.25Z"
+                                        fill="white"
+                                    ></path>
+                                </svg>
+                                <span class="text-sm font-medium pt-0.5"
+                                    >{% trans "بازگشت به سایت" %}</span
+                                >
+                            </a>
                             <button
                                 class="w-[56px] h-[56px] cursor-pointer rounded-full border border-[#4B4B4B] flex items-center justify-center hover:bg-white/5 transition-colors"
                             >
@@ -30,34 +62,34 @@
                     >
                         <span
                             class="text-white text-[13px] font-bold text-right"
-                            >نوع خرید</span
+                            >{% trans "نوع خرید" %}</span
                         >
                         <span
                             class="text-white text-[13px] font-bold text-center"
-                            >تاریخ خرید</span
+                            >{% trans "تاریخ خرید" %}</span
                         >
                         <span
                             class="text-white text-[13px] font-bold text-center"
-                            >مبلغ خرید</span
+                            >{% trans "مبلغ خرید" %}</span
                         >
                         <span
                             class="text-white text-[13px] font-bold text-center"
-                            >وضعیت اشتراک</span
+                            >{% trans "وضعیت اشتراک" %}</span
                         >
                         <span
                             class="text-white text-[13px] font-bold text-center"
-                            >شروع اشتراک</span
+                            >{% trans "شروع اشتراک" %}</span
                         >
                         <span
                             class="text-white text-[13px] font-bold text-center"
-                            >پایان اشتراک</span
+                            >{% trans "پایان اشتراک" %}</span
                         >
                         <span
                             class="text-white text-[13px] font-bold text-center"
-                            >جزئیات پرداخت</span
+                            >{% trans "جزئیات پرداخت" %}</span
                         >
                         <span class="text-white text-[13px] font-bold text-left"
-                            >کد تخفیف</span
+                            >{% trans "کد تخفیف" %}</span
                         >
                     </div>
 
@@ -65,21 +97,22 @@
                         class="grid md:hidden grid-cols-[1.5fr_1fr_1fr_0.5fr] gap-2 items-center bg-transparent border border-[#2A2A2A] rounded-[14px] px-4 py-4 mb-3 shadow-[0_0_10px_rgba(0,0,0,0.1)]"
                     >
                         <span class="text-xs font-bold text-right text-white"
-                            >نوع خرید</span
+                            >{% trans "نوع خرید" %}</span
                         >
                         <span class="text-xs font-bold text-center text-white"
-                            >تاریخ</span
+                            >{% trans "تاریخ" %}</span
                         >
                         <span class="text-xs font-bold text-center text-white"
-                            >مبلغ</span
+                            >{% trans "مبلغ" %}</span
                         >
                         <span class="text-xs font-bold text-left text-white"
-                            >جزئیات</span
+                            >{% trans "جزئیات" %}</span
                         >
                     </div>
 
                     <div class="flex flex-col gap-3 mb-6">
-                        <div
+{% for payment in payments %}
+<div
                             x-data="{ expanded: false }"
                             class="bg-transparent border border-[#2A2A2A] hover:bg-[#0A0A0A] rounded-[18px] transition-all duration-300 overflow-hidden flex flex-col"
                         >
@@ -88,35 +121,35 @@
                             >
                                 <span
                                     class="text-[#D1D1D1] text-[13px] text-right truncate"
-                                    >اشتراک ۱ ماهه</span
+                                    >{% if payment.subscription %}{{ payment.subscription.plan.name }}{% else %}-{% endif %}</span
                                 >
                                 <span
                                     class="text-[#939393] text-[13px] text-center"
-                                    >1404/12/30</span
+                                    >{{ payment.created_at|to_jalali:"%Y/%m/%d" }}</span
                                 >
                                 <span
                                     class="text-[#939393] text-[13px] text-center"
-                                    >1.652.000</span
+                                    >{{ payment.formatted_amount }} تومان</span
                                 >
                                 <span
                                     class="text-[#939393] text-[13px] text-center"
-                                    >غیرفعال</span
+                                    >{% if payment.subscription and payment.subscription.is_valid %}{% trans "فعال" %}{% else %}{% trans "غیرفعال" %}{% endif %}</span
                                 >
                                 <span
                                     class="text-[#939393] text-[13px] text-center"
-                                    >1404/12/30</span
+                                    >{% if payment.subscription %}{{ payment.subscription.start_date|to_jalali:"%Y/%m/%d" }}{% else %}-{% endif %}</span
                                 >
                                 <span
                                     class="text-[#939393] text-[13px] text-center"
-                                    >1404/12/30</span
+                                    >{% if payment.subscription %}{{ payment.expected_end_date|to_jalali:"%Y/%m/%d" }}{% else %}-{% endif %}</span
                                 >
                                 <span
-                                    class="text-[#939393] text-xl text-center pb-2 cursor-pointer"
-                                    >...</span
+                                    class="text-[#939393] text-[13px] text-center pb-2 cursor-pointer"
+                                    >{% if payment.status == "SUCCESS" %}موفق{% else %}ناموفق{% endif %}</span
                                 >
                                 <span
                                     class="text-[#939393] text-xl text-left pb-2 cursor-pointer"
-                                    >...</span
+                                    >{% if payment.discount_code %}{{ payment.discount_code }}{% else %}-{% endif %}</span
                                 >
                             </div>
                             <div
@@ -125,15 +158,15 @@
                             >
                                 <span
                                     class="text-[#D1D1D1] text-[11px] text-right truncate"
-                                    >اشتراک ۱ ماهه</span
+                                    >{% if payment.subscription %}{{ payment.subscription.plan.name }}{% else %}-{% endif %}</span
                                 >
                                 <span
                                     class="text-[#939393] text-[11px] text-center"
-                                    >1404/12/30</span
+                                    >{{ payment.created_at|to_jalali:"%Y/%m/%d" }}</span
                                 >
                                 <span
                                     class="text-[#939393] text-[11px] text-center truncate"
-                                    >1.652.000</span
+                                    >{{ payment.formatted_amount }} تومان</span
                                 >
                                 <div
                                     class="flex items-center justify-end text-left"
@@ -175,631 +208,53 @@
                                     <div class="flex flex-col gap-1.5">
                                         <span
                                             class="text-white text-[11px] font-bold"
-                                            >وضعیت اشتراک</span
+                                            >{% trans "وضعیت اشتراک" %}</span
                                         ><span
                                             class="text-[#939393] text-[11px]"
-                                            >غیرفعال</span
+                                            >{% if payment.subscription and payment.subscription.is_valid %}{% trans "فعال" %}{% else %}{% trans "غیرفعال" %}{% endif %}</span
                                         >
                                     </div>
                                     <div class="flex flex-col gap-1.5">
                                         <span
                                             class="text-white text-[11px] font-bold"
-                                            >کد تخفیف</span
+                                            >{% trans "کد تخفیف" %}</span
                                         ><span
                                             class="text-[#939393] text-lg leading-none mt-[-5px]"
-                                            >...</span
+                                            >{% if payment.discount_code %}{{ payment.discount_code }}{% else %}-{% endif %}</span
                                         >
                                     </div>
                                     <div class="flex flex-col gap-1.5">
                                         <span
                                             class="text-white text-[11px] font-bold"
-                                            >شروع اشتراک</span
+                                            >{% trans "شروع اشتراک" %}</span
                                         ><span
                                             class="text-[#939393] text-[11px]"
-                                            >1404/12/30</span
+                                            >{% if payment.subscription %}{{ payment.subscription.start_date|to_jalali:"%Y/%m/%d" }}{% else %}-{% endif %}</span
                                         >
                                     </div>
                                     <div class="flex flex-col gap-1.5">
                                         <span
                                             class="text-white text-[11px] font-bold"
-                                            >پایان اشتراک</span
+                                            >{% trans "پایان اشتراک" %}</span
                                         ><span
                                             class="text-[#939393] text-[11px]"
-                                            >1404/12/30</span
+                                            >{% if payment.subscription %}{{ payment.expected_end_date|to_jalali:"%Y/%m/%d" }}{% else %}-{% endif %}</span
                                         >
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div
-                            x-data="{ expanded: false }"
-                            class="bg-transparent border border-[#2A2A2A] hover:bg-[#0A0A0A] rounded-[18px] transition-all duration-300 overflow-hidden flex flex-col"
-                        >
-                            <div
-                                class="items-center hidden w-full grid-cols-8 gap-4 px-6 py-5 md:grid"
-                            >
-                                <span
-                                    class="text-[#D1D1D1] text-[13px] text-right truncate"
-                                    >اشتراک ۱ ماهه</span
-                                >
-                                <span
-                                    class="text-[#939393] text-[13px] text-center"
-                                    >1404/12/30</span
-                                >
-                                <span
-                                    class="text-[#939393] text-[13px] text-center"
-                                    >1.652.000</span
-                                >
-                                <span
-                                    class="text-[#939393] text-[13px] text-center"
-                                    >غیرفعال</span
-                                >
-                                <span
-                                    class="text-[#939393] text-[13px] text-center"
-                                    >1404/12/30</span
-                                >
-                                <span
-                                    class="text-[#939393] text-[13px] text-center"
-                                    >1404/12/30</span
-                                >
-                                <span
-                                    class="text-[#939393] text-xl text-center pb-2 cursor-pointer"
-                                    >...</span
-                                >
-                                <span
-                                    class="text-[#939393] text-xl text-left pb-2 cursor-pointer"
-                                    >...</span
-                                >
-                            </div>
-                            <div
-                                @click="expanded = !expanded"
-                                class="grid md:hidden grid-cols-[1.5fr_1fr_1fr_0.5fr] gap-2 items-center w-full px-4 py-5 cursor-pointer select-none"
-                            >
-                                <span
-                                    class="text-[#D1D1D1] text-[11px] text-right truncate"
-                                    >اشتراک ۱ ماهه</span
-                                >
-                                <span
-                                    class="text-[#939393] text-[11px] text-center"
-                                    >1404/12/30</span
-                                >
-                                <span
-                                    class="text-[#939393] text-[11px] text-center truncate"
-                                    >1.652.000</span
-                                >
-                                <div
-                                    class="flex items-center justify-end text-left"
-                                >
-                                    <svg
-                                        width="20"
-                                        height="20"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="#939393"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        class="transition-transform duration-300"
-                                        :class="expanded ? 'rotate-90' : ''"
-                                    >
-                                        <circle
-                                            cx="12"
-                                            cy="12"
-                                            r="1.5"
-                                        ></circle>
-                                        <circle
-                                            cx="19"
-                                            cy="12"
-                                            r="1.5"
-                                        ></circle>
-                                        <circle cx="5" cy="12" r="1.5"></circle>
-                                    </svg>
-                                </div>
-                            </div>
-                            <div
-                                x-show="expanded"
-                                x-transition
-                                class="px-4 pb-4 md:hidden"
-                            >
-                                <div
-                                    class="pt-4 border-t border-[#2A2A2A] grid grid-cols-2 gap-y-4 gap-x-2"
-                                >
-                                    <div class="flex flex-col gap-1.5">
-                                        <span
-                                            class="text-white text-[11px] font-bold"
-                                            >وضعیت اشتراک</span
-                                        ><span
-                                            class="text-[#939393] text-[11px]"
-                                            >غیرفعال</span
-                                        >
-                                    </div>
-                                    <div class="flex flex-col gap-1.5">
-                                        <span
-                                            class="text-white text-[11px] font-bold"
-                                            >کد تخفیف</span
-                                        ><span
-                                            class="text-[#939393] text-lg leading-none mt-[-5px]"
-                                            >...</span
-                                        >
-                                    </div>
-                                    <div class="flex flex-col gap-1.5">
-                                        <span
-                                            class="text-white text-[11px] font-bold"
-                                            >شروع اشتراک</span
-                                        ><span
-                                            class="text-[#939393] text-[11px]"
-                                            >1404/12/30</span
-                                        >
-                                    </div>
-                                    <div class="flex flex-col gap-1.5">
-                                        <span
-                                            class="text-white text-[11px] font-bold"
-                                            >پایان اشتراک</span
-                                        ><span
-                                            class="text-[#939393] text-[11px]"
-                                            >1404/12/30</span
-                                        >
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        
+{% empty %}
+<div class="text-center text-white p-4">{% trans "هیچ تراکنشی یافت نشد." %}</div>
+{% endfor %}
+</div>
 
-                        <div
-                            x-data="{ expanded: false }"
-                            class="bg-transparent border border-[#2A2A2A] hover:bg-[#0A0A0A] rounded-[18px] transition-all duration-300 overflow-hidden flex flex-col"
-                        >
-                            <div
-                                class="items-center hidden w-full grid-cols-8 gap-4 px-6 py-5 md:grid"
-                            >
-                                <span
-                                    class="text-[#D1D1D1] text-[13px] text-right truncate"
-                                    >اشتراک ۱ ماهه</span
-                                >
-                                <span
-                                    class="text-[#939393] text-[13px] text-center"
-                                    >1404/12/30</span
-                                >
-                                <span
-                                    class="text-[#939393] text-[13px] text-center"
-                                    >1.652.000</span
-                                >
-                                <span
-                                    class="text-[#939393] text-[13px] text-center"
-                                    >غیرفعال</span
-                                >
-                                <span
-                                    class="text-[#939393] text-[13px] text-center"
-                                    >1404/12/30</span
-                                >
-                                <span
-                                    class="text-[#939393] text-[13px] text-center"
-                                    >1404/12/30</span
-                                >
-                                <span
-                                    class="text-[#939393] text-xl text-center pb-2 cursor-pointer"
-                                    >...</span
-                                >
-                                <span
-                                    class="text-[#939393] text-xl text-left pb-2 cursor-pointer"
-                                    >...</span
-                                >
-                            </div>
-                            <div
-                                @click="expanded = !expanded"
-                                class="grid md:hidden grid-cols-[1.5fr_1fr_1fr_0.5fr] gap-2 items-center w-full px-4 py-5 cursor-pointer select-none"
-                            >
-                                <span
-                                    class="text-[#D1D1D1] text-[11px] text-right truncate"
-                                    >اشتراک ۱ ماهه</span
-                                >
-                                <span
-                                    class="text-[#939393] text-[11px] text-center"
-                                    >1404/12/30</span
-                                >
-                                <span
-                                    class="text-[#939393] text-[11px] text-center truncate"
-                                    >1.652.000</span
-                                >
-                                <div
-                                    class="flex items-center justify-end text-left"
-                                >
-                                    <svg
-                                        width="20"
-                                        height="20"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="#939393"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        class="transition-transform duration-300"
-                                        :class="expanded ? 'rotate-90' : ''"
-                                    >
-                                        <circle
-                                            cx="12"
-                                            cy="12"
-                                            r="1.5"
-                                        ></circle>
-                                        <circle
-                                            cx="19"
-                                            cy="12"
-                                            r="1.5"
-                                        ></circle>
-                                        <circle cx="5" cy="12" r="1.5"></circle>
-                                    </svg>
-                                </div>
-                            </div>
-                            <div
-                                x-show="expanded"
-                                x-transition
-                                class="px-4 pb-4 md:hidden"
-                            >
-                                <div
-                                    class="pt-4 border-t border-[#2A2A2A] grid grid-cols-2 gap-y-4 gap-x-2"
-                                >
-                                    <div class="flex flex-col gap-1.5">
-                                        <span
-                                            class="text-white text-[11px] font-bold"
-                                            >وضعیت اشتراک</span
-                                        ><span
-                                            class="text-[#939393] text-[11px]"
-                                            >غیرفعال</span
-                                        >
-                                    </div>
-                                    <div class="flex flex-col gap-1.5">
-                                        <span
-                                            class="text-white text-[11px] font-bold"
-                                            >کد تخفیف</span
-                                        ><span
-                                            class="text-[#939393] text-lg leading-none mt-[-5px]"
-                                            >...</span
-                                        >
-                                    </div>
-                                    <div class="flex flex-col gap-1.5">
-                                        <span
-                                            class="text-white text-[11px] font-bold"
-                                            >شروع اشتراک</span
-                                        ><span
-                                            class="text-[#939393] text-[11px]"
-                                            >1404/12/30</span
-                                        >
-                                    </div>
-                                    <div class="flex flex-col gap-1.5">
-                                        <span
-                                            class="text-white text-[11px] font-bold"
-                                            >پایان اشتراک</span
-                                        ><span
-                                            class="text-[#939393] text-[11px]"
-                                            >1404/12/30</span
-                                        >
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div
-                            x-data="{ expanded: false }"
-                            class="bg-transparent border border-[#2A2A2A] hover:bg-[#0A0A0A] rounded-[18px] transition-all duration-300 overflow-hidden flex flex-col"
-                        >
-                            <div
-                                class="items-center hidden w-full grid-cols-8 gap-4 px-6 py-5 md:grid"
-                            >
-                                <span
-                                    class="text-[#D1D1D1] text-[13px] text-right truncate"
-                                    >اشتراک ۱ ماهه</span
-                                >
-                                <span
-                                    class="text-[#939393] text-[13px] text-center"
-                                    >1404/12/30</span
-                                >
-                                <span
-                                    class="text-[#939393] text-[13px] text-center"
-                                    >1.652.000</span
-                                >
-                                <span
-                                    class="text-[#939393] text-[13px] text-center"
-                                    >غیرفعال</span
-                                >
-                                <span
-                                    class="text-[#939393] text-[13px] text-center"
-                                    >1404/12/30</span
-                                >
-                                <span
-                                    class="text-[#939393] text-[13px] text-center"
-                                    >1404/12/30</span
-                                >
-                                <span
-                                    class="text-[#939393] text-xl text-center pb-2 cursor-pointer"
-                                    >...</span
-                                >
-                                <span
-                                    class="text-[#939393] text-xl text-left pb-2 cursor-pointer"
-                                    >...</span
-                                >
-                            </div>
-                            <div
-                                @click="expanded = !expanded"
-                                class="grid md:hidden grid-cols-[1.5fr_1fr_1fr_0.5fr] gap-2 items-center w-full px-4 py-5 cursor-pointer select-none"
-                            >
-                                <span
-                                    class="text-[#D1D1D1] text-[11px] text-right truncate"
-                                    >اشتراک ۱ ماهه</span
-                                >
-                                <span
-                                    class="text-[#939393] text-[11px] text-center"
-                                    >1404/12/30</span
-                                >
-                                <span
-                                    class="text-[#939393] text-[11px] text-center truncate"
-                                    >1.652.000</span
-                                >
-                                <div
-                                    class="flex items-center justify-end text-left"
-                                >
-                                    <svg
-                                        width="20"
-                                        height="20"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="#939393"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        class="transition-transform duration-300"
-                                        :class="expanded ? 'rotate-90' : ''"
-                                    >
-                                        <circle
-                                            cx="12"
-                                            cy="12"
-                                            r="1.5"
-                                        ></circle>
-                                        <circle
-                                            cx="19"
-                                            cy="12"
-                                            r="1.5"
-                                        ></circle>
-                                        <circle cx="5" cy="12" r="1.5"></circle>
-                                    </svg>
-                                </div>
-                            </div>
-                            <div
-                                x-show="expanded"
-                                x-transition
-                                class="px-4 pb-4 md:hidden"
-                            >
-                                <div
-                                    class="pt-4 border-t border-[#2A2A2A] grid grid-cols-2 gap-y-4 gap-x-2"
-                                >
-                                    <div class="flex flex-col gap-1.5">
-                                        <span
-                                            class="text-white text-[11px] font-bold"
-                                            >وضعیت اشتراک</span
-                                        ><span
-                                            class="text-[#939393] text-[11px]"
-                                            >غیرفعال</span
-                                        >
-                                    </div>
-                                    <div class="flex flex-col gap-1.5">
-                                        <span
-                                            class="text-white text-[11px] font-bold"
-                                            >کد تخفیف</span
-                                        ><span
-                                            class="text-[#939393] text-lg leading-none mt-[-5px]"
-                                            >...</span
-                                        >
-                                    </div>
-                                    <div class="flex flex-col gap-1.5">
-                                        <span
-                                            class="text-white text-[11px] font-bold"
-                                            >شروع اشتراک</span
-                                        ><span
-                                            class="text-[#939393] text-[11px]"
-                                            >1404/12/30</span
-                                        >
-                                    </div>
-                                    <div class="flex flex-col gap-1.5">
-                                        <span
-                                            class="text-white text-[11px] font-bold"
-                                            >پایان اشتراک</span
-                                        ><span
-                                            class="text-[#939393] text-[11px]"
-                                            >1404/12/30</span
-                                        >
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div
-                            x-data="{ expanded: false }"
-                            class="bg-transparent border border-[#2A2A2A] hover:bg-[#0A0A0A] rounded-[18px] transition-all duration-300 overflow-hidden flex flex-col"
-                        >
-                            <div
-                                class="items-center hidden w-full grid-cols-8 gap-4 px-6 py-5 md:grid"
-                            >
-                                <span
-                                    class="text-[#D1D1D1] text-[13px] text-right truncate"
-                                    >اشتراک ۱ ماهه</span
-                                >
-                                <span
-                                    class="text-[#939393] text-[13px] text-center"
-                                    >1404/12/30</span
-                                >
-                                <span
-                                    class="text-[#939393] text-[13px] text-center"
-                                    >1.652.000</span
-                                >
-                                <span
-                                    class="text-[#939393] text-[13px] text-center"
-                                    >غیرفعال</span
-                                >
-                                <span
-                                    class="text-[#939393] text-[13px] text-center"
-                                    >1404/12/30</span
-                                >
-                                <span
-                                    class="text-[#939393] text-[13px] text-center"
-                                    >1404/12/30</span
-                                >
-                                <span
-                                    class="text-[#939393] text-xl text-center pb-2 cursor-pointer"
-                                    >...</span
-                                >
-                                <span
-                                    class="text-[#939393] text-xl text-left pb-2 cursor-pointer"
-                                    >...</span
-                                >
-                            </div>
-                            <div
-                                @click="expanded = !expanded"
-                                class="grid md:hidden grid-cols-[1.5fr_1fr_1fr_0.5fr] gap-2 items-center w-full px-4 py-5 cursor-pointer select-none"
-                            >
-                                <span
-                                    class="text-[#D1D1D1] text-[11px] text-right truncate"
-                                    >اشتراک ۱ ماهه</span
-                                >
-                                <span
-                                    class="text-[#939393] text-[11px] text-center"
-                                    >1404/12/30</span
-                                >
-                                <span
-                                    class="text-[#939393] text-[11px] text-center truncate"
-                                    >1.652.000</span
-                                >
-                                <div
-                                    class="flex items-center justify-end text-left"
-                                >
-                                    <svg
-                                        width="20"
-                                        height="20"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="#939393"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        class="transition-transform duration-300"
-                                        :class="expanded ? 'rotate-90' : ''"
-                                    >
-                                        <circle
-                                            cx="12"
-                                            cy="12"
-                                            r="1.5"
-                                        ></circle>
-                                        <circle
-                                            cx="19"
-                                            cy="12"
-                                            r="1.5"
-                                        ></circle>
-                                        <circle cx="5" cy="12" r="1.5"></circle>
-                                    </svg>
-                                </div>
-                            </div>
-                            <div
-                                x-show="expanded"
-                                x-transition
-                                class="px-4 pb-4 md:hidden"
-                            >
-                                <div
-                                    class="pt-4 border-t border-[#2A2A2A] grid grid-cols-2 gap-y-4 gap-x-2"
-                                >
-                                    <div class="flex flex-col gap-1.5">
-                                        <span
-                                            class="text-white text-[11px] font-bold"
-                                            >وضعیت اشتراک</span
-                                        ><span
-                                            class="text-[#939393] text-[11px]"
-                                            >غیرفعال</span
-                                        >
-                                    </div>
-                                    <div class="flex flex-col gap-1.5">
-                                        <span
-                                            class="text-white text-[11px] font-bold"
-                                            >کد تخفیف</span
-                                        ><span
-                                            class="text-[#939393] text-lg leading-none mt-[-5px]"
-                                            >...</span
-                                        >
-                                    </div>
-                                    <div class="flex flex-col gap-1.5">
-                                        <span
-                                            class="text-white text-[11px] font-bold"
-                                            >شروع اشتراک</span
-                                        ><span
-                                            class="text-[#939393] text-[11px]"
-                                            >1404/12/30</span
-                                        >
-                                    </div>
-                                    <div class="flex flex-col gap-1.5">
-                                        <span
-                                            class="text-white text-[11px] font-bold"
-                                            >پایان اشتراک</span
-                                        ><span
-                                            class="text-[#939393] text-[11px]"
-                                            >1404/12/30</span
-                                        >
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-end w-full pb-5">
-                        <div class="flex flex-row-reverse items-center gap-2">
-                            <button
-                                class="bg-gradient-to-b cursor-pointer from-[rgba(58,58,58,0.396)] to-[rgba(36,36,36,0.6)] border-[1.3px] border-[#3C3C3C] backdrop-blur-[15.5px] hover:brightness-110 transition-all duration-300 text-white font-medium text-[13px] px-6 py-2.5 rounded-[50px]"
-                            >
-                                صفحه بعدی
-                            </button>
-                            <button
-                                class="w-[42px] h-[42px] cursor-pointer rounded-full flex items-center justify-center backdrop-blur-[15.5px] shadow-[0_0_15px_rgba(221,2,2,0.4)] hover:brightness-125 hover:scale-105 transition-all duration-300"
-                                style="
-                                    border: 1.3px solid transparent;
-                                    background:
-                                        linear-gradient(
-                                                180deg,
-                                                rgba(134, 0, 2, 0) 0%,
-                                                #860002 100%
-                                            )
-                                            padding-box,
-                                        linear-gradient(
-                                                180deg,
-                                                rgba(113, 113, 113, 0) 0%,
-                                                #d7d7d7 100%
-                                            )
-                                            border-box;
-                                "
-                            >
-                                <svg
-                                    width="18"
-                                    height="18"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                >
-                                    <path
-                                        d="M7 17L17 7"
-                                        stroke="white"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                    />
-                                    <path
-                                        d="M7 7H17V17"
-                                        stroke="white"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-
+        <div class="flex items-center justify-center gap-2 mt-auto">
+            <!-- You can add standard Django pagination here -->
+        </div>
+        
+</main>
 {% endwith %}
-{% endblock %}
-
-{% block footer_references %}
-
 {% endblock %}

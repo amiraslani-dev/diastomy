@@ -129,7 +129,12 @@
     </script>
 
     <!-- Normal User Tools Links -->
-    <div style="display: flex; align-items: center; gap: 8px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <a href="{% url 'accounts:support:operator_chat' %}" style="background: linear-gradient(135deg, #ed1c24 0%, #a80000 100%); color: #ffffff; padding: 5px 13px; border-radius: 20px; font-weight: bold; text-decoration: none; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(237,28,36,0.4);">
+            <span>💬</span>
+            <span>{% translate "پشتیبانی آنلاین" %}</span>
+        </a>
+
         {% block welcome-msg %}
             {% translate 'Welcome,' %}
             <strong>{% firstof user.get_short_name user.get_username %}</strong>.

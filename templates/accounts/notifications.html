@@ -1,458 +1,141 @@
 {% extends 'accounts/account_base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block dashboard_title %}اعلان‌ها{% endblock %}
+{% block dashboard_title %}{% trans "اعلان‌ها" %}{% endblock %}
 
 {% block profile_content %}
 {% with active_tab='notifications' %}
-                            <button
-                                class="w-[56px] h-[56px] cursor-pointer rounded-full border border-[#4B4B4B] flex items-center justify-center hover:bg-white/5 transition-colors"
-                            >
-                                <svg
-                                    class="w-[28px] h-[28px]"
-                                    width="38"
-                                    height="38"
-                                    viewBox="0 0 38 38"
-                                    fill="none"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                >
-                                    <path
-                                        d="M26.125 19C26.125 22.9283 22.9283 26.125 19 26.125C15.0718 26.125 11.875 22.9283 11.875 19C11.875 15.0718 15.0718 11.875 19 11.875C22.9283 11.875 26.125 15.0718 26.125 19ZM20.1875 7.91667V4.75C20.1875 4.0945 19.6555 3.5625 19 3.5625C18.3445 3.5625 17.8125 4.0945 17.8125 4.75V7.91667C17.8125 8.57217 18.3445 9.10417 19 9.10417C19.6555 9.10417 20.1875 8.57217 20.1875 7.91667ZM20.1875 33.25V30.0833C20.1875 29.4278 19.6555 28.8958 19 28.8958C18.3445 28.8958 17.8125 29.4278 17.8125 30.0833V33.25C17.8125 33.9055 18.3445 34.4375 19 34.4375C19.6555 34.4375 20.1875 33.9055 20.1875 33.25ZM9.10417 19C9.10417 18.3445 8.57217 17.8125 7.91667 17.8125H4.75C4.0945 17.8125 3.5625 18.3445 3.5625 19C3.5625 19.6555 4.0945 20.1875 4.75 20.1875H7.91667C8.57217 20.1875 9.10417 19.6555 9.10417 19ZM34.4375 19C34.4375 18.3445 33.9055 17.8125 33.25 17.8125H30.0833C29.4278 17.8125 28.8958 18.3445 28.8958 19C28.8958 19.6555 29.4278 20.1875 30.0833 20.1875H33.25C33.9055 20.1875 34.4375 19.6555 34.4375 19ZM12.0032 12.0032C12.4672 11.5393 12.4672 10.7872 12.0032 10.3233L9.7644 8.08448C9.30049 7.62056 8.5484 7.62056 8.08448 8.08448C7.62056 8.5484 7.62056 9.30049 8.08448 9.7644L10.3233 12.0032C10.5545 12.2344 10.8585 12.3516 11.1625 12.3516C11.4665 12.3516 11.7705 12.2344 12.0032 12.0032ZM29.9155 29.9155C30.3794 29.4516 30.3794 28.6995 29.9155 28.2356L27.6767 25.9968C27.2128 25.5328 26.4607 25.5328 25.9968 25.9968C25.5328 26.4607 25.5328 27.2128 25.9968 27.6767L28.2356 29.9155C28.4668 30.1467 28.7708 30.2639 29.0748 30.2639C29.3788 30.2639 29.6844 30.1483 29.9155 29.9155ZM9.7644 29.9155L12.0032 27.6767C12.4672 27.2128 12.4672 26.4607 12.0032 25.9968C11.5393 25.5328 10.7872 25.5328 10.3233 25.9968L8.08448 28.2356C7.62056 28.6995 7.62056 29.4516 8.08448 29.9155C8.31565 30.1467 8.61965 30.2639 8.92365 30.2639C9.22765 30.2639 9.53165 30.1483 9.7644 29.9155ZM27.6767 12.0032L29.9155 9.7644C30.3794 9.30049 30.3794 8.5484 29.9155 8.08448C29.4516 7.62056 28.6995 7.62056 28.2356 8.08448L25.9968 10.3233C25.5328 10.7872 25.5328 11.5393 25.9968 12.0032C26.2279 12.2344 26.5319 12.3516 26.8359 12.3516C27.1399 12.3516 27.4439 12.2344 27.6767 12.0032Z"
-                                        fill="white"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
+<main class="flex flex-col flex-1 w-full mx-auto md:pb-10">
+    <div class="items-center justify-between hidden w-full mb-8 md:flex">
+        <h1 class="text-white text-[22px] font-bold">
+            {% trans "اعلان‌ها" %} ({{ total_count }})
+        </h1>
 
-                    <div class="flex flex-col w-full gap-4 mb-10">
-                        <div
-                            class="w-full border border-white/5 rounded-[20px] p-5 hover:border-white/10 transition-colors"
-                            style="
-                                background: linear-gradient(
-                                    90deg,
-                                    rgba(20, 19, 19, 0.74) 23.42%,
-                                    rgba(0, 0, 0, 0) 101%
-                                );
-                            "
-                        >
-                            <div class="flex items-start justify-between mb-2">
-                                <div class="flex items-center gap-2">
-                                    <svg
-                                        width="22"
-                                        height="22"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                        <path
-                                            d="M22 11.08V12a10 10 0 1 1-5.93-9.14"
-                                            stroke="#28C76F"
-                                            stroke-width="2.5"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                        />
-                                        <path
-                                            d="M22 4L12 14.01L9 11.01"
-                                            stroke="#28C76F"
-                                            stroke-width="2.5"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                        />
-                                    </svg>
-                                    <h3
-                                        class="font-bold text-[13px] md:text-[14px] text-[#28C76F]"
-                                    >
-                                        لورم ایپسوم متن تصادفی
-                                    </h3>
-                                </div>
-                                <button
-                                    class="text-[#777] hover:text-white transition-colors pt-1"
-                                >
-                                    <svg
-                                        width="20"
-                                        height="20"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="1.5"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                    >
-                                        <line
-                                            x1="18"
-                                            y1="6"
-                                            x2="6"
-                                            y2="18"
-                                        ></line>
-                                        <line
-                                            x1="6"
-                                            y1="6"
-                                            x2="18"
-                                            y2="18"
-                                        ></line>
-                                    </svg>
-                                </button>
-                            </div>
-                            <p
-                                class="font-light text-white text-[12px] md:text-[13px] leading-5 text-start"
-                            >
-                                لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از
-                                صنعت چاپ، و با استفاده از طراحان گرافیک است،
-                                چاپگرها و متون بلکه روزنامه و مجله در ستون و
-                                سطرآنچنان که لازم است.
-                            </p>
-                        </div>
+        <div class="flex flex-row-reverse items-center gap-3">
+            <a
+                href="{% url 'home' %}"
+                class="flex items-center gap-2 border border-[#4B4B4B] rounded-[50px] px-5 py-4 text-white hover:bg-white/5 transition-colors shrink-0"
+            >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17.6919 12.2871C17.6539 12.3791 17.599 12.462 17.53 12.531L12.53 17.531C12.384 17.677 12.192 17.751 12 17.751C11.808 17.751 11.616 17.678 11.47 17.531C11.177 17.238 11.177 16.763 11.47 16.47L15.1899 12.75H3C2.586 12.75 2.25 12.414 2.25 12C2.25 11.586 2.586 11.25 3 11.25H15.189L11.469 7.53003C11.176 7.23703 11.176 6.76199 11.469 6.46899C11.762 6.17599 12.237 6.17599 12.53 6.46899L17.53 11.469C17.599 11.538 17.6539 11.6209 17.6919 11.7129C17.7679 11.8969 17.7679 12.1031 17.6919 12.2871ZM21 5.25C20.586 5.25 20.25 5.586 20.25 6V18C20.25 18.414 20.586 18.75 21 18.75C21.414 18.75 21.75 18.414 21.75 18V6C21.75 5.586 21.414 5.25 21 5.25Z" fill="white"></path>
+                </svg>
+                <span class="text-sm font-medium pt-0.5">{% trans "بازگشت به سایت" %}</span>
+            </a>
+            <button class="w-[56px] h-[56px] cursor-pointer rounded-full border border-[#4B4B4B] flex items-center justify-center hover:bg-white/5 transition-colors">
+                <svg class="w-[28px] h-[28px]" width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M26.125 19C26.125 22.9283 22.9283 26.125 19 26.125C15.0718 26.125 11.875 22.9283 11.875 19C11.875 15.0718 15.0718 11.875 19 11.875C22.9283 11.875 26.125 15.0718 26.125 19ZM20.1875 7.91667V4.75C20.1875 4.0945 19.6555 3.5625 19 3.5625C18.3445 3.5625 17.8125 4.0945 17.8125 4.75V7.91667C17.8125 8.57217 18.3445 9.10417 19 9.10417C19.6555 9.10417 20.1875 8.57217 20.1875 7.91667ZM20.1875 33.25V30.0833C20.1875 29.4278 19.6555 28.8958 19 28.8958C18.3445 28.8958 17.8125 29.4278 17.8125 30.0833V33.25C17.8125 33.9055 18.3445 34.4375 19 34.4375C19.6555 34.4375 20.1875 33.9055 20.1875 33.25ZM9.10417 19C9.10417 18.3445 8.57217 17.8125 7.91667 17.8125H4.75C4.0945 17.8125 3.5625 18.3445 3.5625 19C3.5625 19.6555 4.0945 20.1875 4.75 20.1875H7.91667C8.57217 20.1875 9.10417 19.6555 9.10417 19ZM34.4375 19C34.4375 18.3445 33.9055 17.8125 33.25 17.8125H30.0833C29.4278 17.8125 28.8958 18.3445 28.8958 19C28.8958 19.6555 29.4278 20.1875 30.0833 20.1875H33.25C33.9055 20.1875 34.4375 19.6555 34.4375 19ZM12.0032 12.0032C12.4672 11.5393 12.4672 10.7872 12.0032 10.3233L9.7644 8.08448C9.30049 7.62056 8.5484 7.62056 8.08448 8.08448C7.62056 8.5484 7.62056 9.30049 8.08448 9.7644L10.3233 12.0032C10.5545 12.2344 10.8585 12.3516 11.1625 12.3516C11.4665 12.3516 11.7705 12.2344 12.0032 12.0032ZM29.9155 29.9155C30.3794 29.4516 30.3794 28.6995 29.9155 28.2356L27.6767 25.9968C27.2128 25.5328 26.4607 25.5328 25.9968 25.9968C25.5328 26.4607 25.5328 27.2128 25.9968 27.6767L28.2356 29.9155C28.4668 30.1467 28.7708 30.2639 29.0748 30.2639C29.3788 30.2639 29.6844 30.1483 29.9155 29.9155ZM9.7644 29.9155L12.0032 27.6767C12.4672 27.2128 12.4672 26.4607 12.0032 25.9968C11.5393 25.5328 10.7872 25.5328 10.3233 25.9968L8.08448 28.2356C7.62056 28.6995 7.62056 29.4516 8.08448 29.9155C8.31565 30.1467 8.61965 30.2639 8.92365 30.2639C9.22765 30.2639 9.53165 30.1483 9.7644 29.9155ZM27.6767 12.0032L29.9155 9.7644C30.3794 9.30049 30.3794 8.5484 29.9155 8.08448C29.4516 7.62056 28.6995 7.62056 28.2356 8.08448L25.9968 10.3233C25.5328 10.7872 25.5328 11.5393 25.9968 12.0032C26.2279 12.2344 26.5319 12.3516 26.8359 12.3516C27.1399 12.3516 27.4439 12.2344 27.6767 12.0032Z" fill="white"/>
+                </svg>
+            </button>
+        </div>
+    </div>
 
-                        <div
-                            class="w-full border border-white/5 rounded-[20px] p-5 hover:border-white/10 transition-colors"
-                            style="
-                                background: linear-gradient(
-                                    90deg,
-                                    rgba(20, 19, 19, 0.74) 23.42%,
-                                    rgba(0, 0, 0, 0) 101%
-                                );
-                            "
-                        >
-                            <div class="flex items-start justify-between mb-2">
-                                <div class="flex items-center gap-2">
-                                    <svg
-                                        width="22"
-                                        height="22"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                        <circle
-                                            cx="12"
-                                            cy="12"
-                                            r="10"
-                                            stroke="#FF4C51"
-                                            stroke-width="2.5"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                        />
-                                        <line
-                                            x1="12"
-                                            y1="8"
-                                            x2="12"
-                                            y2="12"
-                                            stroke="#FF4C51"
-                                            stroke-width="2.5"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                        />
-                                        <line
-                                            x1="12"
-                                            y1="16"
-                                            x2="12.01"
-                                            y2="16"
-                                            stroke="#FF4C51"
-                                            stroke-width="2.5"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                        />
-                                    </svg>
-                                    <h3
-                                        class="font-bold text-[13px] md:text-[14px] text-[#FF4C51]"
-                                    >
-                                        لورم ایپسوم متن تصادفی
-                                    </h3>
-                                </div>
-                                <button
-                                    class="text-[#777] hover:text-white transition-colors pt-1"
-                                >
-                                    <svg
-                                        width="20"
-                                        height="20"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="1.5"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                    >
-                                        <line
-                                            x1="18"
-                                            y1="6"
-                                            x2="6"
-                                            y2="18"
-                                        ></line>
-                                        <line
-                                            x1="6"
-                                            y1="6"
-                                            x2="18"
-                                            y2="18"
-                                        ></line>
-                                    </svg>
-                                </button>
-                            </div>
-                            <p
-                                class="font-light text-white text-[12px] md:text-[13px] leading-5 text-start"
-                            >
-                                لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از
-                                صنعت چاپ، و با استفاده از طراحان گرافیک است،
-                                چاپگرها و متون بلکه روزنامه و مجله در ستون و
-                                سطرآنچنان که لازم است.
-                            </p>
-                        </div>
+    {% if notifications %}
+    <div class="flex flex-col w-full gap-4 mb-10">
+        {% for notif in notifications %}
+        <div
+            x-data="{ visible: true }"
+            x-show="visible"
+            x-transition.out.opacity.duration.300ms
+            class="w-full border border-white/5 rounded-[20px] p-5 hover:border-white/10 transition-colors"
+            style="background: linear-gradient(90deg, rgba(20, 19, 19, 0.74) 23.42%, rgba(0, 0, 0, 0) 101%);"
+        >
+            <div class="flex items-start justify-between mb-2">
+                <div class="flex items-center gap-2">
+                    {% if notif.notification_type == 'SUCCESS' %}
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke="#28C76F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M22 4L12 14.01L9 11.01" stroke="#28C76F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <h3 class="font-bold text-[13px] md:text-[14px] text-[#28C76F]">
+                        {{ notif.title }}
+                    </h3>
+                    {% elif notif.notification_type == 'DANGER' %}
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="#FF4C51" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <line x1="12" y1="8" x2="12" y2="12" stroke="#FF4C51" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16" stroke="#FF4C51" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <h3 class="font-bold text-[13px] md:text-[14px] text-[#FF4C51]">
+                        {{ notif.title }}
+                    </h3>
+                    {% elif notif.notification_type == 'WARNING' %}
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10.29 3.86L1.82 18C1.56589 18.4357 1.56589 18.9643 1.82 19.4C2.07411 19.8357 2.53589 20.1 3.05 20.1H19.95C20.4641 20.1 20.9259 19.8357 21.18 19.4C21.4341 18.9643 21.4341 18.4357 21.18 18L12.71 3.86C12.4559 3.4243 11.9941 3.15833 11.5 3.15833C11.0059 3.15833 10.5441 3.4243 10.29 3.86Z" stroke="#FF9F43" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <line x1="12" y1="9" x2="12" y2="13" stroke="#FF9F43" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17" stroke="#FF9F43" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <h3 class="font-bold text-[13px] md:text-[14px] text-[#FF9F43]">
+                        {{ notif.title }}
+                    </h3>
+                    {% else %}
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="#00CFE8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <line x1="12" y1="16" x2="12" y2="12" stroke="#00CFE8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <line x1="12" y1="8" x2="12.01" y2="8" stroke="#00CFE8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <h3 class="font-bold text-[13px] md:text-[14px] text-[#00CFE8]">
+                        {{ notif.title }}
+                    </h3>
+                    {% endif %}
+                </div>
+                <button
+                    @click="fetch('{% url 'accounts:dismiss_notification' notif.id %}', {method: 'POST', headers: {'X-CSRFToken': '{{ csrf_token }}'}}).then(() => visible = false)"
+                    class="text-[#777] hover:text-white transition-colors pt-1 cursor-pointer"
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <p class="font-light text-white text-[12px] md:text-[13px] leading-5 text-start">
+                {{ notif.message }}
+            </p>
+        </div>
+        {% endfor %}
+    </div>
 
-                        <div
-                            class="w-full border border-white/5 rounded-[20px] p-5 hover:border-white/10 transition-colors"
-                            style="
-                                background: linear-gradient(
-                                    90deg,
-                                    rgba(20, 19, 19, 0.74) 23.42%,
-                                    rgba(0, 0, 0, 0) 101%
-                                );
-                            "
-                        >
-                            <div class="flex items-start justify-between mb-2">
-                                <div class="flex items-center gap-2">
-                                    <svg
-                                        width="22"
-                                        height="22"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                        <path
-                                            d="M10.29 3.86L1.82 18C1.56589 18.4357 1.56589 18.9643 1.82 19.4C2.07411 19.8357 2.53589 20.1 3.05 20.1H19.95C20.4641 20.1 20.9259 19.8357 21.18 19.4C21.4341 18.9643 21.4341 18.4357 21.18 18L12.71 3.86C12.4559 3.4243 11.9941 3.15833 11.5 3.15833C11.0059 3.15833 10.5441 3.4243 10.29 3.86Z"
-                                            stroke="#FF9F43"
-                                            stroke-width="2.5"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                        />
-                                        <line
-                                            x1="12"
-                                            y1="9"
-                                            x2="12"
-                                            y2="13"
-                                            stroke="#FF9F43"
-                                            stroke-width="2.5"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                        />
-                                        <line
-                                            x1="12"
-                                            y1="17"
-                                            x2="12.01"
-                                            y2="17"
-                                            stroke="#FF9F43"
-                                            stroke-width="2.5"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                        />
-                                    </svg>
-                                    <h3
-                                        class="font-bold text-[13px] md:text-[14px] text-[#FF9F43]"
-                                    >
-                                        لورم ایپسوم متن تصادفی
-                                    </h3>
-                                </div>
-                                <button
-                                    class="text-[#777] hover:text-white transition-colors pt-1"
-                                >
-                                    <svg
-                                        width="20"
-                                        height="20"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="1.5"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                    >
-                                        <line
-                                            x1="18"
-                                            y1="6"
-                                            x2="6"
-                                            y2="18"
-                                        ></line>
-                                        <line
-                                            x1="6"
-                                            y1="6"
-                                            x2="18"
-                                            y2="18"
-                                        ></line>
-                                    </svg>
-                                </button>
-                            </div>
-                            <p
-                                class="font-light text-white text-[12px] md:text-[13px] leading-5 text-start"
-                            >
-                                لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از
-                                صنعت چاپ، و با استفاده از طراحان گرافیک است،
-                                چاپگرها و متون بلکه روزنامه و مجله در ستون و
-                                سطرآنچنان که لازم است.
-                            </p>
-                        </div>
+    {% if page_obj.has_other_pages %}
+    <div class="flex items-center justify-end w-full pb-5">
+        <div class="flex flex-row-reverse items-center gap-2">
+            {% if page_obj.has_next %}
+            <a
+                href="?page={{ page_obj.next_page_number }}"
+                class="bg-gradient-to-b cursor-pointer from-[rgba(58,58,58,0.396)] to-[rgba(36,36,36,0.6)] border-[1.3px] border-[#3C3C3C] backdrop-blur-[15.5px] hover:brightness-110 transition-all duration-300 text-white font-medium text-[13px] px-6 py-2.5 rounded-[50px]"
+            >
+                {% trans "صفحه بعدی" %}
+            </a>
+            {% endif %}
+            
+            {% if page_obj.has_previous %}
+            <a
+                href="?page={{ page_obj.previous_page_number }}"
+                class="bg-gradient-to-b cursor-pointer from-[rgba(58,58,58,0.396)] to-[rgba(36,36,36,0.6)] border-[1.3px] border-[#3C3C3C] backdrop-blur-[15.5px] hover:brightness-110 transition-all duration-300 text-white font-medium text-[13px] px-6 py-2.5 rounded-[50px]"
+            >
+                {% trans "صفحه قبلی" %}
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
 
-                        <div
-                            class="w-full border border-white/5 rounded-[20px] p-5 hover:border-white/10 transition-colors"
-                            style="
-                                background: linear-gradient(
-                                    90deg,
-                                    rgba(20, 19, 19, 0.74) 23.42%,
-                                    rgba(0, 0, 0, 0) 101%
-                                );
-                            "
-                        >
-                            <div class="flex items-start justify-between mb-2">
-                                <div class="flex items-center gap-2">
-                                    <svg
-                                        width="22"
-                                        height="22"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                        <circle
-                                            cx="12"
-                                            cy="12"
-                                            r="10"
-                                            stroke="#00CFE8"
-                                            stroke-width="2.5"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                        />
-                                        <line
-                                            x1="12"
-                                            y1="16"
-                                            x2="12"
-                                            y2="12"
-                                            stroke="#00CFE8"
-                                            stroke-width="2.5"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                        />
-                                        <line
-                                            x1="12"
-                                            y1="8"
-                                            x2="12.01"
-                                            y2="8"
-                                            stroke="#00CFE8"
-                                            stroke-width="2.5"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                        />
-                                    </svg>
-                                    <h3
-                                        class="font-bold text-[13px] md:text-[14px] text-[#00CFE8]"
-                                    >
-                                        لورم ایپسوم متن تصادفی
-                                    </h3>
-                                </div>
-                                <button
-                                    class="text-[#777] hover:text-white transition-colors pt-1"
-                                >
-                                    <svg
-                                        width="20"
-                                        height="20"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="1.5"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                    >
-                                        <line
-                                            x1="18"
-                                            y1="6"
-                                            x2="6"
-                                            y2="18"
-                                        ></line>
-                                        <line
-                                            x1="6"
-                                            y1="6"
-                                            x2="18"
-                                            y2="18"
-                                        ></line>
-                                    </svg>
-                                </button>
-                            </div>
-                            <p
-                                class="font-light text-white text-[12px] md:text-[13px] leading-5 text-start"
-                            >
-                                لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از
-                                صنعت چاپ، و با استفاده از طراحان گرافیک است،
-                                چاپگرها و متون بلکه روزنامه و مجله در ستون و
-                                سطرآنچنان که لازم است.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-end w-full pb-5">
-                        <div class="flex flex-row-reverse items-center gap-2">
-                            <button
-                                class="bg-gradient-to-b cursor-pointer from-[rgba(58,58,58,0.396)] to-[rgba(36,36,36,0.6)] border-[1.3px] border-[#3C3C3C] backdrop-blur-[15.5px] hover:brightness-110 transition-all duration-300 text-white font-medium text-[13px] px-6 py-2.5 rounded-[50px]"
-                            >
-                                صفحه بعدی
-                            </button>
-                            <button
-                                class="w-[42px] h-[42px] cursor-pointer rounded-full flex items-center justify-center backdrop-blur-[15.5px] shadow-[0_0_15px_rgba(221,2,2,0.4)] hover:brightness-125 hover:scale-105 transition-all duration-300"
-                                style="
-                                    border: 1.3px solid transparent;
-                                    background:
-                                        linear-gradient(
-                                                180deg,
-                                                rgba(134, 0, 2, 0) 0%,
-                                                #860002 100%
-                                            )
-                                            padding-box,
-                                        linear-gradient(
-                                                180deg,
-                                                rgba(113, 113, 113, 0) 0%,
-                                                #d7d7d7 100%
-                                            )
-                                            border-box;
-                                "
-                            >
-                                <svg
-                                    width="18"
-                                    height="18"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                >
-                                    <path
-                                        d="M7 17L17 7"
-                                        stroke="white"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                    />
-                                    <path
-                                        d="M7 7H17V17"
-                                        stroke="white"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div
-                        class="flex-1 flex flex-col items-center justify-center w-full min-h-[50vh] gap-2 select-none"
-                    >
-                        <img
-                            src="{% static 'public/assets/img/account/no-notif.webp' %}"
-                            alt="No Notifications"
-                            class="w-[100px] md:w-[120px] object-contain drop-shadow-[0_10px_20px_rgba(221,2,2,0.15)] hover:scale-105 transition-transform duration-300"
-                        />
-
-                        <h2
-                            class="text-white font-bold text-[18px] md:text-[22px] tracking-wide"
-                        >
-                            اعلان جدیدی ندارید!
-                        </h2>
-                    </div>
-
+    {% else %}
+    <!-- Empty State -->
+    <div class="flex-1 flex flex-col items-center justify-center w-full min-h-[50vh] gap-2 select-none">
+        <img
+            src="{% static 'public/assets/img/account/no-notif.webp' %}"
+            alt="No Notifications"
+            class="w-[100px] md:w-[120px] object-contain drop-shadow-[0_10px_20px_rgba(221,2,2,0.15)] hover:scale-105 transition-transform duration-300"
+        />
+        <h2 class="text-white font-bold text-[18px] md:text-[22px] tracking-wide">
+            {% trans "اعلان جدیدی ندارید!" %}
+        </h2>
+    </div>
+    {% endif %}
+</main>
 {% endwith %}
 {% endblock %}
 
 {% block footer_references %}
-
 {% endblock %}

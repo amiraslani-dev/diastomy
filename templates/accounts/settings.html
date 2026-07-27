@@ -1,10 +1,40 @@
 {% extends 'accounts/account_base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block dashboard_title %}تنظیمات{% endblock %}
+{% block dashboard_title %}{% trans "تنظیمات" %}{% endblock %}
 
 {% block profile_content %}
 {% with active_tab='settings' %}
+                <main class="flex flex-col flex-1 w-full mx-auto md:pb-10">
+                    <div
+                        class="items-center justify-between hidden w-full mb-8 md:flex"
+                    >
+                        <h1 class="text-white text-[22px] font-bold">
+                            {% trans "تنظیمات" %}
+                        </h1>
+
+                        <div class="flex flex-row-reverse items-center gap-3">
+                            <a
+                                href="{% url 'home' %}"
+                                class="flex items-center gap-2 border border-[#4B4B4B] rounded-[50px] px-5 py-4 text-white hover:bg-white/5 transition-colors shrink-0"
+                            >
+                                <svg
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
+                                    <path
+                                        d="M17.6919 12.2871C17.6539 12.3791 17.599 12.462 17.53 12.531L12.53 17.531C12.384 17.677 12.192 17.751 12 17.751C11.808 17.751 11.616 17.678 11.47 17.531C11.177 17.238 11.177 16.763 11.47 16.47L15.1899 12.75H3C2.586 12.75 2.25 12.414 2.25 12C2.25 11.586 2.586 11.25 3 11.25H15.189L11.469 7.53003C11.176 7.23703 11.176 6.76199 11.469 6.46899C11.762 6.17599 12.237 6.17599 12.53 6.46899L17.53 11.469C17.599 11.538 17.6539 11.6209 17.6919 11.7129C17.7679 11.8969 17.7679 12.1031 17.6919 12.2871ZM21 5.25C20.586 5.25 20.25 5.586 20.25 6V18C20.25 18.414 20.586 18.75 21 18.75C21.414 18.75 21.75 18.414 21.75 18V6C21.75 5.586 21.414 5.25 21 5.25Z"
+                                        fill="white"
+                                    ></path>
+                                </svg>
+                                <span class="text-sm font-medium pt-0.5"
+                                    >{% trans "بازگشت به سایت" %}</span
+                                >
+                            </a>
                             <button
                                 class="w-[56px] h-[56px] cursor-pointer rounded-full border border-[#4B4B4B] flex items-center justify-center hover:bg-white/5 transition-colors"
                             >
@@ -32,11 +62,12 @@
                             <div
                                 x-data="{ open: window.innerWidth >= 768 }"
                                 @resize.window="open = window.innerWidth >= 768"
-                                class="flex flex-col w-full border border-[#4B4B4B8A] rounded-[22px] overflow-hidden bg-[#0A0A0A]"
+                                class="flex flex-col w-full border border-[#4B4B4B8A] rounded-[22px] overflow-hidden bg-[#0A0A0A] max-h-[470px]"
+                                style="max-height: 470px;"
                             >
                                 <div
                                     @click="if(window.innerWidth < 768) open = !open"
-                                    class="flex justify-between items-center bg-[#D9D9D908] px-4 py-4 transition-colors"
+                                    class="flex justify-between items-center bg-[#D9D9D908] px-4 py-4 transition-colors shrink-0"
                                     :class="window.innerWidth < 768 ? 'cursor-pointer hover:bg-white/5' : 'cursor-default', open ? 'border-b border-[#4B4B4B8A]' : ''"
                                 >
                                     <div
@@ -44,11 +75,11 @@
                                     >
                                         <span
                                             class="text-white text-[15px] font-bold"
-                                            >لیست دستگاه‌های فعال</span
+                                            >{% trans "لیست دستگاه‌های فعال" %}</span
                                         >
                                         <span
                                             class="text-[#939393] text-[14px] ml-3 md:ml-0"
-                                            >(۱) عدد</span
+                                            >({{ active_devices|length }}) {% trans "عدد" %}</span
                                         >
                                     </div>
 
@@ -70,8 +101,9 @@
                                     </svg>
                                 </div>
 
-                                <div x-show="open" x-collapse.duration.400ms>
+                                <div x-show="open" x-collapse.duration.400ms class="overflow-y-auto custom-scrollbar flex-1">
                                     <div class="flex flex-col px-2 py-5">
+                                        {% for device in active_devices %}
                                         <div
                                             class="border-b border-b-[#8A8A8A63] py-4 px-2 md:px-5 flex flex-col gap-5 relative first:pt-0 last:pb-0 last:border-b-0 overflow-hidden"
                                         >
@@ -83,7 +115,7 @@
                                                 >
                                                     <span
                                                         class="text-white text-[12px] md:text-[14px]"
-                                                        >windows chrome</span
+                                                        >{{ device.device_name }}</span
                                                     >
                                                     <svg
                                                         class="w-[18px] h-[18px]"
@@ -99,14 +131,16 @@
                                                         />
                                                     </svg>
                                                 </div>
+                                                {% if device.is_current %}
                                                 <div
                                                     class="bg-[#2D663A5C] text-[#6DE474] font-medium text-[8px] px-2.5 py-1 rounded-[36px] flex items-center gap-1.5 shadow-[0_0_8px_rgba(45,102,58,0.3)] shrink-0"
                                                 >
                                                     <div
                                                         class="w-1.5 h-1.5 rounded-full bg-[#6DE474]"
                                                     ></div>
-                                                    دستگاه فعلی
+                                                    {% trans "دستگاه فعلی" %}
                                                 </div>
+                                                {% endif %}
                                             </div>
 
                                             <div
@@ -123,22 +157,21 @@
                                                         class="w-8 h-8 md:w-9 md:h-9 rounded-full border border-[#4B4B4B] overflow-hidden shrink-0"
                                                     >
                                                         <img
-                                                            src="https://i.pravatar.cc/100?img=32"
+                                                            src="{% if request.user.avatar %}{{ request.user.avatar.url }}{% else %}https://i.pravatar.cc/100?img=32{% endif %}"
                                                             alt="avatar"
                                                             class="object-cover w-full h-full"
                                                         />
                                                     </div>
                                                     <span
                                                         class="text-white font-medium text-[14px]"
-                                                        >خودم</span
+                                                        >{% if device.is_current %}{% trans "خودم" %}{% else %}{{ request.user.full_name|default:request.user.username }}{% endif %}</span
                                                     >
                                                 </div>
                                                 <div
                                                     class="flex items-center gap-1.5 flex-row-reverse font-light text-white text-[10px] md:text-[13px]"
                                                 >
                                                     <span dir="ltr"
-                                                        >1405/2/26 ،
-                                                        11:31:55</span
+                                                        >{{ device.last_activity }}</span
                                                     >
                                                     <svg
                                                         class="w-[18px] h-[18px]"
@@ -159,7 +192,8 @@
                                             </div>
 
                                             <button
-                                                class="w-full cursor-pointer rounded-[13px] border border-[#FFFFFF1A] py-1.5 text-white hover:text-white text-[13px] transition-colors relative z-10"
+                                                onclick="terminateDevice({{ device.id }}, '{{ device.device_name|escapejs }}')"
+                                                class="w-full cursor-pointer rounded-[13px] border border-[#FFFFFF1A] py-1.5 text-white hover:text-red-400 text-[13px] transition-colors relative z-10"
                                                 style="
                                                     background: linear-gradient(
                                                         89.21deg,
@@ -169,116 +203,53 @@
                                                     );
                                                 "
                                             >
-                                                خروج دستگاه
+                                                {% trans "خروج دستگاه" %}
                                             </button>
                                         </div>
-
-                                        <div
-                                            class="border-b border-b-[#8A8A8A63] py-4 px-2 md:px-5 flex flex-col gap-5 relative first:pt-0 last:pb-0 last:border-b-0 overflow-hidden"
-                                        >
-                                            <div
-                                                class="relative z-10 flex items-center justify-between"
-                                            >
-                                                <div
-                                                    class="flex flex-row-reverse items-center gap-2"
-                                                >
-                                                    <span
-                                                        class="text-white text-[12px] md:text-[14px]"
-                                                        >windows chrome</span
-                                                    >
-                                                    <svg
-                                                        class="w-[18px] h-[18px]"
-                                                        width="21"
-                                                        height="21"
-                                                        viewBox="0 0 21 21"
-                                                        fill="none"
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                    >
-                                                        <path
-                                                            d="M15.4263 2.625H5.5825C3.61375 2.625 2.625 3.605 2.625 5.57375V15.4175C2.625 17.3862 3.61375 18.375 5.5825 18.375H15.4263C17.395 18.375 18.375 17.3862 18.375 15.4175V5.57375C18.375 3.605 17.395 2.625 15.4263 2.625ZM14.0263 8.92501L9.93999 13.0025C9.81749 13.1337 9.65127 13.195 9.47626 13.195C9.31001 13.195 9.14374 13.1337 9.01249 13.0025L6.97372 10.9638C6.71997 10.71 6.71997 10.29 6.97372 10.0362C7.22747 9.78247 7.64753 9.78247 7.90128 10.0362L9.47626 11.6113L13.0987 7.99751C13.3525 7.73501 13.7725 7.73501 14.0263 7.99751C14.28 8.25126 14.28 8.66251 14.0263 8.92501Z"
-                                                            fill="white"
-                                                        />
-                                                    </svg>
-                                                </div>
-                                                <div
-                                                    class="bg-[#2D663A5C] text-[#6DE474] font-medium text-[8px] px-2.5 py-1 rounded-[36px] flex items-center gap-1.5 shadow-[0_0_8px_rgba(45,102,58,0.3)] shrink-0"
-                                                >
-                                                    <div
-                                                        class="w-1.5 h-1.5 rounded-full bg-[#6DE474]"
-                                                    ></div>
-                                                    دستگاه فعلی
-                                                </div>
-                                            </div>
-
-                                            <div
-                                                class="border-b border-dashed border-[#8C8C8C] w-full"
-                                            ></div>
-
-                                            <div
-                                                class="relative z-10 flex items-center justify-between"
-                                            >
-                                                <div
-                                                    class="flex items-center gap-1 md:gap-3"
-                                                >
-                                                    <div
-                                                        class="w-8 h-8 md:w-9 md:h-9 rounded-full border border-[#4B4B4B] overflow-hidden shrink-0"
-                                                    >
-                                                        <img
-                                                            src="https://i.pravatar.cc/100?img=32"
-                                                            alt="avatar"
-                                                            class="object-cover w-full h-full"
-                                                        />
-                                                    </div>
-                                                    <span
-                                                        class="text-white font-medium text-[14px]"
-                                                        >خودم</span
-                                                    >
-                                                </div>
-                                                <div
-                                                    class="flex items-center gap-1.5 flex-row-reverse font-light text-white text-[10px] md:text-[13px]"
-                                                >
-                                                    <span dir="ltr"
-                                                        >1405/2/26 ،
-                                                        11:31:55</span
-                                                    >
-                                                    <svg
-                                                        class="w-[18px] h-[18px]"
-                                                        width="21"
-                                                        height="21"
-                                                        viewBox="0 0 21 21"
-                                                        fill="none"
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                    >
-                                                        <path
-                                                            fill-rule="evenodd"
-                                                            clip-rule="evenodd"
-                                                            d="M10.5 1.75C5.66738 1.75 1.75 5.66738 1.75 10.5C1.75 15.3326 5.66738 19.25 10.5 19.25C15.3326 19.25 19.25 15.3326 19.25 10.5C19.25 5.66738 15.3326 1.75 10.5 1.75ZM13.5888 13.5888C13.461 13.7165 13.293 13.7812 13.125 13.7812C12.957 13.7812 12.789 13.7174 12.6612 13.5888L10.0362 10.9638C9.91285 10.8404 9.84375 10.6733 9.84375 10.5V6.125C9.84375 5.76275 10.1377 5.46875 10.5 5.46875C10.8623 5.46875 11.1562 5.76275 11.1562 6.125V10.2278L13.5888 12.6604C13.8452 12.9176 13.8452 13.3324 13.5888 13.5888Z"
-                                                            fill="white"
-                                                        />
-                                                    </svg>
-                                                </div>
-                                            </div>
-
-                                            <button
-                                                class="w-full rounded-[13px] cursor-pointer border border-[#FFFFFF1A] py-1.5 text-white hover:text-white text-[13px] transition-colors relative z-10"
-                                                style="
-                                                    background: linear-gradient(
-                                                        89.21deg,
-                                                        rgba(20, 19, 19, 0.74)
-                                                            23.78%,
-                                                        rgba(0, 0, 0, 0) 212.52%
-                                                    );
-                                                "
-                                            >
-                                                خروج دستگاه
-                                            </button>
+                                        {% empty %}
+                                        <div class="text-center py-6 text-[#939393] text-sm">
+                                            {% trans "هیچ دستگاه فعالی یافت نشد." %}
                                         </div>
+                                        {% endfor %}
                                     </div>
                                 </div>
                             </div>
 
                             <div
-                                x-data="{ open: false, selected: 'فارسی', options: ['فارسی', 'English', 'العربیه'] }"
+                                x-data="{
+                                    open: false,
+                                    selected: '{{ request.user.preferred_language|default:request.LANGUAGE_CODE|default:"fa" }}',
+                                    options: [
+                                        {% for lang in site_languages %}
+                                        { code: '{{ lang.code }}', label: '{{ lang.name }}' }{% if not forloop.last %},{% endif %}
+                                        {% endfor %}
+                                    ],
+                                    get selectedLabel() {
+                                        const found = this.options.find(o => o.code === this.selected);
+                                        return found ? found.label : this.selected;
+                                    },
+                                    async changeLanguage(code) {
+                                        if (this.selected === code) return;
+                                        this.selected = code;
+                                        this.open = false;
+                                        try {
+                                            const response = await fetch('{% url "accounts:api_set_language" %}', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    'X-CSRFToken': '{{ csrf_token }}'
+                                                },
+                                                body: JSON.stringify({ language: code })
+                                            });
+                                            const data = await response.json();
+                                            if (response.ok && data.redirect_url) {
+                                                window.location.href = data.redirect_url;
+                                            } else {
+                                                window.location.reload();
+                                            }
+                                        } catch (e) {}
+                                    }
+                                }"
                                 class="flex flex-col w-full border border-[#4B4B4B8A] rounded-[22px] overflow-hidden bg-[#0A0A0A]"
                             >
                                 <div
@@ -288,13 +259,13 @@
                                 >
                                     <span
                                         class="text-white font-bold text-[15px]"
-                                        >انتخاب زبان سایت</span
+                                        >{% trans "انتخاب زبان سایت" %}</span
                                     >
                                     <div class="flex items-center gap-2">
                                         <span
                                             x-show="!open"
                                             class="text-[#939393] text-[14px] ml-2"
-                                            x-text="selected"
+                                            x-text="selectedLabel"
                                         ></span>
                                         <svg
                                             class="transition-transform duration-300"
@@ -318,22 +289,22 @@
                                 <div x-show="open" x-collapse.duration.400ms>
                                     <div class="flex flex-col gap-2 p-4">
                                         <template
-                                            x-for="lang in options"
-                                            :key="lang"
+                                            x-for="item in options"
+                                            :key="item.code"
                                         >
                                             <div
-                                                @click="selected = lang; open = false"
+                                                @click="changeLanguage(item.code)"
                                                 class="relative flex items-center justify-center w-full rounded-[22px] px-5 py-2 cursor-pointer transition-all duration-300"
-                                                :class="selected === lang ? 'bg-[#FFFFFF0D] border border-[#4B4B4B8A]' : 'border border-transparent hover:bg-white/5'"
+                                                :class="selected === item.code ? 'bg-[#FFFFFF0D] border border-[#4B4B4B8A]' : 'border border-transparent hover:bg-white/5'"
                                             >
                                                 <span
                                                     class="text-[14px] font-[300] transition-colors"
-                                                    :class="selected === lang ? 'text-white' : 'text-[#A5A5A5]'"
-                                                    x-text="lang"
+                                                    :class="selected === item.code ? 'text-white font-bold' : 'text-[#A5A5A5]'"
+                                                    x-text="item.label"
                                                 ></span>
 
                                                 <div
-                                                    x-show="selected === lang"
+                                                    x-show="selected === item.code"
                                                     x-transition.opacity
                                                     class="absolute right-4"
                                                 >
@@ -357,7 +328,35 @@
                             </div>
 
                             <div
-                                x-data="{ open: false, selected: 'خودکار', options: ['خودکار', 'VeryHigh', 'High', 'Medium', 'Low'] }"
+                                x-data="{
+                                    open: false,
+                                    selected: '{{ request.user.preferred_quality|default:"AUTO" }}',
+                                    options: [
+                                        { code: 'AUTO', label: '{% trans "خودکار" %}' },
+                                        { code: 'VeryHigh', label: '1080p (Very High)' },
+                                        { code: 'High', label: '720p (High)' },
+                                        { code: 'Medium', label: '480p (Medium)' },
+                                        { code: 'Low', label: '360p (Low)' }
+                                    ],
+                                    get selectedLabel() {
+                                        const found = this.options.find(o => o.code === this.selected);
+                                        return found ? found.label : this.selected;
+                                    },
+                                    async changeQuality(code) {
+                                        this.selected = code;
+                                        this.open = false;
+                                        try {
+                                            await fetch('{% url "accounts:api_update_player_quality" %}', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    'X-CSRFToken': '{{ csrf_token }}'
+                                                },
+                                                body: JSON.stringify({ quality: code })
+                                            });
+                                        } catch (e) {}
+                                    }
+                                }"
                                 class="flex flex-col w-full border border-[#4B4B4B8A] rounded-[22px] overflow-hidden bg-[#0A0A0A]"
                             >
                                 <div
@@ -367,13 +366,13 @@
                                 >
                                     <span
                                         class="text-white font-bold text-[15px]"
-                                        >نوع کیفیت پخش‌کننده</span
+                                        >{% trans "نوع کیفیت پخش‌کننده" %}</span
                                     >
                                     <div class="flex items-center gap-2">
                                         <span
                                             x-show="!open"
                                             class="text-[#939393] text-[14px] ml-2"
-                                            x-text="selected"
+                                            x-text="selectedLabel"
                                         ></span>
                                         <svg
                                             class="transition-transform duration-300"
@@ -396,20 +395,20 @@
 
                                 <div x-show="open" x-collapse.duration.400ms>
                                     <div class="flex flex-col gap-2 p-4">
-                                        <template x-for="q in options" :key="q">
+                                        <template x-for="item in options" :key="item.code">
                                             <div
-                                                @click="selected = q; open = false"
+                                                @click="changeQuality(item.code)"
                                                 class="relative flex items-center justify-center w-full rounded-[22px] px-5 py-2 cursor-pointer transition-all duration-300"
-                                                :class="selected === q ? 'bg-[#FFFFFF0D] border border-[#4B4B4B8A]' : 'border border-transparent hover:bg-white/5'"
+                                                :class="selected === item.code ? 'bg-[#FFFFFF0D] border border-[#4B4B4B8A]' : 'border border-transparent hover:bg-white/5'"
                                             >
                                                 <span
                                                     class="text-[14px] font-[300] transition-colors"
-                                                    :class="selected === q ? 'text-white font-bold' : 'text-[#A5A5A5]'"
-                                                    x-text="q"
+                                                    :class="selected === item.code ? 'text-white font-bold' : 'text-[#A5A5A5]'"
+                                                    x-text="item.label"
                                                 ></span>
 
                                                 <div
-                                                    x-show="selected === q"
+                                                    x-show="selected === item.code"
                                                     x-transition.opacity
                                                     class="absolute right-4"
                                                 >
@@ -442,17 +441,81 @@
                                 >
                                     <span
                                         class="text-white font-bold text-[15px]"
-                                        >شماره تلفن:</span
+                                        >{% trans "شماره تلفن:" %}</span
                                     >
                                     <span
                                         class="text-white font-light text-[15px] dir-ltr"
-                                        >09373050735</span
+                                        >{{ request.user.phone|default:"-" }}</span
                                     >
                                 </div>
                             </div>
 
                             <div
-                                x-data="{ open: window.innerWidth >= 768, showOld: false, showNew: false, showConfirm: false }"
+                                x-data="{
+                                    open: window.innerWidth >= 768,
+                                    showOld: false,
+                                    showNew: false,
+                                    showConfirm: false,
+                                    oldPassword: '',
+                                    newPassword: '',
+                                    confirmPassword: '',
+                                    isLoading: false,
+                                    message: '',
+                                    isError: false,
+                                    async submitChangePassword() {
+                                        this.message = '';
+                                        this.isError = false;
+                                        if (true && !this.oldPassword) {
+                                            // Validate old password if needed
+                                        }
+                                        if (!this.newPassword) {
+                                            this.isError = true;
+                                            this.message = '{% trans "لطفاً رمز عبور جدید را وارد کنید." %}';
+                                            return;
+                                        }
+                                        if (this.newPassword.length < 6) {
+                                            this.isError = true;
+                                            this.message = '{% trans "رمز عبور جدید باید حداقل ۶ کاراکتر باشد." %}';
+                                            return;
+                                        }
+                                        if (this.newPassword !== this.confirmPassword) {
+                                            this.isError = true;
+                                            this.message = '{% trans "رمز عبور جدید و تکرار آن یکسان نیستند." %}';
+                                            return;
+                                        }
+                                        this.isLoading = true;
+                                        try {
+                                            const response = await fetch('{% url "accounts:api_change_password" %}', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    'X-CSRFToken': '{{ csrf_token }}'
+                                                },
+                                                body: JSON.stringify({
+                                                    old_password: this.oldPassword,
+                                                    new_password: this.newPassword,
+                                                    confirm_password: this.confirmPassword
+                                                })
+                                            });
+                                            const data = await response.json();
+                                            this.isLoading = false;
+                                            if (response.ok && data.success) {
+                                                this.isError = false;
+                                                this.message = data.message;
+                                                this.oldPassword = '';
+                                                this.newPassword = '';
+                                                this.confirmPassword = '';
+                                            } else {
+                                                this.isError = true;
+                                                this.message = data.error || '{% trans "خطایی رخ داد" %}';
+                                            }
+                                        } catch (err) {
+                                            this.isLoading = false;
+                                            this.isError = true;
+                                            this.message = '{% trans "خطا در برقراری ارتباط با سرور" %}';
+                                        }
+                                    }
+                                }"
                                 @resize.window="open = window.innerWidth >= 768"
                                 class="flex flex-col w-full border border-[#4B4B4B8A] rounded-[22px] overflow-hidden bg-[#0A0A0A] md:p-6 transition-all"
                             >
@@ -476,7 +539,7 @@
                                     <span
                                         class="text-white font-bold text-[15px] pt-0.5"
                                     >
-                                        تغییر رمزعبور
+                                        {% trans "تغییر رمز عبور" %}
                                     </span>
 
                                     <svg
@@ -506,12 +569,13 @@
                                         >
                                             <label
                                                 class="text-white text-[13px] font-bold text-right pr-2"
-                                                >رمز عبور قبلی</label
+                                                >{% trans "رمز عبور قبلی" %}</label
                                             >
                                             <div class="relative w-full">
                                                 <input
+                                                    x-model="oldPassword"
                                                     :type="showOld ? 'text' : 'password'"
-                                                    placeholder="رمز عبور جدید را وارد کنید."
+                                                    placeholder="{% trans 'رمز عبور جدید را وارد کنید.' %}"
                                                     dir="rtl"
                                                     class="w-full bg-[#00000033] border border-[#2A2A2A] rounded-[12px] px-4 py-3.5 text-[#D1D1D1] text-[13px] font-light placeholder-[#555] outline-none focus:border-[#4B4B4B] transition-colors pl-12 placeholder:text-right text-left"
                                                 />
@@ -565,12 +629,13 @@
                                         >
                                             <label
                                                 class="text-white text-[13px] font-bold text-right pr-2"
-                                                >رمز عبور جدید</label
+                                                >{% trans "رمز عبور جدید" %}</label
                                             >
                                             <div class="relative w-full">
                                                 <input
+                                                    x-model="newPassword"
                                                     :type="showNew ? 'text' : 'password'"
-                                                    placeholder="رمز عبور جدید را وارد کنید."
+                                                    placeholder="{% trans 'رمز عبور جدید را وارد کنید.' %}"
                                                     dir="rtl"
                                                     class="w-full bg-[#00000033] border border-[#2A2A2A] rounded-[12px] px-4 py-3.5 text-[#D1D1D1] text-[13px] font-light placeholder-[#555] outline-none focus:border-[#4B4B4B] transition-colors pl-12 placeholder:text-right text-left"
                                                 />
@@ -624,12 +689,13 @@
                                         >
                                             <label
                                                 class="text-white text-[13px] font-bold text-right pr-2"
-                                                >تکرار رمز عبور جدید</label
+                                                >{% trans "تکرار رمز عبور جدید" %}</label
                                             >
                                             <div class="relative w-full">
                                                 <input
+                                                    x-model="confirmPassword"
                                                     :type="showConfirm ? 'text' : 'password'"
-                                                    placeholder="رمز عبور جدید را دوباره وارد کنید."
+                                                    placeholder="{% trans 'رمز عبور جدید را دوباره وارد کنید.' %}"
                                                     dir="rtl"
                                                     class="w-full bg-[#00000033] border border-[#2A2A2A] rounded-[12px] px-4 py-3.5 text-[#D1D1D1] text-[13px] font-light placeholder-[#555] outline-none focus:border-[#4B4B4B] transition-colors pl-12 placeholder:text-right text-left"
                                                 />
@@ -682,8 +748,18 @@
                                             </div>
                                         </div>
 
+                                        <div
+                                            x-show="message"
+                                            x-transition
+                                            class="text-xs p-3 rounded-lg text-center font-medium my-1"
+                                            :class="isError ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-green-500/10 text-green-400 border border-green-500/20'"
+                                            x-text="message"
+                                        ></div>
+
                                         <button
-                                            class="w-full cursor-pointer text-white font-bold text-sm py-3.5 rounded-[12px] transition-colors mt-2"
+                                            @click="submitChangePassword()"
+                                            :disabled="isLoading"
+                                            class="w-full cursor-pointer text-white font-bold text-sm py-3.5 rounded-[12px] transition-colors mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                             style="background: #dd020294"
                                             onmouseover="
                                                 this.style.background =
@@ -694,17 +770,156 @@
                                                     '#DD020294'
                                             "
                                         >
-                                            تغییر رمز عبور
+                                            <span x-show="!isLoading">{% trans "تغییر رمز عبور" %}</span>
+                                            <span x-show="isLoading">{% trans "در حال ثبت..." %}</span>
                                         </button>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </main>
+
+<!-- Terminate Device Confirmation Modal -->
+<div
+    x-data="terminateModal()"
+    @open-terminate-modal.window="open($event.detail.id, $event.detail.name)"
+>
+    <div
+        x-show="isOpen"
+        x-cloak
+        style="display: none;"
+        class="fixed inset-0 z-[100] flex items-center justify-center p-4"
+    >
+        <!-- Backdrop -->
+        <div
+            x-show="isOpen"
+            x-transition.opacity
+            @click="close()"
+            class="absolute inset-0 bg-black/80 backdrop-blur-md"
+        ></div>
+
+        <!-- Modal Box -->
+        <div
+            x-show="isOpen"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 scale-90"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-90"
+            class="relative w-full max-w-[320px] bg-[#0A0A0A] border border-[#4B4B4B8A] rounded-[22px] p-5 shadow-[0_10px_40px_rgba(0,0,0,0.9)] z-10 flex flex-col items-center text-center"
+            style="max-width: 320px;"
+        >
+            <!-- Close Button (Top Right) -->
+            <button
+                @click="close()"
+                class="absolute right-4 top-4 w-7 h-7 flex items-center justify-center rounded-full bg-[#1A1A1A] hover:bg-[#2A2A2A] text-[#888] hover:text-white transition-colors cursor-pointer border border-[#4B4B4B8A]"
+            >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+
+            <!-- Warning Icon -->
+            <div class="w-11 h-11 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-3 text-[#DD0202] shadow-[0_0_15px_rgba(221,2,2,0.15)] shrink-0">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                    <line x1="12" y1="2" x2="12" y2="12"></line>
+                </svg>
+            </div>
+
+            <!-- Title -->
+            <h3 class="text-base font-bold text-white mb-1.5">
+                {% trans "خروج از دستگاه" %}
+            </h3>
+
+            <!-- Message -->
+            <p class="text-[#999999] text-xs leading-relaxed mb-4 font-light">
+                {% trans "آیا از خروج دستگاه" %} <span class="text-white font-medium dir-ltr inline-block px-0.5" x-text="deviceName"></span> {% trans "اطمینان دارید؟" %}
+            </p>
+
+            <!-- Error Message -->
+            <div x-show="errorMessage" class="w-full text-[11px] p-2.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 mb-3" x-text="errorMessage"></div>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-2.5 w-full">
+                <button
+                    @click="close()"
+                    :disabled="isLoading"
+                    class="flex-1 cursor-pointer bg-[#181818] hover:bg-[#252525] text-[#D1D1D1] hover:text-white font-medium text-xs py-2.5 rounded-[12px] transition-colors border border-[#4B4B4B8A]"
+                >
+                    {% trans "انصراف" %}
+                </button>
+                <button
+                    @click="confirmTerminate()"
+                    :disabled="isLoading"
+                    class="flex-1 cursor-pointer bg-[#DD0202] hover:bg-[#B50202] text-white font-bold text-xs py-2.5 rounded-[12px] transition-all shadow-[0_0_15px_rgba(221,2,2,0.3)] disabled:opacity-50 flex items-center justify-center gap-1.5"
+                >
+                    <span x-show="!isLoading">{% trans "تأیید و خروج" %}</span>
+                    <span x-show="isLoading">{% trans "در حال خروج..." %}</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endwith %}
 {% endblock %}
 
 {% block footer_references %}
+<script>
+function terminateDevice(deviceId, deviceName) {
+    window.dispatchEvent(new CustomEvent('open-terminate-modal', {
+        detail: { id: deviceId, name: deviceName }
+    }));
+}
 
+function terminateModal() {
+    return {
+        isOpen: false,
+        deviceId: null,
+        deviceName: '',
+        isLoading: false,
+        errorMessage: '',
+        open(id, name) {
+            this.deviceId = id;
+            this.deviceName = name;
+            this.errorMessage = '';
+            this.isLoading = false;
+            this.isOpen = true;
+        },
+        close() {
+            if (this.isLoading) return;
+            this.isOpen = false;
+        },
+        async confirmTerminate() {
+            if (!this.deviceId) return;
+            this.isLoading = true;
+            this.errorMessage = '';
+            try {
+                const response = await fetch(`/accounts/api/devices/${this.deviceId}/terminate/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    this.errorMessage = data.error || "{% trans 'خطا در خروج دستگاه' %}";
+                    this.isLoading = false;
+                }
+            } catch (e) {
+                this.errorMessage = "{% trans 'خطای ارتباط با سرور' %}";
+                this.isLoading = false;
+            }
+        }
+    }
+}
+</script>
 {% endblock %}
+

@@ -14,6 +14,8 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
+from django.utils.translation import gettext_lazy as _
+
 load_dotenv()
 
 GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID', 'YOUR_GOOGLE_CLIENT_ID_HERE')
@@ -37,6 +39,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'modeltranslation',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -44,8 +47,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
     # Third party
+    'channels',
     'rosetta',
+    'jalali_date',
     # Project Apps
     'core',
     'movie',
@@ -55,6 +61,14 @@ INSTALLED_APPS = [
     'support',
 ]
 
+ASGI_APPLICATION = 'diastomy.asgi.application'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -62,6 +76,8 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'accounts.middleware.DeviceTrackingMiddleware',
+    'accounts.middleware.SmartLanguageMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'accounts.middleware.OnboardingMiddleware',
@@ -123,7 +139,7 @@ from django.utils.translation import gettext_lazy as _
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'fa-ir'
+LANGUAGE_CODE = 'fa'
 
 TIME_ZONE = 'Asia/Tehran'
 
@@ -135,7 +151,11 @@ LANGUAGES = (
     ('fa', _('Persian')),
     ('en', _('English')),
     ('ar', _('Arabic')),
+    ('ru', _('Russian')),
+    ('tr', _('Turkish')),
 )
+
+MODELTRANSLATION_LANGUAGES = ('fa', 'en', 'ar', 'ru', 'tr')
 
 MODELTRANSLATION_DEFAULT_LANGUAGE = 'fa'
 MODELTRANSLATION_FALLBACK_LANGUAGES = ('fa', 'en')
@@ -143,6 +163,8 @@ MODELTRANSLATION_FALLBACK_LANGUAGES = ('fa', 'en')
 LOCALE_PATHS = [
     BASE_DIR / 'locale',
 ]
+
+GEOIP_PATH = BASE_DIR / 'geoip'
 
 # Rosetta Settings
 ROSETTA_AUTO_COMPILE = True

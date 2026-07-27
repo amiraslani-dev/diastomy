@@ -1,326 +1,395 @@
 {% extends 'accounts/account_base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block dashboard_title %}پشتیبانی آنلاین{% endblock %}
+{% block dashboard_title %}{% trans "پشتیبانی آنلاین" %}{% endblock %}
+
+{% block header_references %}
+<script>
+    window.USER_AVATAR = "{% if request.user.avatar %}{{ request.user.avatar.url }}{% else %}https://ui-avatars.com/api/?name={{ request.user.get_full_name|default:request.user.username|urlencode }}&background=DD0202&color=fff{% endif %}";
+</script>
+<script src="{% static 'public/assets/js/support.js' %}"></script>
+{% endblock %}
 
 {% block profile_content %}
 {% with active_tab='support' %}
-                            <button
-                                class="w-[56px] h-[56px] rounded-full cursor-pointer border border-[#4B4B4B] flex items-center justify-center hover:bg-white/5 transition-colors"
-                            >
-                                <svg
-                                    class="w-[28px] h-[28px]"
-                                    width="38"
-                                    height="38"
-                                    viewBox="0 0 38 38"
-                                    fill="none"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                >
-                                    <path
-                                        d="M26.125 19C26.125 22.9283 22.9283 26.125 19 26.125C15.0718 26.125 11.875 22.9283 11.875 19C11.875 15.0718 15.0718 11.875 19 11.875C22.9283 11.875 26.125 15.0718 26.125 19ZM20.1875 7.91667V4.75C20.1875 4.0945 19.6555 3.5625 19 3.5625C18.3445 3.5625 17.8125 4.0945 17.8125 4.75V7.91667C17.8125 8.57217 18.3445 9.10417 19 9.10417C19.6555 9.10417 20.1875 8.57217 20.1875 7.91667ZM20.1875 33.25V30.0833C20.1875 29.4278 19.6555 28.8958 19 28.8958C18.3445 28.8958 17.8125 29.4278 17.8125 30.0833V33.25C17.8125 33.9055 18.3445 34.4375 19 34.4375C19.6555 34.4375 20.1875 33.9055 20.1875 33.25ZM9.10417 19C9.10417 18.3445 8.57217 17.8125 7.91667 17.8125H4.75C4.0945 17.8125 3.5625 18.3445 3.5625 19C3.5625 19.6555 4.0945 20.1875 4.75 20.1875H7.91667C8.57217 20.1875 9.10417 19.6555 9.10417 19ZM34.4375 19C34.4375 18.3445 33.9055 17.8125 33.25 17.8125H30.0833C29.4278 17.8125 28.8958 18.3445 28.8958 19C28.8958 19.6555 29.4278 20.1875 30.0833 20.1875H33.25C33.9055 20.1875 34.4375 19.6555 34.4375 19ZM12.0032 12.0032C12.4672 11.5393 12.4672 10.7872 12.0032 10.3233L9.7644 8.08448C9.30049 7.62056 8.5484 7.62056 8.08448 8.08448C7.62056 8.5484 7.62056 9.30049 8.08448 9.7644L10.3233 12.0032C10.5545 12.2344 10.8585 12.3516 11.1625 12.3516C11.4665 12.3516 11.7705 12.2344 12.0032 12.0032ZM29.9155 29.9155C30.3794 29.4516 30.3794 28.6995 29.9155 28.2356L27.6767 25.9968C27.2128 25.5328 26.4607 25.5328 25.9968 25.9968C25.5328 26.4607 25.5328 27.2128 25.9968 27.6767L28.2356 29.9155C28.4668 30.1467 28.7708 30.2639 29.0748 30.2639C29.3788 30.2639 29.6844 30.1483 29.9155 29.9155ZM9.7644 29.9155L12.0032 27.6767C12.4672 27.2128 12.4672 26.4607 12.0032 25.9968C11.5393 25.5328 10.7872 25.5328 10.3233 25.9968L8.08448 28.2356C7.62056 28.6995 7.62056 29.4516 8.08448 29.9155C8.31565 30.1467 8.61965 30.2639 8.92365 30.2639C9.22765 30.2639 9.53165 30.1483 9.7644 29.9155ZM27.6767 12.0032L29.9155 9.7644C30.3794 9.30049 30.3794 8.5484 29.9155 8.08448C29.4516 7.62056 28.6995 7.62056 28.2356 8.08448L25.9968 10.3233C25.5328 10.7872 25.5328 11.5393 25.9968 12.0032C26.2279 12.2344 26.5319 12.3516 26.8359 12.3516C27.1399 12.3516 27.4439 12.2344 27.6767 12.0032Z"
-                                        fill="white"
-                                    />
-                                </svg>
-                            </button>
+<main
+    class="flex flex-col flex-1 w-full mx-auto md:pb-10 h-[calc(100vh-140px)] max-h-[750px] min-h-[500px]"
+    x-data="chatController()"
+>
+    <!-- Upper Header -->
+    <div
+        class="items-center justify-between hidden w-full mb-6 md:flex"
+    >
+        <h1 class="text-white text-[22px] font-bold">
+            {% trans "پشتیبانی آنلاین" %}
+        </h1>
+
+        <div class="flex flex-row-reverse items-center gap-3">
+            <a
+                href="{% url 'home' %}"
+                class="flex items-center gap-2 border border-[#4B4B4B] rounded-[50px] px-5 py-4 text-white hover:bg-white/5 transition-colors shrink-0"
+            >
+                <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <path
+                        d="M17.6919 12.2871C17.6539 12.3791 17.599 12.462 17.53 12.531L12.53 17.531C12.384 17.677 12.192 17.751 12 17.751C11.808 17.751 11.616 17.678 11.47 17.531C11.177 17.238 11.177 16.763 11.47 16.47L15.1899 12.75H3C2.586 12.75 2.25 12.414 2.25 12C2.25 11.586 2.586 11.25 3 11.25H15.189L11.469 7.53003C11.176 7.23703 11.176 6.76199 11.469 6.46899C11.762 6.17599 12.237 6.17599 12.53 6.46899L17.53 11.469C17.599 11.538 17.6539 11.6209 17.6919 11.7129C17.7679 11.8969 17.7679 12.1031 17.6919 12.2871ZM21 5.25C20.586 5.25 20.25 5.586 20.25 6V18C20.25 18.414 20.586 18.75 21 18.75C21.414 18.75 21.75 18.414 21.75 18V6C21.75 5.586 21.414 5.25 21 5.25Z"
+                        fill="white"
+                    ></path>
+                </svg>
+                <span class="text-sm font-medium pt-0.5"
+                    >{% trans "بازگشت به سایت" %}</span
+                >
+            </a>
+            <button
+                class="w-[56px] h-[56px] rounded-full cursor-pointer border border-[#4B4B4B] flex items-center justify-center hover:bg-white/5 transition-colors"
+            >
+                <svg
+                    class="w-[28px] h-[28px]"
+                    width="38"
+                    height="38"
+                    viewBox="0 0 38 38"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <path
+                        d="M26.125 19C26.125 22.9283 22.9283 26.125 19 26.125C15.0718 26.125 11.875 22.9283 11.875 19C11.875 15.0718 15.0718 11.875 19 11.875C22.9283 11.875 26.125 15.0718 26.125 19ZM20.1875 7.91667V4.75C20.1875 4.0945 19.6555 3.5625 19 3.5625C18.3445 3.5625 17.8125 4.0945 17.8125 4.75V7.91667C17.8125 8.57217 18.3445 9.10417 19 9.10417C19.6555 9.10417 20.1875 8.57217 20.1875 7.91667ZM20.1875 33.25V30.0833C20.1875 29.4278 19.6555 28.8958 19 28.8958C18.3445 28.8958 17.8125 29.4278 17.8125 30.0833V33.25C17.8125 33.9055 18.3445 34.4375 19 34.4375C19.6555 34.4375 20.1875 33.9055 20.1875 33.25ZM9.10417 19C9.10417 18.3445 8.57217 17.8125 7.91667 17.8125H4.75C4.0945 17.8125 3.5625 18.3445 3.5625 19C3.5625 19.6555 4.0945 20.1875 4.75 20.1875H7.91667C8.57217 20.1875 9.10417 19.6555 9.10417 19ZM34.4375 19C34.4375 18.3445 33.9055 17.8125 33.25 17.8125H30.0833C29.4278 17.8125 28.8958 18.3445 28.8958 19C28.8958 19.6555 29.4278 20.1875 30.0833 20.1875H33.25C33.9055 20.1875 34.4375 19.6555 34.4375 19ZM12.0032 12.0032C12.4672 11.5393 12.4672 10.7872 12.0032 10.3233L9.7644 8.08448C9.30049 7.62056 8.5484 7.62056 8.08448 8.08448C7.62056 8.5484 7.62056 9.30049 8.08448 9.7644L10.3233 12.0032C10.5545 12.2344 10.8585 12.3516 11.1625 12.3516C11.4665 12.3516 11.7705 12.2344 12.0032 12.0032ZM29.9155 29.9155C30.3794 29.4516 30.3794 28.6995 29.9155 28.2356L27.6767 25.9968C27.2128 25.5328 26.4607 25.5328 25.9968 25.9968C25.5328 26.4607 25.5328 27.2128 25.9968 27.6767L28.2356 29.9155C28.4668 30.1467 28.7708 30.2639 29.0748 30.2639C29.3788 30.2639 29.6844 30.1483 29.9155 29.9155ZM9.7644 29.9155L12.0032 27.6767C12.4672 27.2128 12.4672 26.4607 12.0032 25.9968C11.5393 25.5328 10.7872 25.5328 10.3233 25.9968L8.08448 28.2356C7.62056 28.6995 7.62056 29.4516 8.08448 29.9155C8.31565 30.1467 8.61965 30.2639 8.92365 30.2639C9.22765 30.2639 9.53165 30.1483 9.7644 29.9155ZM27.6767 12.0032L29.9155 9.7644C30.3794 9.30049 30.3794 8.5484 29.9155 8.08448C29.4516 7.62056 28.6995 7.62056 28.2356 8.08448L25.9968 10.3233C25.5328 10.7872 25.5328 11.5393 25.9968 12.0032C26.2279 12.2344 26.5319 12.3516 27.1399 12.3516C27.4439 12.2344 27.6767 12.0032Z"
+                        fill="white"
+                    />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Chat Card Box -->
+    <div
+        class="flex-1 md:flex-none flex flex-col w-full bg-[#050505] md:bg-[#0A0A0A] md:border border-[#4B4B4B80] md:rounded-[27px] relative shadow-[0_0_30px_rgba(0,0,0,0.5)] md:h-[80vh]"
+    >
+        <!-- Chat Gradient Header -->
+        <div
+            class="w-full flex items-center rounded-[27px] justify-between px-4 md:px-8 py-3 md:py-2.5 shadow-md z-10"
+            style="
+                background: linear-gradient(
+                    179deg,
+                    #ed1c24 0.86%,
+                    rgba(153, 0, 6, 0.760784) 99.14%
+                );
+            "
+        >
+            <div class="flex items-center gap-2">
+                <div class="relative flex flex-row-reverse items-center pl-2">
+                    {% for avatar in support_avatars %}
+                        <img
+                            src="{{ avatar.image.url }}"
+                            alt="{{ avatar.name|default:'پشتیبان' }}"
+                            class="w-10 h-10 md:w-11 md:h-11 rounded-full border-[2px] border-[#990000] relative object-cover shadow-sm {% if not forloop.first %}-mr-4{% endif %}"
+                            style="z-index: {{ 30|add:forloop.counter0 }};"
+                        />
+                    {% empty %}
+                        <img src="https://i.pravatar.cc/100?img=32" class="w-10 h-10 md:w-11 md:h-11 rounded-full border-[2px] border-[#990000] z-30 relative object-cover shadow-sm" />
+                        <img src="https://i.pravatar.cc/100?img=12" class="w-10 h-10 md:w-11 md:h-11 rounded-full border-[2px] border-[#990000] z-20 -mr-4 relative object-cover shadow-sm" />
+                        <img src="https://i.pravatar.cc/100?img=11" class="w-10 h-10 md:w-11 md:h-11 rounded-full border-[2px] border-[#990000] z-10 -mr-4 relative object-cover shadow-sm" />
+                    {% endfor %}
+                </div>
+                <h2
+                    class="text-white font-bold text-[17px] md:text-[20px]"
+                >
+                    {% trans "سامانه پشتیبانی آنلاین" %}
+                </h2>
+            </div>
+
+            <div class="hidden text-sm md:block text-white/90">
+                {% trans "پاسخگوی سوالات شما هستیم!" %}
+            </div>
+
+            <button
+                class="text-white transition-transform md:hidden hover:scale-110"
+            >
+                <svg
+                    width="28"
+                    height="28"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Chat Messages Area -->
+        <div
+            x-ref="messagesContainer"
+            x-init="$nextTick(() => { $el.scrollTop = $el.scrollHeight })"
+            class="flex flex-col flex-1 gap-4 p-4 overflow-y-auto md:p-8 custom-scrollbar min-h-0"
+        >
+            <template x-for="(msg, index) in messages" :key="msg.id">
+                <div class="flex flex-col w-full">
+                    <!-- Telegram-style Sticky Date Badge -->
+                    <template x-if="index === 0 || msg.date_display !== messages[index - 1].date_display">
+                        <div class="flex justify-center my-2 sticky top-2 z-10">
+                            <span class="bg-[#1A1A1A] text-gray-300 border border-[#333] px-4 py-1 rounded-full text-xs font-semibold shadow-lg backdrop-blur-md opacity-90" x-text="msg.date_display || '{% trans "امروز" %}'"></span>
                         </div>
-                    </div>
+                    </template>
 
                     <div
-                        class="flex-1 md:flex-none flex flex-col w-full bg-[#050505] md:bg-[#0A0A0A] md:border border-[#4B4B4B80] md:rounded-[27px] relative shadow-[0_0_30px_rgba(0,0,0,0.5)] md:h-[80vh]"
+                        :class="msg.is_operator ? 'self-end flex flex-row-reverse gap-3 w-[95%] md:w-[70%] mt-1' : 'self-start flex gap-3 w-[95%] md:w-[70%] mt-1'"
                     >
                         <div
-                            class="w-full flex items-center rounded-[27px] justify-between px-4 md:px-8 py-3 md:py-2.5 shadow-md z-10"
+                            class="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden shrink-0 mt-1 p-[1px]"
                             style="
                                 background: linear-gradient(
-                                    179deg,
-                                    #ed1c24 0.86%,
-                                    rgba(153, 0, 6, 0.760784) 99.14%
+                                    151.23deg,
+                                    #d40000 6.45%,
+                                    rgba(14, 14, 16, 0) 82.53%
                                 );
                             "
                         >
-                            <div class="flex items-center gap-2">
-                                <div
-                                    class="relative flex flex-row-reverse items-center pl-2"
-                                >
-                                    <img
-                                        src="https://i.pravatar.cc/100?img=32"
-                                        class="w-10 h-10 md:w-11 md:h-11 rounded-full border-[2px] border-[#990000] z-30 relative object-cover shadow-sm"
-                                    />
-                                    <img
-                                        src="https://i.pravatar.cc/100?img=12"
-                                        class="w-10 h-10 md:w-11 md:h-11 rounded-full border-[2px] border-[#990000] z-20 -mr-4 relative object-cover shadow-sm"
-                                    />
-                                    <img
-                                        src="https://i.pravatar.cc/100?img=11"
-                                        class="w-10 h-10 md:w-11 md:h-11 rounded-full border-[2px] border-[#990000] z-10 -mr-4 relative object-cover shadow-sm"
-                                    />
-                                </div>
-                                <h2
-                                    class="text-white font-bold text-[17px] md:text-[20px]"
-                                >
-                                    سامانه پشتیبانی آنلاین
-                                </h2>
-                            </div>
-
-                            <div class="hidden text-sm md:block text-white/90">
-                                پاسخگوی سوالات شما هستیم!
-                            </div>
-
-                            <button
-                                class="text-white transition-transform md:hidden hover:scale-110"
-                            >
-                                <svg
-                                    width="28"
-                                    height="28"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2.5"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                >
-                                    <path d="M19 12H5M12 19l-7-7 7-7" />
-                                </svg>
-                            </button>
-                        </div>
-
-                        <div
-                            x-init="$nextTick(() => { $el.scrollTop = $el.scrollHeight })"
-                            class="flex flex-col flex-1 gap-5 p-4 overflow-y-auto md:p-8 custom-scrollbar"
-                        >
                             <div
-                                class="text-center text-white font-bold text-[16px] md:text-[18px] my-2 md:mb-4"
+                                class="w-full h-full rounded-full bg-[#111] overflow-hidden"
                             >
-                                موضوع سوال شما در چه موردی است؟
-                            </div>
-
-                            <div
-                                class="self-start flex gap-3 w-[95%] md:w-[70%] mt-2"
-                            >
-                                <div
-                                    class="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden shrink-0 mt-1 p-[1px]"
-                                    style="
-                                        background: linear-gradient(
-                                            151.23deg,
-                                            #d40000 6.45%,
-                                            rgba(14, 14, 16, 0) 82.53%
-                                        );
-                                    "
-                                >
-                                    <div
-                                        class="w-full h-full rounded-full bg-[#111] overflow-hidden"
-                                    >
-                                        <img
-                                            src="https://i.pravatar.cc/100?img=33"
-                                            alt="User"
-                                            class="object-cover w-full h-full"
-                                        />
-                                    </div>
-                                </div>
-                                <div
-                                    class="flex flex-col gap-1.5 items-start w-full"
-                                >
-                                    <div
-                                        class="bg-[#111111] border border-[#2A2A2A] text-[#D1D1D1] text-[13px] md:text-[14px] p-4 rounded-[20px] rounded-tr-sm leading-7 md:leading-8 text-justify w-full"
-                                    >
-                                        سلام، من یک مشکلی در تنظیمات پرداخت
-                                        دارم. می‌خواستم ببینم چطور می‌تونم
-                                        اشتراکم رو تمدید کنم در حالی که خطای
-                                        بانکی میده؟
-                                    </div>
-                                    <span
-                                        class="text-white text-[11px] font-light self-end pl-2"
-                                        >۱۱:۴۵</span
-                                    >
-                                </div>
-                            </div>
-
-                            <div
-                                class="self-end flex flex-row-reverse gap-3 w-[95%] md:w-[70%] mt-2"
-                            >
-                                <div
-                                    class="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden shrink-0 mt-1 p-[1px]"
-                                    style="
-                                        background: linear-gradient(
-                                            151.23deg,
-                                            #d40000 6.45%,
-                                            rgba(14, 14, 16, 0) 82.53%
-                                        );
-                                    "
-                                >
-                                    <div
-                                        class="w-full h-full rounded-full bg-[#111] overflow-hidden"
-                                    >
-                                        <img
-                                            src="https://i.pravatar.cc/100?img=11"
-                                            alt="Operator"
-                                            class="object-cover w-full h-full"
-                                        />
-                                    </div>
-                                </div>
-                                <div
-                                    class="flex flex-col gap-1.5 items-end w-full"
-                                >
-                                    <div
-                                        class="bg-[#3B0709] border border-[#520000] text-white text-[13px] md:text-[14px] p-4 rounded-[20px] rounded-tl-sm leading-7 md:leading-8 text-justify w-full"
-                                    >
-                                        سلام کاربر عزیز. لطفاً مطمئن شوید که
-                                        فیلترشکن شما خاموش است. در صورتی که مشکل
-                                        پابرجا بود، یک اسکرین‌شات از خطا برای ما
-                                        ارسال کنید.
-                                    </div>
-                                    <span
-                                        class="text-white text-[11px] font-light self-start pr-2"
-                                        >۱۱:۴۷</span
-                                    >
-                                </div>
-                            </div>
-
-                            <div
-                                class="self-start flex gap-3 w-[95%] md:w-[70%] mt-2"
-                            >
-                                <div
-                                    class="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden shrink-0 mt-1 p-[1px]"
-                                    style="
-                                        background: linear-gradient(
-                                            151.23deg,
-                                            #d40000 6.45%,
-                                            rgba(14, 14, 16, 0) 82.53%
-                                        );
-                                    "
-                                >
-                                    <div
-                                        class="w-full h-full rounded-full bg-[#111] overflow-hidden"
-                                    >
-                                        <img
-                                            src="https://i.pravatar.cc/100?img=33"
-                                            alt="User"
-                                            class="object-cover w-full h-full"
-                                        />
-                                    </div>
-                                </div>
-                                <div
-                                    class="flex flex-col gap-1.5 items-start w-full"
-                                >
-                                    <div
-                                        class="bg-[#111111] border border-[#2A2A2A] text-[#D1D1D1] text-[13px] md:text-[14px] p-4 rounded-[20px] rounded-tr-sm leading-7 md:leading-8 text-justify w-full"
-                                    >
-                                        فیلترشکن رو خاموش کردم و حل شد. خیلی
-                                        ممنونم بابت راهنمایی سریع‌تون.
-                                    </div>
-                                    <span
-                                        class="text-white text-[11px] font-light self-end pl-2"
-                                        >لحظاتی پیش</span
-                                    >
-                                </div>
-                            </div>
-                        </div>
-
-                        <div
-                            class="p-4 md:p-6 bg-[#0A0A0A] flex items-end gap-3 z-20 mt-auto md:rounded-b-[27px]"
-                        >
-                            <div
-                                class="flex-1 flex items-end bg-[#151515] border border-[#2A2A2A] rounded-[24px] px-2 md:px-4 py-1.5 min-h-[56px] relative focus-within:border-[#4B4B4B] transition-colors"
-                            >
-                                <button
-                                    @click="$refs.fileInput.click()"
-                                    class="text-[#777] cursor-pointer hover:text-white transition-colors shrink-0 outline-none p-2 mb-0.5"
-                                >
-                                    <svg
-                                        width="22"
-                                        height="22"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        class="transform -rotate-45"
-                                    >
-                                        <path
-                                            d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"
-                                        ></path>
-                                    </svg>
-                                </button>
-
-                                <input
-                                    type="file"
-                                    x-ref="fileInput"
-                                    class="hidden"
-                                    @change="handleFileSelect"
+                                <img
+                                    :src="msg.sender_avatar"
+                                    alt="Avatar"
+                                    class="object-cover w-full h-full"
                                 />
-
-                                <textarea
-                                    x-ref="messageInput"
-                                    x-model="message"
-                                    @input="resizeTextarea"
-                                    rows="1"
-                                    class="flex-1 bg-transparent border-none outline-none px-3 py-2.5 text-white placeholder-[#fff] w-full resize-none max-h-[150px] overflow-y-auto custom-scrollbar leading-6"
-                                    placeholder="پیامی بنویسید..."
-                                ></textarea>
-
-                                <div class="relative flex items-center mb-0.5">
-                                    <button
-                                        @click="showEmoji = !showEmoji"
-                                        class="text-[#777] cursor-pointer hover:text-white transition-colors shrink-0 outline-none p-2"
-                                    >
-                                        <svg
-                                            width="26"
-                                            height="26"
-                                            viewBox="0 0 26 26"
-                                            fill="none"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                            <path
-                                                fill-rule="evenodd"
-                                                clip-rule="evenodd"
-                                                d="M6.6813 3.54244C7.92297 2.69797 9.31954 2.10771 10.7905 1.80569C12.2614 1.50367 13.7776 1.49589 15.2515 1.78277C16.7255 2.06966 18.1281 2.64555 19.3783 3.47722C20.6286 4.30889 21.7018 5.37988 22.5361 6.62841C23.3704 7.87693 23.9492 9.27829 24.2392 10.7516C24.5292 12.225 24.5245 13.7412 24.2256 15.2127C23.9267 16.6843 23.3393 18.0821 22.4975 19.3255C21.6556 20.569 20.5759 21.6334 19.3206 22.4574C16.8123 24.1337 13.7408 24.7449 10.7819 24.1566C7.82294 23.5683 5.2189 21.8287 3.54262 19.3204C1.86633 16.8121 1.25512 13.7406 1.84343 10.7817C2.43174 7.82277 4.17139 5.21873 6.67968 3.54244H6.6813ZM7.5848 21.1071C8.64928 21.8263 9.84541 22.3281 11.1044 22.5836C12.3635 22.8391 13.6606 22.8432 14.9212 22.5958C16.1819 22.3484 17.3812 21.8543 18.4502 21.1419C19.5193 20.4294 20.437 19.5128 21.1507 18.4445C21.8643 17.3763 22.3598 16.1776 22.6087 14.9172C22.8576 13.6569 22.855 12.3598 22.6009 11.1004C22.3469 9.8411 21.8465 8.64439 21.1285 7.57908C20.4105 6.51377 19.489 5.60086 18.4171 4.89282C16.2668 3.47253 13.6416 2.96129 11.1155 3.47085C8.5894 3.98042 6.36775 5.46934 4.93621 7.61214C3.50466 9.75495 2.97966 12.3774 3.47597 14.9061C3.97228 17.4349 5.44953 19.6643 7.5848 21.1071ZM10.5634 11.3749C10.5634 11.8059 10.3922 12.2192 10.0875 12.524C9.78273 12.8287 9.36941 12.9999 8.93843 12.9999C8.50745 12.9999 8.09413 12.8287 7.78938 12.524C7.48463 12.2192 7.31343 11.8059 7.31343 11.3749C7.31343 10.944 7.48463 10.5306 7.78938 10.2259C8.09413 9.92115 8.50745 9.74994 8.93843 9.74994C9.36941 9.74994 9.78273 9.92115 10.0875 10.2259C10.3922 10.5306 10.5634 10.944 10.5634 11.3749ZM18.6884 11.3749C18.6884 11.8059 18.5172 12.2192 18.2125 12.524C17.9077 12.8287 17.4944 12.9999 17.0634 12.9999C16.6325 12.9999 16.2191 12.8287 15.9144 12.524C15.6096 12.2192 15.4384 11.8059 15.4384 11.3749C15.4384 10.944 15.6096 10.5306 15.9144 10.2259C16.2191 9.92115 16.6325 9.74994 17.0634 9.74994C17.4944 9.74994 17.9077 9.92115 18.2125 10.2259C18.5172 10.5306 18.6884 10.944 18.6884 11.3749ZM13.0009 17.8749C12.1179 17.8771 11.2509 17.6394 10.4925 17.1872C9.73401 16.735 9.11264 16.0853 8.69468 15.3074L7.28093 16.0874C7.84992 17.1404 8.69858 18.0158 9.73337 18.6172C10.7682 19.2185 11.9489 19.5225 13.1454 19.4957C14.342 19.4688 15.5079 19.112 16.5146 18.4648C17.5213 17.8175 18.3298 16.9049 18.8509 15.8274L17.3884 15.1287C16.9887 15.9522 16.3652 16.6465 15.5893 17.1322C14.8133 17.6179 13.9163 17.8753 13.0009 17.8749Z"
-                                                fill="currentColor"
-                                            />
-                                        </svg>
-                                    </button>
-
-                                    <div
-                                        x-show="showEmoji"
-                                        @click.away="showEmoji = false"
-                                        x-transition
-                                        x-ref="emojiContainer"
-                                        class="fixed bottom-[85px] left-1/2 -translate-x-1/2 md:absolute md:bottom-[calc(100%+15px)] md:left-0 md:translate-x-0 shadow-2xl z-[999] cursor-default rounded-[12px] overflow-hidden"
-                                        @click.stop
-                                        dir="ltr"
-                                    ></div>
-                                </div>
                             </div>
+                        </div>
+                        <div
+                            :class="msg.is_operator ? 'items-end' : 'items-start'"
+                            class="flex flex-col gap-1.5 w-full min-w-0"
+                        >
+                            <!-- Text content if present -->
+                            <template x-if="msg.content">
+                                <div
+                                    :class="msg.is_operator ? 'bg-[#3B0709] border-[#520000] text-white rounded-[20px] rounded-tl-sm' : 'bg-[#111111] border-[#2A2A2A] text-[#D1D1D1] rounded-[20px] rounded-tr-sm'"
+                                    class="border text-[13px] md:text-[14px] p-4 leading-7 md:leading-8 text-justify w-full break-words shadow-md"
+                                    x-text="msg.content"
+                                ></div>
+                            </template>
 
-                            <button
-                                @click="sendMessage"
-                                class="bg-[#DD0202] cursor-pointer hover:bg-[#b00000] text-white rounded-[50px] h-14 w-14 md:w-auto md:px-8 flex items-center justify-center gap-2 shrink-0 transition-colors shadow-[0_0_15px_rgba(221,2,2,0.3)] outline-none mb-0.5"
-                            >
-                                <span class="hidden font-bold md:block"
-                                    >ارسال</span
-                                >
-                                <svg
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 20 20"
-                                    fill="none"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class="mt-1 ml-1 transform -rotate-90 md:rotate-0 md:mt-0 md:ml-0"
-                                >
-                                    <path
-                                        d="M18.6761 0.83958C17.9741 0.122955 16.98 -0.158795 16.014 0.0872262L2.90123 3.43353C1.15323 3.87964 -0.0128924 5.41495 0.000107595 7.25449C0.0131076 9.09404 1.19923 10.612 2.95323 11.0336L7.59923 12.1494L8.69225 16.8912C9.10525 18.6817 10.5922 19.8924 12.3942 19.9057C12.4032 19.9057 12.4132 19.9057 12.4222 19.9057C14.2112 19.9057 15.7011 18.7185 16.1361 16.9442L19.4142 3.55805C19.6542 2.57295 19.3791 1.55723 18.6761 0.83958ZM17.9581 3.18649L14.68 16.5727C14.351 17.913 13.2902 18.3826 12.4032 18.3744C11.5582 18.3683 10.4622 17.8844 10.1522 16.541L9.0482 11.7523L13.2792 7.43213C13.5722 7.13303 13.5722 6.64812 13.2792 6.34902C12.9862 6.04992 12.5111 6.04992 12.2181 6.34902L7.98619 10.6692L3.29503 9.54218C1.97803 9.22572 1.50415 8.10588 1.49815 7.24328C1.49215 6.38067 1.95105 5.25367 3.26305 4.91883L16.3761 1.57253C16.4831 1.54496 16.5911 1.53171 16.6971 1.53171C17.0371 1.53171 17.3651 1.6685 17.6141 1.92269C17.9411 2.25548 18.0701 2.72813 17.9581 3.18649Z"
-                                        fill="white"
-                                    />
-                                </svg>
-                            </button>
+                            <!-- Attachment rendering if present -->
+                            <template x-if="msg.attachment_url">
+                                <div class="mt-1 w-full max-w-sm">
+                                    <!-- Image Attachment -->
+                                    <template x-if="msg.attachment_type === 'image'">
+                                        <a :href="msg.attachment_url" target="_blank" class="block rounded-2xl overflow-hidden border border-[#2A2A2A] shadow-md group">
+                                            <img :src="msg.attachment_url" class="w-full max-h-64 object-cover group-hover:scale-105 transition-transform duration-300" />
+                                        </a>
+                                    </template>
+
+                                    <!-- Audio Attachment -->
+                                    <template x-if="msg.attachment_type === 'audio'">
+                                        <div class="bg-[#151515] border border-[#2A2A2A] p-3 rounded-2xl flex flex-col gap-2">
+                                            <div class="flex items-center gap-2 text-xs text-gray-300">
+                                                <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12 0c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg>
+                                                <span class="truncate font-semibold" x-text="msg.attachment_name"></span>
+                                            </div>
+                                            <audio :src="msg.attachment_url" controls class="w-full h-8 custom-scrollbar"></audio>
+                                        </div>
+                                    </template>
+
+                                    <!-- Document / File Attachment -->
+                                    <template x-if="msg.attachment_type === 'document' || msg.attachment_type === 'video'">
+                                        <a :href="msg.attachment_url" target="_blank" download class="hover:bg-[#18181D] rounded-2xl flex items-center justify-between gap-4 transition-all shadow-md group my-1 w-full max-w-[320px] outline-none" style="background-color: #111114; border: 1px solid #222228; padding: 12px 20px;">
+                                            <div class="flex items-center gap-3 min-w-0">
+                                                <div class="w-8 h-8 rounded-xl bg-red-950/60 border border-red-800/40 flex items-center justify-center text-red-500 shrink-0">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                                </div>
+                                                <div class="min-w-0 flex flex-col">
+                                                    <div class="text-xs font-bold text-gray-200 truncate" x-text="msg.attachment_name"></div>
+                                                    <div class="text-[10px] text-gray-400 font-normal">{% trans "دانلود فایل" %}</div>
+                                                </div>
+                                            </div>
+                                            <div class="w-7 h-7 rounded-full bg-[#1C1C22] group-hover:bg-red-600 flex items-center justify-center text-gray-400 group-hover:text-white transition-all shrink-0 border border-[#2A2A32]">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                            </div>
+                                        </a>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <span
+                                :class="msg.is_operator ? 'self-start pr-2' : 'self-end pl-2'"
+                                class="text-white text-[11px] font-light"
+                                x-text="msg.created_at"
+                            ></span>
                         </div>
                     </div>
+                </div>
+            </template>
 
+            <!-- Operator Typing Indicator -->
+            <div x-show="isOperatorTyping" x-transition class="self-end flex flex-row-reverse gap-3 w-auto mt-2">
+                <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 mt-1 p-[1px]" style="background: linear-gradient(151.23deg, #d40000 6.45%, rgba(14, 14, 16, 0) 82.53%);">
+                    <div class="w-full h-full rounded-full bg-[#111] overflow-hidden flex items-center justify-center">
+                        <img src="https://i.pravatar.cc/100?img=11" alt="Operator" class="object-cover w-full h-full" />
+                    </div>
+                </div>
+                <div class="bg-[#3B0709] border border-[#520000] text-white px-4 py-3 rounded-[20px] rounded-tl-sm flex items-center gap-1.5 shadow-lg">
+                    <span class="text-xs text-gray-300 ml-1">{% trans "پشتیبان در حال تایپ است" %}</span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-white animate-bounce" style="animation-delay: 0ms;"></span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-white animate-bounce" style="animation-delay: 150ms;"></span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-white animate-bounce" style="animation-delay: 300ms;"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Input Controls -->
+        <div
+            class="p-4 md:p-6 bg-[#0A0A0A] flex flex-col gap-2 z-20 mt-auto md:rounded-b-[27px]"
+        >
+            <!-- Staged File Attachment Preview Chip -->
+            <div x-show="selectedFile" x-transition class="flex items-center gap-2.5 rounded-full text-white text-xs shadow-md my-1 outline-none" style="background-color: #141417; border: 1px solid #222228; padding: 6px 16px; width: fit-content; max-width: 320px;">
+                <svg class="w-4 h-4 text-[#ed1c24] transform -rotate-45 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                <span class="truncate font-semibold text-gray-200" x-text="selectedFileName"></span>
+                <button @click="removeSelectedFile()" type="button" title="{% trans 'حذف فایل انتخاب شده' %}" class="text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10 shrink-0 cursor-pointer">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <div class="flex items-end gap-3 w-full">
+                <div
+                    class="flex-1 flex items-end bg-[#151515] border border-[#2A2A2A] rounded-[24px] px-2 md:px-4 py-1.5 min-h-[56px] relative focus-within:border-[#4B4B4B] transition-colors"
+                >
+                <button
+                    @click="$refs.fileInput.click()"
+                    class="text-[#777] cursor-pointer hover:text-white transition-colors shrink-0 outline-none p-2 mb-0.5"
+                >
+                    <svg
+                        width="22"
+                        height="22"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="transform -rotate-45"
+                    >
+                        <path
+                            d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"
+                        ></path>
+                    </svg>
+                </button>
+
+                <input
+                    type="file"
+                    x-ref="fileInput"
+                    class="hidden"
+                    @change="handleFileSelect"
+                />
+
+                <textarea
+                    x-ref="messageInput"
+                    x-model="message"
+                    @input="handleInput"
+                    @keydown.enter.prevent="sendMessage"
+                    rows="1"
+                    class="flex-1 bg-transparent border-none outline-none px-3 py-2.5 text-white placeholder-[#fff] w-full resize-none max-h-[150px] overflow-y-auto custom-scrollbar leading-6"
+                    placeholder="{% trans 'پیامی بنویسید...' %}"
+                ></textarea>
+
+                <div class="relative flex items-center mb-0.5">
+                    <button
+                        @click="showEmoji = !showEmoji"
+                        class="text-[#777] cursor-pointer hover:text-white transition-colors shrink-0 outline-none p-2"
+                    >
+                        <svg
+                            width="26"
+                            height="26"
+                            viewBox="0 0 26 26"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path
+                                fill-rule="evenodd"
+                                clip-rule="evenodd"
+                                d="M6.6813 3.54244C7.92297 2.69797 9.31954 2.10771 10.7905 1.80569C12.2614 1.50367 13.7776 1.49589 15.2515 1.78277C16.7255 2.06966 18.1281 2.64555 19.3783 3.47722C20.6286 4.30889 21.7018 5.37988 22.5361 6.62841C23.3704 7.87693 23.9492 9.27829 24.2392 10.7516C24.5292 12.225 24.5245 13.7412 24.2256 15.2127C23.9267 16.6843 23.3393 18.0821 22.4975 19.3255C21.6556 20.569 20.5759 21.6334 19.3206 22.4574C16.8123 24.1337 13.7408 24.7449 10.7819 24.1566C7.82294 23.5683 5.2189 21.8287 3.54262 19.3204C1.86633 16.8121 1.25512 13.7406 1.84343 10.7817C2.43174 7.82277 4.17139 5.21873 6.67968 3.54244H6.6813ZM7.5848 21.1071C8.64928 21.8263 9.84541 22.3281 11.1044 22.5836C12.3635 22.8391 13.6606 22.8432 14.9212 22.5958C16.1819 22.3484 17.3812 21.8543 18.4502 21.1419C19.5193 20.4294 20.437 19.5128 21.1507 18.4445C21.8643 17.3763 22.3598 16.1776 22.6087 14.9172C22.8576 13.6569 22.855 12.3598 22.6009 11.1004C22.3469 9.8411 21.8465 8.64439 21.1285 7.57908C20.4105 6.51377 19.489 5.60086 18.4171 4.89282C16.2668 3.47253 13.6416 2.96129 11.1155 3.47085C8.5894 3.98042 6.36775 5.46934 4.93621 7.61214C3.50466 9.75495 2.97966 12.3774 3.47597 14.9061C3.97228 17.4349 5.44953 19.6643 7.5848 21.1071ZM10.5634 11.3749C10.5634 11.8059 10.3922 12.2192 10.0875 12.524C9.78273 12.8287 9.36941 12.9999 8.93843 12.9999C8.50745 12.9999 8.09413 12.8287 7.78938 12.524C7.48463 12.2192 7.31343 11.8059 7.31343 11.3749C7.31343 10.944 7.48463 10.5306 7.78938 10.2259C8.09413 9.92115 8.50745 9.74994 8.93843 9.74994C9.36941 9.74994 9.78273 9.92115 10.0875 10.2259C10.3922 10.5306 10.5634 10.944 10.5634 11.3749ZM18.6884 11.3749C18.6884 11.8059 18.5172 12.2192 18.2125 12.524C17.9077 12.8287 17.4944 12.9999 17.0634 12.9999C16.6325 12.9999 16.2191 12.8287 15.9144 12.524C15.6096 12.2192 15.4384 11.8059 15.4384 11.3749C15.4384 10.944 15.6096 10.5306 15.9144 10.2259C16.2191 9.92115 16.6325 9.74994 17.0634 9.74994C17.4944 9.74994 17.9077 9.92115 18.2125 10.2259C18.5172 10.5306 18.6884 10.944 18.6884 11.3749ZM13.0009 17.8749C12.1179 17.8771 11.2509 17.6394 10.4925 17.1872C9.73401 16.735 9.11264 16.0853 8.69468 15.3074L7.28093 16.0874C7.84992 17.1404 8.69858 18.0158 9.73337 18.6172C10.7682 19.2185 11.9489 19.5225 13.1454 19.4957C14.342 19.4688 15.5079 19.112 16.5146 18.4648C17.5213 17.8175 18.3298 16.9049 18.8509 15.8274L17.3884 15.1287C16.9887 15.9522 16.3652 16.6465 15.5893 17.1322C14.8133 17.6179 13.9163 17.8753 13.0009 17.8749Z"
+                                fill="currentColor"
+                            />
+                        </svg>
+                    </button>
+
+                    <div
+                        x-show="showEmoji"
+                        @click.away="showEmoji = false"
+                        x-transition
+                        class="fixed bottom-[85px] left-4 md:absolute md:bottom-[calc(100%+12px)] md:left-0 shadow-2xl z-[999] cursor-default rounded-2xl overflow-hidden p-3"
+                        style="background-color: #141416; border: 1px solid #2A2A30; box-shadow: 0 10px 40px rgba(0,0,0,0.85); width: 280px;"
+                        @click.stop
+                        dir="rtl"
+                    >
+                        <!-- Category Tabs -->
+                        <div class="flex items-center justify-between border-b border-[#2A2A30] pb-2 mb-2 gap-1 overflow-x-auto custom-scrollbar">
+                            <template x-for="cat in window.NativeEmojiPicker.categories" :key="cat.id">
+                                <button 
+                                    type="button"
+                                    @click="activeEmojiTab = cat.id"
+                                    :class="activeEmojiTab === cat.id ? 'bg-red-600/30 text-red-500 border border-red-500/50' : 'text-gray-400 hover:text-white border border-transparent'"
+                                    class="px-2 py-1 rounded-xl transition-all font-bold text-[11px] shrink-0 cursor-pointer"
+                                    x-text="cat.name.split(' ')[0]"
+                                    :title="cat.name"
+                                ></button>
+                            </template>
+                        </div>
+
+                        <!-- Emoji Grid -->
+                        <div class="h-36 overflow-y-auto overflow-x-hidden custom-scrollbar p-1">
+                            <template x-for="cat in window.NativeEmojiPicker.categories" :key="cat.id">
+                                <template x-if="activeEmojiTab === cat.id">
+                                    <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; justify-items: center;">
+                                        <template x-for="emoji in cat.emojis" :key="emoji">
+                                            <button 
+                                                type="button"
+                                                @click="selectEmoji(emoji)" 
+                                                class="w-8 h-8 flex items-center justify-center text-lg hover:bg-[#222228] rounded-lg transition-colors cursor-pointer active:scale-125"
+                                                x-text="emoji"
+                                            ></button>
+                                        </template>
+                                    </div>
+                                </template>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button
+                @click="sendMessage"
+                class="bg-[#DD0202] cursor-pointer hover:bg-[#b00000] text-white rounded-[50px] h-14 w-14 md:w-auto md:px-8 flex items-center justify-center gap-2 shrink-0 transition-colors shadow-[0_0_15px_rgba(221,2,2,0.3)] outline-none mb-0.5"
+            >
+                <span class="hidden font-bold md:block"
+                    >{% trans "ارسال" %}</span
+                >
+                <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="mt-1 ml-1 transform -rotate-90 md:rotate-0 md:mt-0 md:ml-0"
+                >
+                    <path
+                        d="M18.6761 0.83958C17.9741 0.122955 16.98 -0.158795 16.014 0.0872262L2.90123 3.43353C1.15323 3.87964 -0.0128924 5.41495 0.000107595 7.25449C0.0131076 9.09404 1.19923 10.612 2.95323 11.0336L7.59923 12.1494L8.69225 16.8912C9.10525 18.6817 10.5922 19.8924 12.3942 19.9057C12.4032 19.9057 12.4132 19.9057 12.4222 19.9057C14.2112 19.9057 15.7011 18.7185 16.1361 16.9442L19.4142 3.55805C19.6542 2.57295 19.3791 1.55723 18.6761 0.83958ZM17.9581 3.18649L14.68 16.5727C14.351 17.913 13.2902 18.3826 12.4032 18.3744C11.5582 18.3683 10.4622 17.8844 10.1522 16.541L9.0482 11.7523L13.2792 7.43213C13.5722 7.13303 13.5722 6.64812 13.2792 6.34902C12.9862 6.04992 12.5111 6.04992 12.2181 6.34902L7.98619 10.6692L3.29503 9.54218C1.97803 9.22572 1.50415 8.10588 1.49815 7.24328C1.49215 6.38067 1.95105 5.25367 3.26305 4.91883L16.3761 1.57253C16.4831 1.54496 16.5911 1.53171 16.6971 1.53171C17.0371 1.53171 17.3651 1.6685 17.6141 1.92269C17.9411 2.25548 18.0701 2.72813 17.9581 3.18649Z"
+                        fill="white"
+                    />
+                </svg>
+            </button>
+        </div>
+    </div>
+</main>
 {% endwith %}
 {% endblock %}
 
 {% block footer_references %}
-
-                <script src="{% static 'public/assets/js/support.js' %}"></script>
-
+<script src="{% static 'public/assets/js/native-emoji.js' %}"></script>
+<script src="{% static 'public/assets/js/support.js' %}"></script>
 {% endblock %}
