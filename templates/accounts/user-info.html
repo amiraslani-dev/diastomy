@@ -1,7 +1,8 @@
 {% extends 'accounts/account_base.html' %}
 {% load static i18n humanize %}
 
-{% block dashboard_title %}اطلاعات کاربری{% endblock %}
+{% block title %}{% trans "اطلاعات کاربری" %} | {% trans "دیاستومی" %}{% endblock %}
+{% block dashboard_title %}{% trans "اطلاعات کاربری" %}{% endblock %}
 
 {% block profile_content %}
 <main class="flex flex-col flex-1 w-full mx-auto md:pb-10">
@@ -42,70 +43,6 @@
                             </div>
 
                             <div class="flex items-center gap-2">
-                                <button
-                                    class="w-10 h-10 cursor-pointer rounded-[12px] bg-[#2A2A2A] flex items-center justify-center hover:bg-white/5 transition-colors"
-                                >
-                                    <svg
-                                        width="20"
-                                        height="20"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                    >
-                                        <circle cx="12" cy="12" r="5"></circle>
-                                        <line
-                                            x1="12"
-                                            y1="1"
-                                            x2="12"
-                                            y2="3"
-                                        ></line>
-                                        <line
-                                            x1="12"
-                                            y1="21"
-                                            x2="12"
-                                            y2="23"
-                                        ></line>
-                                        <line
-                                            x1="4.22"
-                                            y1="4.22"
-                                            x2="5.64"
-                                            y2="5.64"
-                                        ></line>
-                                        <line
-                                            x1="18.36"
-                                            y1="18.36"
-                                            x2="19.78"
-                                            y2="19.78"
-                                        ></line>
-                                        <line
-                                            x1="1"
-                                            y1="12"
-                                            x2="3"
-                                            y2="12"
-                                        ></line>
-                                        <line
-                                            x1="21"
-                                            y1="12"
-                                            x2="23"
-                                            y2="12"
-                                        ></line>
-                                        <line
-                                            x1="4.22"
-                                            y1="19.78"
-                                            x2="5.64"
-                                            y2="18.36"
-                                        ></line>
-                                        <line
-                                            x1="18.36"
-                                            y1="5.64"
-                                            x2="19.78"
-                                            y2="4.22"
-                                        ></line>
-                                    </svg>
-                                </button>
 
                                 <button
                                     class="w-10 h-10 cursor-pointer rounded-[12px] border border-[#2A2A2A] flex items-center justify-center hover:bg-white/5 transition-colors"
@@ -128,7 +65,7 @@
                                     href="{% url 'accounts:subscriptions:subscription' %}"
                                     class="bg-[#D40000] inline-flex items-center justify-center cursor-pointer hover:bg-red-700 transition-colors text-white font-bold text-sm px-6 py-2.5 rounded-[15px]"
                                 >
-                                    {% trans "تمدید اشتراک" %}
+                                    {% if request.user.has_active_subscription %}{% trans "تمدید اشتراک" %}{% else %}{% trans "خرید اشتراک" %}{% endif %}
                                 </a>
                             </div>
                         </div>
@@ -251,7 +188,7 @@
                                             xmlns="http://www.w3.org/2000/svg"
                                         >
                                             <path
-                                                d="M17.4534 4.40338L15.5967 2.54669C15.1626 2.11336 14.6201 1.87417 13.9734 1.875C13.3601 1.87584 12.7842 2.11588 12.3525 2.55005L2.0575 12.8925C1.94 13.01 1.875 13.1683 1.875 13.3333V17.5C1.875 17.845 2.155 18.125 2.5 18.125H6.66667C6.83167 18.125 6.99088 18.0592 7.10754 17.9433L17.45 7.6475C17.8841 7.215 18.1242 6.63922 18.125 6.02672C18.1258 5.41338 17.8876 4.83672 17.4534 4.40338ZM6.40828 16.875H3.125V13.5917L10.6191 6.06334L13.9376 9.3808L6.40828 16.875ZM16.5684 6.76168L14.8234 8.49915L11.5009 5.17751L13.2383 3.4317C13.435 3.2342 13.6967 3.12584 13.9758 3.125H13.9766C14.255 3.125 14.5167 3.23331 14.7142 3.42997L16.5708 5.28666C16.7675 5.48416 16.8758 5.74582 16.8758 6.02499C16.875 6.30332 16.7659 6.56501 16.5684 6.76168Z"
+                                                d="M17.4534 4.40338L15.5967 2.54669C15.1626 2.11336 14.6201 1.87417 13.9734 1.875C13.3601 1.87584 12.7842 2.11588 12.3525 2.55005L2.0575 12.8925C1.94 13.01 1.875 13.1683 1.875 13.3333V17.5C1.875 17.845 2.155 18.125 2.5 18.125H6.66667C6.83167 18.125 6.99088 18.0592 7.10754 17.9433L17.45 7.6475C17.8841 7.215 18.1242 6.63922 18.125 6.02672C18.1258 5.41338 17.4534 4.40338ZM6.40828 16.875H3.125V13.5917L10.6191 6.06334L13.9376 9.3808L6.40828 16.875ZM16.5684 6.76168L14.8234 8.49915L11.5009 5.17751L13.2383 3.4317C13.435 3.2342 13.6967 3.12584 13.9758 3.125H13.9766C14.255 3.125 14.5167 3.23331 14.7142 3.42997L16.5708 5.28666C16.7675 5.48416 16.8758 5.74582 16.8758 6.02499C16.875 6.30332 16.7659 6.56501 16.5684 6.76168Z"
                                                 fill="white"
                                             />
                                         </svg>
@@ -320,7 +257,7 @@
                                         href="{% url 'accounts:subscriptions:subscription' %}"
                                         class="bg-[#D40000] inline-flex items-center justify-center hover:bg-red-700 transition-colors text-white font-bold text-xs px-5 py-2.5 rounded-[50px]"
                                     >
-                                        {% trans "تمدید اشتراک" %}
+                                        {% if request.user.has_active_subscription %}{% trans "تمدید اشتراک" %}{% else %}{% trans "خرید اشتراک" %}{% endif %}
                                     </a>
                                 </div>
 

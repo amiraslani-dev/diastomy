@@ -19,42 +19,7 @@
         <div
             class="w-full g-[#030000f2] backdrop-blur-[4px] min-h-screen text-white font-sans items-center pt-10 md:pt-14 px-4 md:px-8 relative overflow-x-hidden"
             dir="rtl"
-            x-data='{ 
-        selected: [], 
-        isSubmitting: false,
-        toggle(id) {
-            if (this.selected.includes(id)) {
-                this.selected = this.selected.filter(i => i !== id);
-            } else {
-                this.selected.push(id);
-            }
-        },
-        movies: {{ items_json|safe }},
-        async submitSelection() {
-            if (this.selected.length < 3) return;
-            this.isSubmitting = true;
-            try {
-                const res = await fetch("{% url 'core:api_selection_submit' %}", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": getCookie("csrftoken")
-                    },
-                    body: JSON.stringify({ selections: this.selected })
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    window.location.href = data.redirect_url || "/";
-                } else {
-                    alert(data.error);
-                }
-            } catch (e) {
-                alert("مشکل در ارتباط با سرور");
-            } finally {
-                this.isSubmitting = false;
-            }
-        }
-     }'
+            x-data="selectionApp()"
         >
             <div
                 class="flex flex-col-reverse gap-y-6 justify-center md:flex-row md:justify-between bg-[#0C0C0CCC] rounded-[68px] px-2 py-6 mb-4 md:mb-8 mx-auto max-w-[1200px]"
@@ -238,6 +203,47 @@
                 }
             }
             return cookieValue;
+        }
+
+        function selectionApp() {
+            return {
+                selected: [],
+                isSubmitting: false,
+                movies: {{ items_json|safe }},
+                toggle(id) {
+                    if (this.selected.includes(id)) {
+                        this.selected = this.selected.filter(i => i !== id);
+                    } else {
+                        this.selected.push(id);
+                    }
+                },
+                async submitSelection() {
+                    if (this.selected.length < 3) return;
+                    this.isSubmitting = true;
+                    try {
+                        const nextParam = new URLSearchParams(window.location.search).get('next');
+                        const res = await fetch("{% url 'core:api_selection_submit' %}", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRFToken": getCookie("csrftoken")
+                            },
+                            body: JSON.stringify({ selections: this.selected, next: nextParam })
+                        });
+                        const data = await res.json();
+                        if (res.ok) {
+                            const validNext = (nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//')) ? nextParam : null;
+                            window.location.href = validNext || data.redirect_url || "/";
+                        } else {
+                            alert(data.error);
+                        }
+                    } catch (e) {
+                        alert("مشکل در ارتباط با سرور");
+                    } finally {
+                        this.isSubmitting = false;
+                    }
+                }
+            };
         }
         </script>
     </body>

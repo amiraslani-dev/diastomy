@@ -8,25 +8,38 @@ from .models import SupportRoom, SupportMessage
 
 User = get_user_model()
 
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext as _, get_language
 
-def format_date_display(dt):
+def to_persian_digits(text):
+    persian_digits = {'0': '۰', '1': '۱', '2': '۲', '3': '۳', '4': '۴', '5': '۵', '6': '۶', '7': '۷', '8': '۸', '9': '۹'}
+    return ''.join(persian_digits.get(ch, ch) for ch in str(text))
+
+def format_date_display(dt, lang=None):
+    if not lang:
+        lang = get_language() or 'fa'
+    
     if not dt:
-        return _("امروز")
+        return _("Today") if lang != 'fa' else "امروز"
+        
     today = date.today()
     msg_date = dt.date() if isinstance(dt, datetime) else dt
 
     if msg_date == today:
-        return _("امروز")
+        return _("Today") if lang != 'fa' else "امروز"
     elif msg_date == today - timedelta(days=1):
-        return _("دیروز")
+        return _("Yesterday") if lang != 'fa' else "دیروز"
     else:
-        try:
-            j_dt = jdatetime.date.fromgregorian(date=msg_date)
-            months = [_("فروردین"), _("اردیبهشت"), _("خرداد"), _("تیر"), _("مرداد"), _("شهریور"), _("مهر"), _("آبان"), _("آذر"), _("دی"), _("بهمن"), _("اسفند")]
-            return f"{j_dt.day} {months[j_dt.month - 1]} {j_dt.year}"
-        except Exception:
-            return msg_date.strftime("%Y-%m-%d")
+        if lang == 'fa':
+            try:
+                j_dt = jdatetime.date.fromgregorian(date=msg_date)
+                months = ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"]
+                raw_str = f"{j_dt.day} {months[j_dt.month - 1]} {j_dt.year}"
+                return to_persian_digits(raw_str)
+            except Exception:
+                return to_persian_digits(msg_date.strftime("%Y/%m/%d"))
+        else:
+            months_en = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+            return f"{msg_date.day} {months_en[msg_date.month - 1]} {msg_date.year}"
 
 class SupportChatConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
@@ -178,6 +191,7 @@ class SupportChatConsumer(AsyncJsonWebsocketConsumer):
 
     @database_sync_to_async
     def get_room_messages(self, room):
+        user_lang = getattr(self.user, 'preferred_language', 'fa') if hasattr(self, 'user') and self.user else 'fa'
         msgs = room.messages.select_related('sender').all()[:100]
         result = []
         for m in msgs:
@@ -199,7 +213,7 @@ class SupportChatConsumer(AsyncJsonWebsocketConsumer):
                 "attachment_type": m.attachment_type,
                 "is_operator": m.is_operator,
                 "created_at": m.created_at.strftime("%H:%M"),
-                "date_display": format_date_display(m.created_at),
+                "date_display": format_date_display(m.created_at, lang=user_lang),
                 "room_id": room.id
             })
         return result
@@ -221,5 +235,5 @@ class SupportChatConsumer(AsyncJsonWebsocketConsumer):
             "id": msg.id,
             "content": msg.content,
             "created_at": msg.created_at.strftime("%H:%M"),
-            "date_display": format_date_display(msg.created_at)
+            "date_display": format_date_display(msg.created_at, lang=getattr(sender, 'preferred_language', None))
         }

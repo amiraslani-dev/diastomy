@@ -125,8 +125,8 @@ x-data="{ isOpenLanguageBox: false, selectedLang: 'Persian', isOpenDownloadBox: 
                         class="flex flex-wrap items-center justify-center md:justify-start gap-x-4 md:gap-x-5 gap-y-2 text-[11px] md:text-[14px] font-medium text-white mb-4"
                     >
                         <span>{% blocktrans with count=movie.collection_items.count %}{{ count }} پارت{% endblocktrans %}</span>
-                        <span>{% for genre in movie.genres.all %}{{ genre.name }}{% if not forloop.last %}، {% endif %}{% endfor %}</span>
-                        <span dir="ltr">{% if movie.country %}{{ movie.country.name }}{% endif %}{% if movie.production_year %}<span class="text-[8px] mr-1">({{ movie.production_year }})</span>{% endif %}</span>
+                        <span>{% for genre in movie.genres.all %}<a href="{% url 'movie:genre_archive' genre.slug %}" class="hover:text-red-500 transition-colors">{{ genre.name }}</a>{% if not forloop.last %}، {% endif %}{% endfor %}</span>
+                        <span dir="ltr">{% if movie.country %}<a href="{% url 'movie:country_archive' movie.country.slug %}" class="hover:text-red-500 transition-colors">{{ movie.country.name }}</a>{% endif %}{% if movie.production_year %}<span class="text-[8px] mr-1">({{ movie.production_year }})</span>{% endif %}</span>
                         <span dir="ltr">+{{ movie.age_limit }}</span>
                         <span
                             class="flex items-center gap-1 tracking-wide"
@@ -499,7 +499,7 @@ x-data="{ isOpenLanguageBox: false, selectedLang: 'Persian', isOpenDownloadBox: 
                     </button>
 
                     <input type="hidden" id="comment-parent-id" value="">
-                    <button id="cancel-reply-btn" style="display:none;" onclick="cancelReply()" class="pl-4 pr-2 text-red-500 transition shrink-0 hover:text-red-400 text-xs">لغو پاسخ</button>
+                    <button id="cancel-reply-btn" style="display:none;" onclick="cancelReply()" class="pl-4 pr-2 text-red-500 transition shrink-0 hover:text-red-400 text-xs">{% trans "لغو پاسخ" %}</button>
                     <textarea id="comment-text"
                         placeholder="{% trans "نظرت رو اینجا بنویس ..." %}"
                         class="flex-grow h-full bg-transparent px-4 py-3 resize-none text-sm md:text-[15px] text-white outline-none text-right placeholder-[#ADADAD]"
@@ -554,7 +554,7 @@ x-data="{ isOpenLanguageBox: false, selectedLang: 'Persian', isOpenDownloadBox: 
                                         </p>
                                         <div class="flex items-center justify-end md:justify-start gap-4 text-gray-400 text-xs md:text-[13px] font-medium mt-4 md:mt-0" dir="ltr">
                                             <div class="flex items-center gap-1 text-white transition cursor-pointer" onclick="replyTo({{ comment.id }}, '{{ comment.user.username|escapejs }}')">
-                                                <span class="pt-0.5">پاسخ</span>
+                                                <span class="pt-0.5">{% trans "پاسخ" %}</span>
                                                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                     <path d="M18.1252 11.2501C18.1252 13.6626 16.1627 15.6251 13.7502 15.6251H5.00022C4.65522 15.6251 4.37522 15.3451 4.37522 15.0001C4.37522 14.6551 4.65522 14.3751 5.00022 14.3751H13.7502C15.4727 14.3751 16.8752 12.9734 16.8752 11.2501C16.8752 9.52673 15.4727 8.12506 13.7502 8.12506H4.00941L5.44272 9.55837C5.68689 9.80254 5.68689 10.1984 5.44272 10.4426C5.32106 10.5642 5.16103 10.6259 5.00103 10.6259C4.84103 10.6259 4.68101 10.5651 4.55934 10.4426L2.05934 7.94257C2.00184 7.88507 1.95612 7.81598 1.92445 7.73932C1.86112 7.58682 1.86112 7.41432 1.92445 7.26182C1.95612 7.18515 2.00184 7.11587 2.05934 7.05837L4.55934 4.55837C4.80351 4.3142 5.19937 4.3142 5.44354 4.55837C5.6877 4.80254 5.6877 5.1984 5.44354 5.44257L4.01023 6.87587H13.751C16.1627 6.87504 18.1252 8.83756 18.1252 11.2501Z" fill="white"/>
                                                 </svg>
@@ -627,7 +627,7 @@ x-data="{ isOpenLanguageBox: false, selectedLang: 'Persian', isOpenDownloadBox: 
                                     </p>
                                     <div class="flex items-center justify-end md:justify-start gap-4 text-gray-400 text-xs md:text-[13px] font-medium mt-4 md:mt-0" dir="ltr">
                                         <div class="flex items-center gap-1 text-white transition cursor-pointer" onclick="replyTo({{ comment.id }}, '{{ comment.user.username|escapejs }}')">
-                                            <span class="pt-0.5">پاسخ</span>
+                                            <span class="pt-0.5">{% trans "پاسخ" %}</span>
                                             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                 <path d="M18.1252 11.2501C18.1252 13.6626 16.1627 15.6251 13.7502 15.6251H5.00022C4.65522 15.6251 4.37522 15.3451 4.37522 15.0001C4.37522 14.6551 4.65522 14.3751 5.00022 14.3751H13.7502C15.4727 14.3751 16.8752 12.9734 16.8752 11.2501C16.8752 9.52673 15.4727 8.12506 13.7502 8.12506H4.00941L5.44272 9.55837C5.68689 9.80254 5.68689 10.1984 5.44272 10.4426C5.32106 10.5642 5.16103 10.6259 5.00103 10.6259C4.84103 10.6259 4.68101 10.5651 4.55934 10.4426L2.05934 7.94257C2.00184 7.88507 1.95612 7.81598 1.92445 7.73932C1.86112 7.58682 1.86112 7.41432 1.92445 7.26182C1.95612 7.18515 2.00184 7.11587 2.05934 7.05837L4.55934 4.55837C4.80351 4.3142 5.19937 4.3142 5.44354 4.55837C5.6877 4.80254 5.6877 5.1984 5.44354 5.44257L4.01023 6.87587H13.751C16.1627 6.87504 18.1252 8.83756 18.1252 11.2501Z" fill="white"/>
                                             </svg>
@@ -652,7 +652,7 @@ x-data="{ isOpenLanguageBox: false, selectedLang: 'Persian', isOpenDownloadBox: 
                             
                         {% endif %}
                     {% empty %}
-                        <p class="text-center text-[#ADADAD] py-4 text-[13px] md:text-[15px]">هنوز دیدگاهی ثبت نشده است. شما اولین نفر باشید!</p>
+                        <p class="text-center text-[#ADADAD] py-4 text-[13px] md:text-[15px]">{% trans "هنوز دیدگاهی ثبت نشده است. شما اولین نفر باشید!" %}</p>
                     {% endfor %}
                 </div>
 
@@ -1140,7 +1140,7 @@ x-data="{ isOpenLanguageBox: false, selectedLang: 'Persian', isOpenDownloadBox: 
                                 class="flex items-center justify-around gap-x-2"
                             >
                                 <a
-                                    href="#"
+                                    href="{{ site_settings.instagram_link|default:'#' }}"
                                     target="_blank"
                                     class="text-white flex font-medium text-[13px] md:text-base justify-center gap-x-2 items-center w-1/2 px-3 md:px-5 py-3 rounded-4xl bg-[linear-gradient(91.86deg,#7017FF_3.47%,#FE01BC_49.47%,#FE9101_96.47%)]"
                                 >
@@ -1160,7 +1160,7 @@ x-data="{ isOpenLanguageBox: false, selectedLang: 'Persian', isOpenDownloadBox: 
                                     <span>{% trans "اینستاگرام ما" %}</span>
                                 </a>
                                 <a
-                                    href="#"
+                                    href="{{ site_settings.telegram_link|default:'#' }}"
                                     target="_blank"
                                     class="text-white flex text-[13px] justify-center gap-x-2 items-center bg-[#00AAFF] w-1/2 px-3 md:px-5 py-3 rounded-4xl"
                                 >
@@ -1188,7 +1188,7 @@ x-data="{ isOpenLanguageBox: false, selectedLang: 'Persian', isOpenDownloadBox: 
                             x-transition
                             class="flex flex-col items-center justify-center py-10 text-sm text-gray-500"
                         >
-                            لینک‌های {% trans "نسخه دوبله" %} به زودی قرار می‌گیرد.
+                            {% trans "لینک‌های نسخه دوبله به زودی قرار می‌گیرد." %}
                         </div>
                     </div>
                 </div>

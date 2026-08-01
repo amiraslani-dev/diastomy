@@ -15,6 +15,7 @@ urlpatterns = [
     path('forgot-password-verify/', views.api_forgot_password_verify, name='raw_api_forgot_password_verify'),
     path('forgot-password-reset/', views.api_forgot_password_reset, name='raw_api_forgot_password_reset'),
     path('notifications/', views.api_notifications_list_view, name='raw_api_notifications'),
+    path('notifications/mark-read/', views.api_mark_notifications_read_view, name='raw_api_notifications_mark_read'),
     path('change-password/', views.api_change_password_view, name='raw_api_change_password'),
     path('update-player-quality/', views.api_update_player_quality_view, name='raw_api_update_player_quality'),
     path('set-language/', views.api_set_language_view, name='raw_api_set_language'),

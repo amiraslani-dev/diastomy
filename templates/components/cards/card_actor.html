@@ -1,22 +1,23 @@
 {% load static %}
-                    <div
-                        class="flex flex-col items-center shrink-0 snap-start group cursor-pointer w-[75px] md:w-[100px] lg:w-[calc(10%-18px)]"
-                    >
-                        <div
-                            class="w-full aspect-square rounded-full border-[2px] border-white/80 group-hover:border-red-600 group-hover:shadow-[0_0_20px_rgba(220,38,38,0.5)] transition-all duration-300 mb-3 md:mb-4"
-                        >
-                            <img
-                                src="{% if actor.photo %}{{ actor.photo.url }}{% else %}{% static 'public/assets/img/actor1.jpg' %}{% endif %}"
-                                draggable="false"
-                                class="object-cover w-full h-full rounded-full shadow-inner pointer-events-none"
-                                alt="{{ actor.name }}"
-                            />
-                        </div>
-                        <div class="w-full px-1 text-center">
-                            <p
-                                class="text-[13px] md:text-[15px] text-white group-hover:text-red-600 font-medium md:font-bold leading-tight transition-colors text-center"
-                            >
-                                {{ actor.name }}
-                            </p>
-                        </div>
-                    </div>
+<a
+    href="{% if actor %}{{ actor.get_absolute_url }}{% else %}#{% endif %}"
+    class="flex flex-col items-center shrink-0 snap-start group cursor-pointer w-[75px] md:w-[100px] lg:w-[calc(10%-18px)]"
+>
+    <div
+        class="w-full aspect-square rounded-full border-[2px] border-white/80 group-hover:border-red-600 group-hover:shadow-[0_0_20px_rgba(220,38,38,0.5)] transition-all duration-300 mb-3 md:mb-4 overflow-hidden"
+    >
+        <img
+            src="{% if actor.photo %}{{ actor.photo.url }}{% else %}{% static 'public/assets/img/actor1.jpg' %}{% endif %}"
+            draggable="false"
+            class="object-cover w-full h-full rounded-full shadow-inner pointer-events-none"
+            alt="{{ actor.name|default:'بازیگر' }}"
+        />
+    </div>
+    <div class="w-full px-1 text-center">
+        <p
+            class="text-[13px] md:text-[15px] text-white group-hover:text-red-600 font-medium md:font-bold leading-tight transition-colors text-center"
+        >
+            {{ actor.name|default:"اسم بازیگر" }}
+        </p>
+    </div>
+</a>

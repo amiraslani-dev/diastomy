@@ -42,14 +42,22 @@ class Subscription(models.Model):
 class Payment(models.Model):
     STATUS_CHOICES = (
         ('PENDING', 'در انتظار پرداخت'),
+        ('AWAITING_VERIFICATION', 'در انتظار تایید ادمین'),
         ('SUCCESS', 'پرداخت موفق'),
         ('FAILED', 'پرداخت ناموفق'),
+    )
+    PAYMENT_METHOD_CHOICES = (
+        ('DIRECT', 'درگاه پرداخت آنلاین'),
+        ('CRYPTO', 'پرداخت کریپتویی'),
     )
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='payments', verbose_name="کاربر")
     subscription = models.ForeignKey(Subscription, on_delete=models.SET_NULL, null=True, blank=True, related_name='payments', verbose_name="اشتراک مربوطه")
     amount = models.DecimalField(max_length=12, decimal_places=0, max_digits=12, verbose_name="مبلغ (تومان)")
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, default='DIRECT', verbose_name="روش پرداخت")
     tracking_code = models.CharField(max_length=100, blank=True, verbose_name="کد رهگیری بانکی")
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING', verbose_name="وضعیت پرداخت")
+    crypto_receipt_image = models.ImageField(upload_to='crypto_receipts/', null=True, blank=True, verbose_name="عکس رسید کریپتو")
+    crypto_tx_hash = models.CharField(max_length=255, blank=True, verbose_name="کد/لینک پیگیری کریپتو")
+    status = models.CharField(max_length=25, choices=STATUS_CHOICES, default='PENDING', verbose_name="وضعیت پرداخت")
     discount_code = models.CharField(max_length=50, blank=True, verbose_name="کد تخفیف")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ثبت تراکنش")
 

@@ -1,142 +1,153 @@
-{% load i18n %}
-{% load static %}
-                        <li
-                            class="relative flex flex-col w-full h-full splide__slide"
-                            dir="rtl"
+{% load i18n static %}
+<li
+    class="relative flex flex-col w-full h-full splide__slide"
+    dir="rtl"
+>
+    <div class="absolute inset-0 z-0">
+        <img
+            src="{% if item.banner_mobile %}{{ item.banner_mobile.url }}{% else %}{% static 'public/assets/img/banner-mobile.webp' %}{% endif %}"
+            alt="{{ item.title|default:'Godzilla vs Kong' }}"
+            class="object-cover w-full h-full origin-center md:hidden"
+        />
+        <img
+            src="{% if item.banner %}{{ item.banner.url }}{% else %}{% static 'public/assets/img/banner.jpg' %}{% endif %}"
+            alt="{{ item.title|default:'Godzilla vs Kong' }}"
+            class="hidden md:block object-cover w-full h-full origin-center"
+        />
+
+        <div class="absolute inset-0 bg-black/5"></div>
+        <div
+            class="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60"
+        ></div>
+        <div
+            class="absolute inset-0 bg-red-900/10 mix-blend-multiply"
+        ></div>
+        <div
+            class="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-[#0a0000]/70 via-[#2a0404]/30 to-transparent"
+        ></div>
+    </div>
+
+    <div
+        class="relative z-10 flex flex-col items-center justify-end flex-grow w-full h-full px-4 pt-28 md:pt-36 pb-12 md:pb-20 lg:pb-16"
+    >
+        <div
+            class="w-full max-w-[85%] md:max-w-[45%] mx-auto flex flex-col items-center md:items-stretch text-center md:text-right"
+        >
+            <div
+                class="flex items-center justify-between w-full mb-1 md:hidden md:px-4"
+                dir="ltr"
+            >
+                <div class="flex items-center gap-1">
+                    <svg class="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    <span
+                        class="font-bold tracking-widest text-white md:text-sm"
+                        ><span
+                            class="font-normal text-gray-200"
+                            >10/</span
+                        ><span class="text-red-500"
+                            >{{ item.imdb_rating|default:"8.2" }}</span
+                        ></span
+                    >
+                </div>
+                <p
+                    class="font-bold text-white md:text-sm"
+                >
+                    {{ item.title|default:"فیلم سینمایی 2026" }}
+                </p>
+            </div>
+
+            <p
+                class="hidden md:block text-sm md:text-[24px] font-bold text-gray-200 mb-2 mr-2"
+            >
+                {{ item.title|default:"فیلم سینمایی 2026" }}
+            </p>
+
+            <h3
+                class="text-[28px] leading-[1.1] md:text-6xl lg:text-[57px] font-black mb-1 md:mb-7 drop-shadow-2xl text-center md:text-left md:self-end"
+                dir="ltr"
+            >
+                {% if item.english_title_primary %}
+                    {{ item.english_title_primary }}
+                    {% if item.english_title_secondary %}<span class="text-[#FF4040]">{{ item.english_title_secondary }}</span>{% endif %}
+                {% else %}
+                    GODZILLA
+                    <span class="text-[#FF4040]">VS</span>
+                    KONG
+                {% endif %}
+            </h3>
+
+            <div
+                class="flex flex-col items-center justify-between w-full gap-6 mt-1 md:flex-row"
+            >
+                <div
+                    class="flex flex-col items-center order-1 w-full gap-1 md:items-start md:order-1 md:w-auto"
+                >
+                    <div
+                        class="flex flex-row-reverse md:flex-row flex-wrap items-center justify-center md:justify-start gap-x-1 gap-y-2 text-[14px] md:text-sm text-[#E8E8E8] md:rounded-lg md:backdrop-blur-sm"
+                    >
+                        <span>{% if item.duration %}{{ item.duration }} {% trans "دقیقه" %}{% else %}138 {% trans "دقیقه" %}{% endif %}</span>
+                        <span
+                            class="text-gray-500 text-[8px]"
+                            >•</span
                         >
-                            <div class="absolute inset-0 z-0">
-                                <img
-                                    src="{% static 'public/assets/img/banner-mobile.webp' %}"
-                                    alt="Godzilla vs Kong"
-                                    class="object-cover w-full h-full origin-center md:hidden"
-                                />
-                                <img
-                                    src="{% static 'public/assets/img/banner.jpg' %}"
-                                    alt="Godzilla vs Kong"
-                                    class="hidden md:block object-cover w-full h-full origin-center"
-                                />
+                        <span class="font-sans"
+                            >{% if item.highest_quality %}{{ item.highest_quality.title }}{% else %}2160p 4K WEB-DL{% endif %}</span
+                        >
+                        <span
+                            class="text-gray-500 text-[8px]"
+                            >•</span
+                        >
+                        <span>
+                            {% for g in item.genres.all %}
+                                {{ g.name }}{% if not forloop.last %}، {% endif %}
+                            {% empty %}
+                                جنایی، درام
+                            {% endfor %}
+                        </span>
+                    </div>
 
-                                <div class="absolute inset-0 bg-black/5"></div>
-                                <div
-                                    class="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60"
-                                ></div>
-                                <div
-                                    class="absolute inset-0 bg-red-900/10 mix-blend-multiply"
-                                ></div>
-                                <div
-                                    class="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-[#0a0000]/70 via-[#2a0404]/30 to-transparent"
-                                ></div>
-                            </div>
+                    <div
+                        class="hidden md:flex items-center gap-1.5 font-sans text-sm"
+                    >
+                        <img
+                            class="max-w-[38px] rounded-[3px]"
+                            src="{% static 'public/assets/img/icons/imdb-icon.webp' %}"
+                            alt="imdb"
+                        />
+                        <span
+                            class="text-[#FF4040] font-bold text-lg"
+                            >{{ item.imdb_rating|default:"8.2" }}
+                            <span
+                                class="text-sm font-normal text-white"
+                                >/ 10</span
+                            ></span
+                        >
+                    </div>
+                </div>
 
-                            <div
-                                class="relative z-10 flex flex-col items-center justify-end flex-grow w-full h-full px-4 pb-12 md:pb-24 lg:pb-20"
-                            >
-                                <div
-                                    class="w-full max-w-[85%] md:max-w-[45%] mx-auto flex flex-col items-center md:items-stretch text-center md:text-right"
-                                >
-                                    <div
-                                        class="flex items-center justify-between w-full mb-1 md:hidden md:px-4"
-                                        dir="ltr"
-                                    >
-                                        <div class="flex items-center gap-1">
-                                            <svg class="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-<path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-</svg>
-                                            <span
-                                                class="font-bold tracking-widest text-white md:text-sm"
-                                                ><span
-                                                    class="font-normal text-gray-200"
-                                                    >10/</span
-                                                ><span class="text-red-500"
-                                                    >8.2</span
-                                                ></span
-                                            >
-                                        </div>
-                                        <p
-                                            class="font-bold text-white md:text-sm"
-                                        >
-                                            فیلم سینمایی 2024
-                                        </p>
-                                    </div>
-
-                                    <p
-                                        class="hidden md:block text-sm md:text-[24px] font-bold text-gray-200 mb-2 mr-2"
-                                    >
-                                        فیلم سینمایی 2026
-                                    </p>
-
-                                    <h3
-                                        class="text-[28px] leading-[1.1] md:text-6xl lg:text-[57px] font-black mb-1 md:mb-7 drop-shadow-2xl text-center md:text-left md:self-end"
-                                        dir="ltr"
-                                    >
-                                        GODZILLA
-                                        <span class="text-[#FF4040]">VS</span>
-                                        KONG
-                                    </h3>
-
-                                    <div
-                                        class="flex flex-col items-center justify-between w-full gap-6 mt-1 md:flex-row"
-                                    >
-                                        <div
-                                            class="flex flex-col items-center order-1 w-full gap-1 md:items-start md:order-1 md:w-auto"
-                                        >
-                                            <div
-                                                class="flex flex-row-reverse md:flex-row flex-wrap items-center justify-center md:justify-start gap-x-1 gap-y-2 text-[14px] md:text-sm text-[#E8E8E8] md:rounded-lg md:backdrop-blur-sm"
-                                            >
-                                                <span>138 دقیقه</span>
-                                                <span
-                                                    class="text-gray-500 text-[8px]"
-                                                    >•</span
-                                                >
-                                                <span class="font-sans"
-                                                    >2160p 4K WEB-DL</span
-                                                >
-                                                <span
-                                                    class="text-gray-500 text-[8px]"
-                                                    >•</span
-                                                >
-                                                <span>جنایی، درام</span>
-                                            </div>
-
-                                            <div
-                                                class="hidden md:flex items-center gap-1.5 font-sans text-sm"
-                                            >
-                                                <img
-                                                    class="max-w-[38px] rounded-[3px]"
-                                                    src="{% static 'public/assets/img/icons/imdb-icon.webp' %}"
-                                                    alt="imdb"
-                                                />
-                                                <span
-                                                    class="text-[#FF4040] font-bold text-lg"
-                                                    >8.2
-                                                    <span
-                                                        class="text-sm font-normal text-white"
-                                                        >/ 10</span
-                                                    ></span
-                                                >
-                                            </div>
-                                        </div>
-
-                                        <div
-                                            class="flex items-center justify-center order-2 w-full gap-2 mb-2 md:w-auto md:justify-start md:mb-0 md:order-2 md:self-auto"
-                                        >
-                                            <button
-                                                class="w-[3.25rem] h-[3.25rem] md:w-14 md:h-14 flex items-center justify-center bg-[#1A1A1A8A] hover:bg-[#1a1a1acc] md:backdrop-blur-sm rounded-full transition-colors order-2 md:order-2"
-                                            >
-                                                <svg fill="none" viewBox="0 0 14 16">
-<path
-                                                        d="M1.58812 15.8126C1.32431 15.8121 1.06516 15.7429 0.836172 15.6119C0.320547 15.3197 0 14.7525 0 14.1368V1.67586C0 1.0584 0.320547 0.492927 0.836172 0.20074C1.07061 0.0660055 1.33694 -0.00328197 1.60731 0.000119469C1.87769 0.00352091 2.14219 0.0794865 2.37316 0.220076L13.023 6.59492C13.2449 6.73409 13.4279 6.92735 13.5547 7.15658C13.6815 7.38581 13.7481 7.64349 13.7481 7.90547C13.7481 8.16744 13.6815 8.42513 13.5547 8.65435C13.4279 8.88358 13.2449 9.07684 13.023 9.21601L2.37145 15.5926C2.13507 15.7355 1.86433 15.8115 1.58812 15.8126Z"
-                                                        fill="white"
-                                                    />
-</svg>
-                                            </button>
-                                            <button
-                                                class="bg-[#d30808] hover:bg-red-700 text-white px-8 md:px-10 py-[0.8rem] md:py-4 rounded-full font-bold transition-all shadow-[0_0_25px_rgba(211,8,8,0.5)] text-sm md:text-base tracking-wide order-1 md:order-1"
-                                            >
-                                                {% trans "تماشای فیلم" %}
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
+                <div
+                    class="flex items-center justify-center order-2 w-full gap-2 mb-2 md:w-auto md:justify-start md:mb-0 md:order-2 md:self-auto"
+                >
+                    <button
+                        class="w-[3.25rem] h-[3.25rem] md:w-14 md:h-14 flex items-center justify-center bg-[#1A1A1A8A] hover:bg-[#1a1a1acc] md:backdrop-blur-sm rounded-full transition-colors order-2 md:order-2"
+                    >
+                        <svg class="w-3.5 h-4 md:w-4 md:h-4.5" fill="none" viewBox="0 0 14 16">
+                            <path
+                                d="M1.58812 15.8126C1.32431 15.8121 1.06516 15.7429 0.836172 15.6119C0.320547 15.3197 0 14.7525 0 14.1368V1.67586C0 1.0584 0.320547 0.492927 0.836172 0.20074C1.07061 0.0660055 1.33694 -0.00328197 1.60731 0.000119469C1.87769 0.00352091 2.14219 0.0794865 2.37316 0.220076L13.023 6.59492C13.2449 6.73409 13.4279 6.92735 13.5547 7.15658C13.6815 7.38581 13.7481 7.64349 13.7481 7.90547C13.7481 8.16744 13.6815 8.42513 13.5547 8.65435C13.4279 8.88358 13.2449 9.07684 13.023 9.21601L2.37145 15.5926C2.13507 15.7355 1.86433 15.8115 1.58812 15.8126Z"
+                                fill="white"
+                            />
+                        </svg>
+                    </button>
+                    <a
+                        href="{% if item %}{{ item.get_absolute_url }}{% else %}#{% endif %}"
+                        class="bg-[#d30808] hover:bg-red-700 text-white px-8 md:px-10 py-[0.8rem] md:py-4 rounded-full font-bold transition-all shadow-[0_0_25px_rgba(211,8,8,0.5)] text-sm md:text-base tracking-wide order-1 md:order-1 inline-flex items-center justify-center text-center"
+                    >
+                        {% trans "تماشای فیلم" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</li>

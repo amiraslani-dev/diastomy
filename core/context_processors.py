@@ -1,4 +1,4 @@
-from .models import HeaderSetting, FooterSetting, SiteLanguage
+from .models import HeaderSetting, FooterSetting, SiteLanguage, DashboardSetting, SiteSettings
 
 def header_settings(request):
     fallback_menu = [
@@ -14,7 +14,10 @@ def header_settings(request):
     admin_unread_count = 0
     total_saved_count = 0
     
+    unread_notifications_count = 0
     if request.user.is_authenticated:
+        from accounts.services import get_unread_notifications_count
+        unread_notifications_count = get_unread_notifications_count(request.user)
         total_saved_count = request.user.movie_bookmarks.count() + request.user.series_bookmarks.count()
         
         if request.user.is_staff:
@@ -33,12 +36,15 @@ def header_settings(request):
         ]
         
     return {
+        'site_settings': SiteSettings.objects.first(),
         'header_settings': HeaderSetting.objects.first(),
         'footer_settings': FooterSetting.objects.first(),
+        'dashboard_setting': DashboardSetting.objects.first(),
         'fallback_menu': fallback_menu,
         'admin_notifications': admin_notifications,
         'admin_unread_count': admin_unread_count,
         'total_saved_count': total_saved_count,
+        'unread_notifications_count': unread_notifications_count,
         'site_languages': active_langs,
     }
 

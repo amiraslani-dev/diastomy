@@ -324,7 +324,7 @@
                         window.authFormContext.step = 'google_completion';
                     }
                 } else {
-                    window.location.href = data.redirect_url || '/';
+                    window.location.href = getRedirectTarget(data);
                 }
             } else {
                 Alpine.store('globalModal').show('error', '{% trans 'خطا' %}', data.error || '{% trans 'خطایی رخ داد' %}');
@@ -341,6 +341,15 @@
             scope: 'email profile openid',
             callback: handleGoogleCredentialResponse
         });
+    }
+
+    function getRedirectTarget(data) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const nextParam = urlParams.get('next');
+        if (nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//')) {
+            return nextParam;
+        }
+        return (data && data.redirect_url) ? data.redirect_url : '/';
     }
 
     function getCookie(name) {
@@ -471,14 +480,15 @@
                 if (!this.password || this.isSending) return;
                 this.isSending = true;
                 try {
+                    const nextParam = new URLSearchParams(window.location.search).get('next');
                     const res = await fetch('/accounts/api/login-password/', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-                        body: JSON.stringify({ phone: this.phone, password: this.password })
+                        body: JSON.stringify({ phone: this.phone, password: this.password, next: nextParam })
                     });
                     const data = await res.json();
                     if (res.ok) {
-                        window.location.href = data.redirect_url || '/';
+                        window.location.href = getRedirectTarget(data);
                     } else {
                         Alpine.store('globalModal').show('error', '{% trans 'خطا' %}', data.error || '{% trans 'خطایی رخ داد' %}');
                     }
@@ -531,17 +541,18 @@
                     this.isVerifying = true;
                     try {
                         const url = this.authType === 'google' ? '/accounts/api/google-verify-otp/' : '/accounts/api/verify-otp/';
+                        const nextParam = new URLSearchParams(window.location.search).get('next');
                         const res = await fetch(url, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-                            body: JSON.stringify({ phone: this.phone, code: fullOtp })
+                            body: JSON.stringify({ phone: this.phone, code: fullOtp, next: nextParam })
                         });
                         const data = await res.json();
                         if (res.ok) {
                             if (data.needs_registration) {
                                 this.step = 'register_info';
                             } else {
-                                window.location.href = data.redirect_url || '/';
+                                window.location.href = getRedirectTarget(data);
                             }
                         } else {
                             Alpine.store('globalModal').show('error', '{% trans 'خطا' %}', data.error || '{% trans 'کد نامعتبر است' %}');
@@ -566,14 +577,16 @@
                 }
                 this.isSending = true;
                 try {
+                    const nextParam = new URLSearchParams(window.location.search).get('next');
+                    const payload = Object.assign({}, this.regData, { next: nextParam });
                     const res = await fetch('/accounts/api/complete-registration/', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-                        body: JSON.stringify(this.regData)
+                        body: JSON.stringify(payload)
                     });
                     const data = await res.json();
                     if (res.ok) {
-                        window.location.href = data.redirect_url || '/';
+                        window.location.href = getRedirectTarget(data);
                     } else {
                         Alpine.store('globalModal').show('error', '{% trans 'خطا' %}', data.error || '{% trans 'خطایی رخ داد' %}');
                     }

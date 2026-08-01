@@ -1,0 +1,833 @@
+{% load i18n static %}
+
+<div
+    class="relative w-full py-10 mx-auto"
+    :class="(isFocused || isFilterOpen) ? 'z-[70]' : 'z-50'"
+    dir="rtl"
+    x-data="{
+        isFocused: false,
+        searchQuery: '',
+        isLoading: false,
+        timeout: null,
+        history: [],
+        saveSearch(query) {
+            const q = query.trim();
+            if (!q) return;
+            let searches = JSON.parse(localStorage.getItem('diastomy_recent_searches') || '[]');
+            searches = searches.filter(s => s.toLowerCase() !== q.toLowerCase());
+            searches.unshift(q);
+            if (searches.length > 8) searches = searches.slice(0, 8);
+            localStorage.setItem('diastomy_recent_searches', JSON.stringify(searches));
+            this.history = searches;
+        },
+        removeEntry(index) {
+            this.history.splice(index, 1);
+            localStorage.setItem('diastomy_recent_searches', JSON.stringify(this.history));
+        },
+        clearAll() {
+            this.history = [];
+            localStorage.removeItem('diastomy_recent_searches');
+        },
+        genresList: [{ slug: '', name: '{% trans "همه" %}' }{% for g in genres %}, { slug: '{{ g.slug|escapejs }}', name: '{{ g.name|escapejs }}' }{% endfor %}],
+        countriesList: [{ slug: '', name: '{% trans "همه" %}' }{% for c in countries %}, { slug: '{{ c.slug|escapejs }}', name: '{{ c.name|escapejs }}' }{% endfor %}],
+        genreSearch: '',
+        countrySearch: '',
+        yearFromSearch: '',
+        yearToSearch: '',
+        yearsList: Array.from({length: 101}, (_, i) => new Date().getFullYear() - i),
+        selectedType: '{% trans "همه" %}',
+        selectedDirector: '',
+        selectedRating: '',
+        selectedActor: '',
+        selectedGenre: '{% trans "همه" %}',
+        selectedGenreSlug: '',
+        selectedCountry: '{% trans "همه" %}',
+        selectedCountrySlug: '',
+        selectedYearFrom: '',
+        selectedYearTo: '',
+        openDropdown: null,
+        searchResults: [],
+        isFilterOpen: false,
+        tagsList: [
+            { key: 'dubbed', label: '{% trans "دوبله فارسی" %}' },
+            { key: 'subtitled', label: '{% trans "فقط زیرنویس" %}' },
+            { key: 'censored', label: '{% trans "سانسور شده" %}' },
+            { key: 'uncensored', label: '{% trans "بدون سانسور" %}' }
+        ],
+        activeFilters: [],
+        toggleFilter(key) {
+            if (this.activeFilters.includes(key)) {
+                this.activeFilters = this.activeFilters.filter(f => f !== key);
+            } else {
+                this.activeFilters.push(key);
+            }
+        },
+        get hasDropdownContent() {
+            return (this.searchQuery.length === 0 && this.history.length > 0) || this.searchQuery.length > 0;
+        },
+        submitSearch() {
+            const query = this.searchQuery.trim();
+            if (query.length > 0) {
+                this.saveSearch(query);
+                window.location.href = '{% url 'movie:archive' %}?q=' + encodeURIComponent(query);
+            }
+        },
+        applyFilters() {
+            this.isFilterOpen = false;
+            if (this.searchQuery.trim()) this.saveSearch(this.searchQuery.trim());
+            const params = new URLSearchParams();
+            if (this.searchQuery.trim()) params.append('q', this.searchQuery.trim());
+            
+            if (this.selectedType) {
+                if (this.selectedType === '{% trans "فیلم" %}' || this.selectedType === 'فیلم' || this.selectedType === 'movie') params.append('type', 'movie');
+                else if (this.selectedType === '{% trans "سریال" %}' || this.selectedType === 'سریال' || this.selectedType === 'series') params.append('type', 'series');
+                else if (this.selectedType === '{% trans "انیمیشن" %}' || this.selectedType === 'انیمیشن' || this.selectedType === 'animation') params.append('type', 'animation');
+            }
+
+            if (this.selectedDirector.trim()) params.append('director', this.selectedDirector.trim());
+            if (this.selectedActor.trim()) params.append('actor', this.selectedActor.trim());
+            if (this.selectedRating.trim()) params.append('rating', this.selectedRating.trim());
+
+            if (this.selectedGenreSlug) {
+                params.append('genre', this.selectedGenreSlug);
+            }
+            if (this.selectedCountrySlug) {
+                params.append('country', this.selectedCountrySlug);
+            }
+
+            if (this.selectedYearFrom) params.append('year_from', this.selectedYearFrom);
+            if (this.selectedYearTo) params.append('year_to', this.selectedYearTo);
+
+            if (this.activeFilters.length > 0) {
+                params.append('tags', this.activeFilters.join(','));
+            }
+
+            window.location.href = '{% url 'movie:archive' %}?' + params.toString();
+        },
+        init() {
+            try {
+                this.history = JSON.parse(localStorage.getItem('diastomy_recent_searches') || '[]');
+            } catch(e) {
+                this.history = [];
+            }
+            this.$watch('searchQuery', (value) => {
+                const query = value.trim();
+                if (query.length > 0) {
+                    this.isFocused = true;
+                    this.isLoading = true;
+                    clearTimeout(this.timeout);
+                    this.timeout = setTimeout(() => {
+                        fetch('{% url 'movie:api_live_search' %}?q=' + encodeURIComponent(query))
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    this.searchResults = data.results;
+                                }
+                                this.isLoading = false;
+                            })
+                            .catch(() => {
+                                this.isLoading = false;
+                            });
+                    }, 300);
+                } else {
+                    this.isLoading = false;
+                    this.searchResults = [];
+                }
+            });
+        }
+     }"
+>
+    <div
+        class="relative w-full"
+        @click.away="isFocused = false; openDropdown = null;"
+    >
+        <div
+            class="relative z-50 flex items-center justify-between px-5 py-3 transition-all duration-300 md:py-4 bg-transparent border border-white/10 rounded-[2rem] hover:border-white/30"
+            :class="(isFocused && hasDropdownContent) ? 'bg-[#0B0B0B] border-b-transparent rounded-t-[2rem] rounded-b-none' : ''"
+        >
+            <div
+                class="flex items-center w-full gap-3"
+                x-data="{ isMobile: window.innerWidth < 500 }"
+                @resize.window="isMobile = window.innerWidth < 500"
+            >
+                <svg
+                    width="29"
+                    height="29"
+                    viewBox="0 0 29 29"
+                    fill="none"
+                    class="shrink-0"
+                >
+                    <path
+                        d="M28.1167 26.5708L22.5152 20.9694C24.3877 18.7483 25.5208 15.8856 25.5208 12.7604C25.5208 5.72396 19.7969 0 12.7604 0C5.72396 0 0 5.72396 0 12.7604C0 19.7969 5.72396 25.5208 12.7604 25.5208C15.8856 25.5208 18.7484 24.3877 20.9694 22.5152L26.5708 28.1167C26.7837 28.3296 27.0637 28.4375 27.3437 28.4375C27.6237 28.4375 27.9038 28.331 28.1167 28.1167C28.544 27.6908 28.544 26.9981 28.1167 26.5708ZM2.1875 12.7604C2.1875 6.93 6.93 2.1875 12.7604 2.1875C18.5908 2.1875 23.3333 6.93 23.3333 12.7604C23.3333 18.5908 18.5908 23.3333 12.7604 23.3333C6.93 23.3333 2.1875 18.5908 2.1875 12.7604Z"
+                        fill="white"
+                    />
+                </svg>
+                <input
+                    type="text"
+                    x-model="searchQuery"
+                    @focus="isFocused = true"
+                    @input="isFocused = true"
+                    @keydown.enter="submitSearch()"
+                    :placeholder="isMobile ? '{% trans "جستجوی فیلم و سریال و ..." %}' : '{% trans "جستجوی فیلم و سریال و بازیگر و ژانر و ..." %}'"
+                    class="search-box-input w-full bg-transparent text-white text-base md:text-[15px] outline-none placeholder-[#B3B3B3] font-light pb-0.5"
+                    placeholder="{% trans "جستجوی فیلم و سریال و بازیگر و ژانر و ..." %}"
+                />
+            </div>
+
+            <button
+                @click.stop="isFilterOpen = true; isFocused = false;"
+                class="pl-2 pr-3 mr-2 text-gray-400 transition-colors cursor-pointer shrink-0 hover:text-white border-white/10"
+            >
+                <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
+                    <path
+                        d="M7.5 4.0625C4.915 4.0625 2.8125 6.165 2.8125 8.75C2.8125 11.335 4.915 13.4375 7.5 13.4375C10.085 13.4375 12.1875 11.335 12.1875 8.75C12.1875 6.165 10.085 4.0625 7.5 4.0625ZM7.5 11.5625C5.94875 11.5625 4.6875 10.3012 4.6875 8.75C4.6875 7.19875 5.94875 5.9375 7.5 5.9375C9.05125 5.9375 10.3125 7.19875 10.3125 8.75C10.3125 10.3012 9.05125 11.5625 7.5 11.5625ZM22.5 16.5625C19.915 16.5625 17.8125 18.665 17.8125 21.25C17.8125 23.835 19.915 25.9375 22.5 25.9375C25.085 25.9375 27.1875 23.835 27.1875 21.25C27.1875 18.665 25.085 16.5625 22.5 16.5625ZM22.5 24.0625C20.9487 24.0625 19.6875 22.8013 19.6875 21.25C19.6875 19.6987 20.9487 18.4375 22.5 18.4375C24.0513 18.4375 25.3125 19.6987 25.3125 21.25C25.3125 22.8013 24.0513 24.0625 22.5 24.0625ZM18.75 9.6875H26.25C26.7675 9.6875 27.1875 9.2675 27.1875 8.75C27.1875 8.2325 26.7675 7.8125 26.25 7.8125H18.75C18.2325 7.8125 17.8125 8.2325 17.8125 8.75C17.8125 9.2675 18.2325 9.6875 18.75 9.6875ZM11.25 20.3125H3.75C3.2325 20.3125 2.8125 20.7325 2.8125 21.25C2.8125 21.7675 3.2325 22.1875 3.75 22.1875H11.25C11.7675 22.1875 12.1875 21.7675 12.1875 21.25C12.1875 20.7325 11.7675 20.3125 11.25 20.3125Z"
+                        fill="#626262"
+                    />
+                </svg>
+            </button>
+        </div>
+
+        <div
+            x-show="isFocused && hasDropdownContent"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-[-10px]"
+            x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 translate-y-0"
+            x-transition:leave-end="opacity-0 translate-y-[-10px]"
+            class="absolute top-full left-0 right-0 -mt-[1px] z-40 bg-[#0B0B0B] border border-white/10 border-t-0 rounded-b-[2rem] pt-2 pb-6 shadow-2xl [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full"
+            style="max-height: {% if is_popup %}36vh{% else %}50vh{% endif %}; overflow: hidden auto; display: none"
+        >
+            <div x-show="searchQuery.length === 0">
+                <div class="flex items-center justify-between px-8 mt-4 mb-4">
+                    <span class="text-sm font-bold text-white md:text-base"
+                        >{% trans "جستجوهای قبلی" %}</span
+                    >
+                    <button
+                        @click="clearAll()"
+                        class="text-[#FF4727] hover:text-red-400 text-[15px] font-medium transition-colors"
+                    >
+                        {% trans "پاک کردن همه" %}
+                    </button>
+                </div>
+                <div class="flex flex-col">
+                    <template x-for="(item, index) in history" :key="index">
+                        <div
+                            @click="searchQuery = item; submitSearch()"
+                            class="group flex items-center justify-between px-8 py-4 border-t border-[#323232] hover:bg-white/5 transition-colors cursor-pointer"
+                        >
+                            <div
+                                class="flex items-center gap-3 text-gray-300 transition-colors group-hover:text-white"
+                            >
+                                <svg
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="#909090"
+                                    stroke-width="1.5"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <path
+                                        d="M22 12C22 17.52 17.52 22 12 22C6.48 22 2 17.52 2 12C2 6.48 6.48 2 12 2C17.52 2 22 6.48 22 12Z"
+                                    />
+                                    <path
+                                        d="M15.7109 15.18L12.6109 13.33C12.0709 13.01 11.6309 12.24 11.6309 11.61V7.51001"
+                                    />
+                                </svg>
+                                <span
+                                    class="text-[14px] md:text-[15px] text-white tracking-wide pt-0.5"
+                                    x-text="item"
+                                ></span>
+                            </div>
+                            <button
+                                @click.stop="removeEntry(index)"
+                                class="text-gray-500 transition-colors hover:text-white"
+                            >
+                                <svg
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="#909090"
+                                    stroke-width="1.5"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <path
+                                        d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z"
+                                    />
+                                    <path d="M9.16992 14.83L14.8299 9.17001" />
+                                    <path d="M14.8299 14.83L9.16992 9.17001" />
+                                </svg>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <div x-show="searchQuery.length > 0" style="display: none">
+                <div
+                    x-show="isLoading"
+                    class="flex flex-col items-center justify-center py-10 md:py-16"
+                    style="display: none"
+                >
+                    <div
+                        class="w-14 h-14 md:w-[60px] md:h-[60px] rounded-full border-[5px] border-[#2A2A2A] border-t-[#ED1C24] animate-spin"
+                    ></div>
+                    <h3
+                        class="text-white text-[16px] md:text-[20px] font-bold mt-6 mb-2"
+                    >
+                        {% trans "در حال جستجو ..." %}
+                    </h3>
+                    <p
+                        class="text-[#909090] text-[13px] md:text-[15px] font-light"
+                    >
+                        {% trans "لطفا کمی صبر کنید." %}
+                    </p>
+                </div>
+
+                <div x-show="!isLoading" class="flex flex-col mt-2">
+                    <template
+                        x-for="result in searchResults"
+                        :key="result.id"
+                    >
+                        <a
+                            :href="result.url"
+                            class="group flex items-center justify-between px-6 md:px-8 py-3.5 border-t border-[#323232] hover:bg-white/5 transition-colors cursor-pointer"
+                        >
+                            <div class="flex items-center gap-4">
+                                <template x-if="result.image">
+                                    <img
+                                        :src="result.image"
+                                        alt="poster"
+                                        class="w-12 h-12 md:w-[50px] md:h-[50px] rounded-xl object-cover shadow-md"
+                                    />
+                                </template>
+                                <template x-if="!result.image">
+                                    <div
+                                        class="w-12 h-12 md:w-[50px] md:h-[50px] rounded-xl bg-white/10 flex items-center justify-center text-white shrink-0 font-bold text-xs shadow-md"
+                                    >
+                                        🎬
+                                    </div>
+                                </template>
+                                <div class="flex flex-col gap-1">
+                                    <span
+                                        class="text-white font-medium text-[16px] md:text-[16px] tracking-wide"
+                                        x-text="result.title"
+                                    ></span>
+                                    <span
+                                        class="text-white text-[14px] font-light"
+                                        x-text="result.genre"
+                                    ></span>
+                                </div>
+                            </div>
+
+                            <div
+                                class="flex items-center gap-1.5 bg-[#292B33] px-3 py-1.5 rounded-full"
+                            >
+                                <svg
+                                    width="18"
+                                    height="18"
+                                    viewBox="0 0 18 18"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
+                                    <path
+                                        fill-rule="evenodd"
+                                        clip-rule="evenodd"
+                                        d="M9.82819 3.13275L11.1988 5.87082C11.3331 6.13962 11.5923 6.32601 11.893 6.36914L14.959 6.81046C15.7165 6.91983 16.018 7.83791 15.4697 8.36396L13.2526 10.4943C13.0348 10.7038 12.9356 11.005 12.9871 11.3007L13.5103 14.3084C13.6392 15.0524 12.8473 15.62 12.1702 15.268L9.42991 13.847C9.16127 13.7076 8.83952 13.7076 8.57009 13.847L5.82975 15.268C5.15267 15.62 4.3608 15.0524 4.49043 14.3084L5.01288 11.3007C5.06443 11.005 4.96525 10.7038 4.74736 10.4943L2.53026 8.36396C1.98204 7.83791 2.28348 6.91983 3.041 6.81046L6.10699 6.36914C6.40765 6.32601 6.66771 6.13962 6.80203 5.87082L8.17181 3.13275C8.51074 2.45575 9.48926 2.45575 9.82819 3.13275Z"
+                                        fill="#FFD600"
+                                    />
+                                </svg>
+                                <span
+                                    class="text-white font-medium text-[13px] md:text-[14px] pt-0.5"
+                                    x-text="result.rating"
+                                ></span>
+                            </div>
+                        </a>
+                    </template>
+                    <div
+                        x-show="searchResults.length === 0"
+                        class="py-1"
+                    >
+                        {% include 'components/empty_state.html' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if not hide_description %}
+    <p
+        :class="!(isFocused && hasDropdownContent) ? 'opacity-100 visible' : 'opacity-0 invisible'"
+        class="mt-6 text-white text-[14px] md:text-[16px] leading-[30px] px-2 transition-all duration-300 opacity-100 visible"
+    >
+        {% trans "عنوان فیلم، سریال مورد نظر خود را جستجو کنید و یا از طریق فیلترهای موجود، فیلم و سریال و بازیگر مورد علاقه خود را پیدا کنید." %}
+    </p>
+    {% endif %}
+
+    <template x-teleport="body">
+        <div
+            x-show="isFilterOpen"
+            x-transition.opacity.duration.300ms
+            class="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto"
+            style="display: none; z-index: 100000000 !important;"
+        >
+            <div
+                class="fixed inset-0 bg-black/80"
+                style="z-index: 100000000 !important;"
+                @click="isFilterOpen = false"
+            ></div>
+
+            <div
+                class="relative w-full max-w-[600px] backdrop-blur-md rounded-[2rem] p-5 md:p-8 shadow-2xl flex flex-col gap-6 overflow-visible my-auto z-10"
+                @click.stop="openDropdown = null"
+                style="
+                    z-index: 100000001 !important;
+                    border: 1px solid transparent;
+                    background:
+                        linear-gradient(#0c0c0ccc, #0c0c0ccc)
+                            padding-box,
+                        linear-gradient(
+                                164.36deg,
+                                rgba(255, 255, 255, 0.18) 5.68%,
+                                rgba(255, 255, 255, 0) 74.28%
+                            )
+                            border-box;
+                "
+            >
+                <div
+                    class="flex items-center justify-between w-full pb-4 border-b border-white/5"
+                >
+                    <span
+                        class="text-xl font-bold tracking-wide text-white"
+                        >{% trans "اعمال فیلتر" %}</span
+                    >
+                    <button
+                        @click.stop="isFilterOpen = false"
+                        class="transition-transform cursor-pointer hover:scale-110"
+                    >
+                        <svg
+                            width="26"
+                            height="26"
+                            viewBox="0 0 30 30"
+                            fill="none"
+                        >
+                            <path
+                                d="M18.625 2.5H11.375C10.525 2.5 9.32499 3.00001 8.72499 3.60001L3.60001 8.72501C3.00001 9.32501 2.5 10.525 2.5 11.375V18.625C2.5 19.475 3.00001 20.675 3.60001 21.275L8.72499 26.4C9.32499 27 10.525 27.5 11.375 27.5H18.625C19.475 27.5 20.675 27 21.275 26.4L26.4 21.275C27 20.675 27.5 19.475 27.5 18.625V11.375C27.5 10.525 27 9.32501 26.4 8.72501L21.275 3.60001C20.675 3.00001 19.475 2.5 18.625 2.5Z"
+                                stroke="white"
+                                stroke-width="1.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            />
+                            <path
+                                d="M10.625 19.375L19.375 10.625"
+                                stroke="white"
+                                stroke-width="1.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            />
+                            <path
+                                d="M19.375 19.375L10.625 10.625"
+                                stroke="white"
+                                stroke-width="1.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            />
+                        </svg>
+                    </button>
+                </div>
+
+                <div
+                    class="grid grid-cols-2 gap-4 md:grid-cols-6 md:gap-5"
+                >
+                    <div
+                        class="col-span-2 md:col-span-3 flex flex-col gap-1.5 relative"
+                        :class="openDropdown === 'type' ? 'z-[60]' : 'z-10'"
+                    >
+                        <label
+                            class="text-white text-[13px] md:text-[14px] font-medium pr-2"
+                            >{% trans "نوع" %}</label
+                        >
+                        <button
+                            @click.stop="openDropdown = openDropdown === 'type' ? null : 'type'"
+                            class="w-full h-[46px] cursor-pointer bg-transparent border border-[#A6A6A6]/10 rounded-[50px] px-4 md:px-5 flex items-center justify-between text-white focus:border-white transition-colors text-sm"
+                        >
+                            <span x-text="selectedType"></span>
+                            <svg
+                                class="w-4 h-4 text-[#A6A6A6] transition-transform"
+                                :class="openDropdown === 'type' ? 'rotate-180' : ''"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M19 9l-7 7-7-7"
+                                />
+                            </svg>
+                        </button>
+                        <div
+                            x-show="openDropdown === 'type'"
+                            x-transition
+                            class="absolute top-[calc(100%+8px)] right-0 w-full bg-[#000] divide-y divide-white/5 border border-white/10 rounded-2xl overflow-hidden shadow-2xl"
+                        >
+                            <div
+                                class="max-h-48 divide-y divide-white/6 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full"
+                            >
+                                <template
+                                    x-for="item in ['{% trans "همه" %}', '{% trans "فیلم" %}', '{% trans "سریال" %}']"
+                                >
+                                    <div
+                                        @click.stop="selectedType = item; openDropdown = null"
+                                        class="px-5 py-2.5 hover:bg-white/10 cursor-pointer text-white transition-colors text-sm"
+                                        x-text="item"
+                                    ></div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        class="col-span-2 md:col-span-3 flex flex-col gap-1.5 z-10"
+                    >
+                        <label
+                            class="text-white text-[13px] md:text-[14px] font-medium pr-2"
+                            >{% trans "کارگردان" %}</label
+                        >
+                        <input
+                            type="text"
+                            x-model="selectedDirector"
+                            placeholder="Todd Philips"
+                            class="w-full h-[46px] bg-transparent border border-[#A6A6A6]/10 rounded-[50px] px-4 md:px-5 text-white outline-none placeholder-[#A6A6A6] focus:border-white transition-colors text-base md:text-sm"
+                        />
+                    </div>
+
+                    <div
+                        class="col-span-2 md:col-span-3 flex flex-col gap-1.5 z-10"
+                    >
+                        <label
+                            class="text-white text-[13px] md:text-[14px] font-medium pr-2"
+                            >{% trans "بازیگران" %}</label
+                        >
+                        <input
+                            type="text"
+                            x-model="selectedActor"
+                            placeholder="Emilia Clarke"
+                            class="w-full h-[46px] bg-transparent border border-[#A6A6A6]/10 rounded-[50px] px-4 md:px-5 text-white outline-none placeholder-[#A6A6A6] focus:border-white transition-colors text-base md:text-sm"
+                        />
+                    </div>
+
+                    <div
+                        class="col-span-1 md:col-span-3 flex flex-col gap-1.5 z-10"
+                    >
+                        <label
+                            class="text-white text-[13px] md:text-[14px] font-medium pr-2"
+                            >{% trans "حداقل امتیاز" %}</label
+                        >
+                        <input
+                            type="text"
+                            x-model="selectedRating"
+                            placeholder="7.8"
+                            class="w-full h-[46px] bg-transparent border border-[#A6A6A6]/10 rounded-[50px] px-4 md:px-5 text-white outline-none placeholder-[#A6A6A6] focus:border-white transition-colors text-base md:text-sm"
+                        />
+                    </div>
+
+                    <div
+                        class="col-span-1 md:col-span-2 flex flex-col gap-1.5 relative"
+                        :class="openDropdown === 'genre' ? 'z-[60]' : 'z-10'"
+                    >
+                        <label
+                            class="text-white text-[13px] md:text-[14px] font-medium pr-2"
+                            >{% trans "ژانر" %}</label
+                        >
+                        <button
+                            @click.stop="genreSearch = ''; openDropdown = openDropdown === 'genre' ? null : 'genre'; if (openDropdown === 'genre') $nextTick(() => $refs.genreInput?.focus())"
+                            class="w-full h-[46px] cursor-pointer bg-transparent border border-[#A6A6A6]/10 rounded-[50px] px-3 md:px-4 flex items-center justify-between text-white focus:border-white transition-colors text-sm"
+                        >
+                            <span x-text="selectedGenre"></span>
+                            <svg
+                                class="w-4 h-4 text-[#A6A6A6] transition-transform"
+                                :class="openDropdown === 'genre' ? 'rotate-180' : ''"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M19 9l-7 7-7-7"
+                                />
+                            </svg>
+                        </button>
+                        <div
+                            x-show="openDropdown === 'genre'"
+                            x-transition
+                            class="absolute top-[calc(100%+8px)] right-0 w-full bg-[#000] border border-white/10 rounded-2xl overflow-hidden shadow-2xl z-50"
+                        >
+                            <div class="p-2 border-b border-white/10 bg-[#0B0B0B]">
+                                <input
+                                    type="text"
+                                    x-ref="genreInput"
+                                    x-model="genreSearch"
+                                    @click.stop
+                                    placeholder="{% trans "جستجوی ژانر..." %}"
+                                    class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-red-500"
+                                />
+                            </div>
+                            <div
+                                class="divide-y divide-white/6 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full"
+                                style="max-height: 180px; overflow-y: auto;"
+                            >
+                                <template
+                                    x-for="item in genresList.filter(i => i.name.toLowerCase().includes(genreSearch.trim().toLowerCase()))"
+                                    :key="item.slug"
+                                >
+                                    <div
+                                        @click.stop="selectedGenre = item.name; selectedGenreSlug = item.slug; openDropdown = null;"
+                                        class="px-5 py-2.5 hover:bg-white/10 cursor-pointer text-white transition-colors text-sm"
+                                        x-text="item.name"
+                                    ></div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        class="col-span-1 md:col-span-2 flex flex-col gap-1.5"
+                    >
+                        <label
+                            class="text-white text-[13px] md:text-[14px] font-medium pr-2 whitespace-nowrap"
+                            >{% trans "سال ساخت" %}</label
+                        >
+
+                        <div
+                            class="flex items-center gap-1.5 w-full"
+                        >
+                            <div
+                                class="relative w-full"
+                                :class="openDropdown === 'yearFrom' ? 'z-[60]' : 'z-10'"
+                            >
+                                <button
+                                    @click.stop="yearFromSearch = ''; openDropdown = openDropdown === 'yearFrom' ? null : 'yearFrom'; if (openDropdown === 'yearFrom') $nextTick(() => $refs.yearFromInput?.focus())"
+                                    class="w-full h-[46px] cursor-pointer bg-transparent border border-[#A6A6A6]/10 rounded-[50px] px-2.5 flex items-center justify-between text-white focus:border-white transition-colors text-[12px] md:text-sm"
+                                >
+                                    <span
+                                        x-text="selectedYearFrom || '{% trans "از" %}'"
+                                        :class="!selectedYearFrom ? 'text-[#A6A6A6]' : ''"
+                                    ></span>
+                                    <svg
+                                        class="w-3.5 h-3.5 text-[#A6A6A6] transition-transform"
+                                        :class="openDropdown === 'yearFrom' ? 'rotate-180' : ''"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M19 9l-7 7-7-7"
+                                        />
+                                    </svg>
+                                </button>
+                                <div
+                                    x-show="openDropdown === 'yearFrom'"
+                                    x-transition
+                                    class="absolute top-[calc(100%+8px)] right-0 w-full bg-[#000] border border-white/10 rounded-2xl overflow-hidden shadow-2xl z-50"
+                                >
+                                    <div class="p-2 border-b border-white/10 bg-[#0B0B0B]">
+                                        <input
+                                            type="text"
+                                            x-ref="yearFromInput"
+                                            x-model="yearFromSearch"
+                                            @click.stop
+                                            placeholder="{% trans "سال..." %}"
+                                            class="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-xs text-white outline-none focus:border-red-500"
+                                        />
+                                    </div>
+                                    <div
+                                        class="divide-y divide-white/6 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full"
+                                        style="max-height: 160px; overflow-y: auto;"
+                                    >
+                                        <template
+                                            x-for="year in yearsList.filter(y => String(y).includes(yearFromSearch.trim()))"
+                                            :key="year"
+                                        >
+                                            <div
+                                                @click.stop="selectedYearFrom = year; openDropdown = null;"
+                                                class="px-4 py-2 text-sm text-white transition-colors cursor-pointer hover:bg-white/10"
+                                                x-text="year"
+                                            ></div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <span
+                                class="text-[#A6A6A6] font-bold text-xs"
+                                >-</span
+                            >
+
+                            <div
+                                class="relative w-full"
+                                :class="openDropdown === 'yearTo' ? 'z-[60]' : 'z-10'"
+                            >
+                                <button
+                                    @click.stop="yearToSearch = ''; openDropdown = openDropdown === 'yearTo' ? null : 'yearTo'; if (openDropdown === 'yearTo') $nextTick(() => $refs.yearToInput?.focus())"
+                                    class="w-full h-[46px] cursor-pointer bg-transparent border border-[#A6A6A6]/10 rounded-[50px] px-2.5 flex items-center justify-between text-white focus:border-white transition-colors text-[12px] md:text-sm"
+                                >
+                                    <span
+                                        x-text="selectedYearTo || '{% trans "تا" %}'"
+                                        :class="!selectedYearTo ? 'text-[#A6A6A6]' : ''"
+                                    ></span>
+                                    <svg
+                                        class="w-3.5 h-3.5 text-[#A6A6A6] transition-transform"
+                                        :class="openDropdown === 'yearTo' ? 'rotate-180' : ''"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M19 9l-7 7-7-7"
+                                        />
+                                    </svg>
+                                </button>
+                                <div
+                                    x-show="openDropdown === 'yearTo'"
+                                    x-transition
+                                    class="absolute top-[calc(100%+8px)] right-0 w-full bg-[#000] border border-white/10 rounded-2xl overflow-hidden shadow-2xl z-50"
+                                >
+                                    <div class="p-2 border-b border-white/10 bg-[#0B0B0B]">
+                                        <input
+                                            type="text"
+                                            x-ref="yearToInput"
+                                            x-model="yearToSearch"
+                                            @click.stop
+                                            placeholder="{% trans "سال..." %}"
+                                            class="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-xs text-white outline-none focus:border-red-500"
+                                        />
+                                    </div>
+                                    <div
+                                        class="divide-y divide-white/6 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full"
+                                        style="max-height: 160px; overflow-y: auto;"
+                                    >
+                                        <template
+                                            x-for="year in yearsList.filter(y => String(y).includes(yearToSearch.trim()))"
+                                            :key="year"
+                                        >
+                                            <div
+                                                @click.stop="selectedYearTo = year; openDropdown = null;"
+                                                class="px-4 py-2 text-sm text-white transition-colors cursor-pointer hover:bg-white/10"
+                                                x-text="year"
+                                            ></div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        class="col-span-1 md:col-span-2 flex flex-col gap-1.5 relative"
+                        :class="openDropdown === 'country' ? 'z-[60]' : 'z-10'"
+                    >
+                        <label
+                            class="text-white text-[13px] md:text-[14px] font-medium pr-2"
+                            >{% trans "کشور" %}</label
+                        >
+                        <button
+                            @click.stop="countrySearch = ''; openDropdown = openDropdown === 'country' ? null : 'country'; if (openDropdown === 'country') $nextTick(() => $refs.countryInput?.focus())"
+                            class="w-full h-[46px] cursor-pointer bg-transparent border border-[#A6A6A6]/10 rounded-[50px] px-3 md:px-4 flex items-center justify-between text-white focus:border-white transition-colors text-sm"
+                        >
+                            <span x-text="selectedCountry"></span>
+                            <svg
+                                class="w-4 h-4 text-[#A6A6A6] transition-transform"
+                                :class="openDropdown === 'country' ? 'rotate-180' : ''"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M19 9l-7 7-7-7"
+                                />
+                            </svg>
+                        </button>
+                        <div
+                            x-show="openDropdown === 'country'"
+                            x-transition
+                            class="absolute top-[calc(100%+8px)] right-0 w-full bg-[#000] border border-white/10 rounded-2xl overflow-hidden shadow-2xl z-50"
+                        >
+                            <div class="p-2 border-b border-white/10 bg-[#0B0B0B]">
+                                <input
+                                    type="text"
+                                    x-ref="countryInput"
+                                    x-model="countrySearch"
+                                    @click.stop
+                                    placeholder="{% trans "جستجوی کشور..." %}"
+                                    class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-red-500"
+                                />
+                            </div>
+                            <div
+                                class="divide-y divide-white/6 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full"
+                                style="max-height: 180px; overflow-y: auto;"
+                            >
+                                <template
+                                    x-for="item in countriesList.filter(i => i.name.toLowerCase().includes(countrySearch.trim().toLowerCase()))"
+                                    :key="item.slug"
+                                >
+                                    <div
+                                        @click.stop="selectedCountry = item.name; selectedCountrySlug = item.slug; openDropdown = null;"
+                                        class="px-5 py-2.5 hover:bg-white/10 cursor-pointer text-white transition-colors text-sm"
+                                        x-text="item.name"
+                                    ></div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-3 mt-1">
+                    <div
+                        class="text-white text-[13px] md:text-[14px] font-medium pr-2 block md:hidden"
+                    >
+                        {% trans "انتخاب براساس:" %}
+                    </div>
+                    <div
+                        class="grid grid-cols-2 md:flex md:flex-wrap items-center gap-2.5"
+                    >
+                        <template
+                            x-for="tag in tagsList"
+                            :key="tag.key"
+                        >
+                            <button
+                                @click.stop="toggleFilter(tag.key)"
+                                class="px-3 md:px-5 py-2 cursor-pointer rounded-[50px] text-[13px] md:text-sm font-medium transition-all duration-300 border text-center"
+                                :class="activeFilters.includes(tag.key) ? 'border-[#DD0202] text-white' : 'border-[#A6A6A6]/30 text-[#A6A6A6] hover:border-white hover:text-white'"
+                                x-text="tag.label"
+                            ></button>
+                        </template>
+                    </div>
+                </div>
+
+                <button
+                    @click.stop="applyFilters()"
+                    class="w-full bg-[#DD0202] cursor-pointer hover:bg-red-700 text-white font-bold text-[15px] md:text-lg py-3 rounded-[50px] mt-2 transition-colors"
+                >
+                    {% trans "جستجو" %}
+                </button>
+            </div>
+        </div>
+    </template>
+</div>

@@ -25,16 +25,46 @@ class SubscriptionAdmin(ModelAdminJalaliMixin, admin.ModelAdmin):
             return datetime2jalali(obj.end_date).strftime('%Y/%m/%d %H:%M')
         return "-"
 
+from django.utils.html import format_html
+from .services import process_payment_verification
+
 @admin.register(Payment)
 class PaymentAdmin(ModelAdminJalaliMixin, admin.ModelAdmin):
-    list_display = ['user', 'amount', 'tracking_code', 'status', 'get_created_at']
-    list_filter = ['status', 'created_at']
+    list_display = ['user', 'amount', 'payment_method', 'status', 'tracking_code', 'crypto_tx_hash', 'get_created_at']
+    list_filter = ['payment_method', 'status', 'created_at']
+    search_fields = ['user__username', 'tracking_code', 'crypto_tx_hash', 'discount_code']
+    readonly_fields = ['receipt_preview']
+    fields = ['user', 'subscription', 'amount', 'payment_method', 'status', 'tracking_code', 'crypto_tx_hash', 'crypto_receipt_image', 'receipt_preview', 'discount_code']
+    actions = ['approve_selected_payments']
+
+    @admin.display(description='پیش‌نمایش رسید کریپتو')
+    def receipt_preview(self, obj):
+        if obj.crypto_receipt_image:
+            return format_html('<a href="{0}" target="_blank"><img src="{0}" style="max-height: 250px; max-width: 100%; border-radius: 8px; border: 1px solid #ccc;" /></a>', obj.crypto_receipt_image.url)
+        return "رسیدی بارگذاری نشده است"
 
     @admin.display(description='تاریخ ثبت تراکنش', ordering='created_at')
     def get_created_at(self, obj):
         if obj.created_at:
             return datetime2jalali(obj.created_at).strftime('%Y/%m/%d %H:%M')
         return "-"
+
+    @admin.action(description='تایید و فعال‌سازی پرداخت‌های انتخاب شده')
+    def approve_selected_payments(self, request, queryset):
+        count = 0
+        for payment in queryset:
+            if payment.status != 'SUCCESS':
+                success, msg, _ = process_payment_verification(payment.user, payment.id)
+                if success:
+                    count += 1
+        self.message_user(request, f"تعداد {count} پرداخت با موفقیت تایید و اشتراک کاربر فعال گردید.")
+
+    def save_model(self, request, obj, form, change):
+        if change and 'status' in form.changed_data and obj.status == 'SUCCESS':
+            obj.save()
+            process_payment_verification(obj.user, obj.id)
+        else:
+            super().save_model(request, obj, form, change)
 
 
 @admin.register(DiscountCode)

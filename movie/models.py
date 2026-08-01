@@ -6,6 +6,7 @@ class Person(models.Model):
     name = models.CharField(max_length=255, verbose_name="نام")
     slug = models.SlugField(max_length=255, unique=True, verbose_name="اسلاگ")
     bio = models.TextField(blank=True, verbose_name="بیوگرافی")
+    meta_description = models.TextField(blank=True, null=True, verbose_name="توضیحات متا سئو")
     photo = models.ImageField(upload_to='persons/', blank=True, null=True, verbose_name="تصویر")
 
     is_actor = models.BooleanField(default=True, verbose_name="بازیگر است")
@@ -25,10 +26,15 @@ class Person(models.Model):
             role = " (کارگردان)"
         return f"{self.name}{role}"
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('movie:actor_detail', kwargs={'slug': self.slug})
+
 
 class Country(models.Model):
     name = models.CharField(max_length=100, verbose_name="نام کشور")
     slug = models.SlugField(max_length=100, unique=True, verbose_name="اسلاگ")
+    description = models.TextField(blank=True, verbose_name="توضیحات سئو / متا دسکریپشن")
 
     class Meta:
         verbose_name = "کشور"
@@ -37,10 +43,15 @@ class Country(models.Model):
     def __str__(self):
         return self.name
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('movie:country_archive', kwargs={'slug': self.slug})
+
 
 class Genre(models.Model):
     name = models.CharField(max_length=100, verbose_name="نام ژانر")
     slug = models.SlugField(max_length=100, unique=True, verbose_name="اسلاگ")
+    description = models.TextField(blank=True, verbose_name="توضیحات سئو / متا دسکریپشن")
 
     class Meta:
         verbose_name = "ژانر"
@@ -48,6 +59,10 @@ class Genre(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('movie:genre_archive', kwargs={'slug': self.slug})
 
 
 class Quality(models.Model):
@@ -89,6 +104,7 @@ class MovieBase(models.Model):
     banner_mobile = models.ImageField(upload_to='banners_mobile/', blank=True, null=True, verbose_name="تصویر بنر (موبایل)")
     screenshot_1 = models.ImageField(upload_to='screenshots/', blank=True, null=True, verbose_name="اسکرین‌شات ۱")
     screenshot_2 = models.ImageField(upload_to='screenshots/', blank=True, null=True, verbose_name="اسکرین‌شات ۲")
+    square_image = models.ImageField(upload_to='square_images/', blank=True, null=True, verbose_name="تصویر مربعی")
 
     imdb_rating = models.FloatField(null=True, blank=True, verbose_name="امتیاز IMDb")
     satisfaction_rate = models.PositiveIntegerField(default=100, verbose_name="درصد رضایت کاربران")
@@ -101,10 +117,22 @@ class MovieBase(models.Model):
 
     teaser = models.FileField(upload_to='teasers/', blank=True, null=True, verbose_name="فایل تیزر")
 
+    duration = models.PositiveIntegerField(help_text="مدت زمان به دقیقه", null=True, blank=True, verbose_name="مدت زمان (دقیقه)")
+    is_animation = models.BooleanField(default=False, verbose_name="انیمیشن است")
+    is_dubbed = models.BooleanField(default=False, verbose_name="دوبله فارسی")
+    has_subtitle = models.BooleanField(default=True, verbose_name="دارای زیرنویس")
+    is_censored = models.BooleanField(default=False, verbose_name="سانسور شده")
+
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ثبت")
 
     likes = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='%(class)s_likes', blank=True, verbose_name="لایک‌ها")
     bookmarks = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='%(class)s_bookmarks', blank=True, verbose_name="ذخیره‌شده‌ها (Save)")
+    @property
+    def imdb_rating_percent(self):
+        if self.imdb_rating is not None:
+            return min(100, max(0, int(round(self.imdb_rating * 10))))
+        return 83
+
     class Meta:
         abstract = True
 
@@ -121,6 +149,14 @@ class Movie(MovieBase):
         verbose_name = "فیلم"
         verbose_name_plural = "فیلم‌ها"
 
+    @property
+    def is_series(self):
+        return False
+
+    @property
+    def is_movie(self):
+        return True
+
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse('movie:movie_detail', kwargs={'slug': self.slug})
@@ -130,6 +166,14 @@ class Series(MovieBase):
     class Meta:
         verbose_name = "سریال"
         verbose_name_plural = "سریال‌ها"
+
+    @property
+    def is_series(self):
+        return True
+
+    @property
+    def is_movie(self):
+        return False
 
     def get_absolute_url(self):
         from django.urls import reverse
@@ -292,14 +336,14 @@ class MovieComment(models.Model):
 
 
 class SeriesComment(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="کاربر")
     series = models.ForeignKey(Series, on_delete=models.CASCADE, related_name='comments', verbose_name="سریال")
-    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='replies', verbose_name="پاسخ به")
-    text = models.TextField(verbose_name="متن نظر")
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ثبت")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="کاربر")
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies', verbose_name="دیدگاه مادر")
+    text = models.TextField(verbose_name="متن دیدگاه")
     is_approved = models.BooleanField(default=False, verbose_name="تایید شده")
-    likes = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='series_comment_likes', blank=True, verbose_name="لایک‌ها")
-    dislikes = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='series_comment_dislikes', blank=True, verbose_name="دیس‌لایک‌ها")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ثبت")
+    likes = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='liked_series_comments', verbose_name="لایک‌ها")
+    dislikes = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='disliked_series_comments', verbose_name="دیس‌لایک‌ها")
 
     class Meta:
         verbose_name = "دیدگاه سریال"
@@ -307,7 +351,8 @@ class SeriesComment(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.user.username} - {self.series.title}"
+        return f"{self.user} - {self.series.title}"
+
 
 
 # Signals to automatically trigger notifications on comments creation using centralized AdminNotification

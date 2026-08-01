@@ -1,7 +1,8 @@
 {% extends 'accounts/account_base.html' %}
 {% load static i18n %}
 
-{% block dashboard_title %}اشتراک{% endblock %}
+{% block title %}{% trans "اشتراک" %} | {% trans "دیاستومی" %}{% endblock %}
+{% block dashboard_title %}{% trans "اشتراک" %}{% endblock %}
 
 {% block profile_content %}
 {% with active_tab='subscription' %}
@@ -35,23 +36,6 @@
                                     >{% trans "بازگشت به سایت" %}</span
                                 >
                             </a>
-                            <button
-                                class="w-[56px] cursor-pointer h-[56px] rounded-full border border-[#4B4B4B] flex items-center justify-center hover:bg-white/5 transition-colors"
-                            >
-                                <svg
-                                    class="w-[28px] h-[28px]"
-                                    width="38"
-                                    height="38"
-                                    viewBox="0 0 38 38"
-                                    fill="none"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                >
-                                    <path
-                                        d="M26.125 19C26.125 22.9283 22.9283 26.125 19 26.125C15.0718 26.125 11.875 22.9283 11.875 19C11.875 15.0718 15.0718 11.875 19 11.875C22.9283 11.875 26.125 15.0718 26.125 19ZM20.1875 7.91667V4.75C20.1875 4.0945 19.6555 3.5625 19 3.5625C18.3445 3.5625 17.8125 4.0945 17.8125 4.75V7.91667C17.8125 8.57217 18.3445 9.10417 19 9.10417C19.6555 9.10417 20.1875 8.57217 20.1875 7.91667ZM20.1875 33.25V30.0833C20.1875 29.4278 19.6555 28.8958 19 28.8958C18.3445 28.8958 17.8125 29.4278 17.8125 30.0833V33.25C17.8125 33.9055 18.3445 34.4375 19 34.4375C19.6555 34.4375 20.1875 33.9055 20.1875 33.25ZM9.10417 19C9.10417 18.3445 8.57217 17.8125 7.91667 17.8125H4.75C4.0945 17.8125 3.5625 18.3445 3.5625 19C3.5625 19.6555 4.0945 20.1875 4.75 20.1875H7.91667C8.57217 20.1875 9.10417 19.6555 9.10417 19ZM34.4375 19C34.4375 18.3445 33.9055 17.8125 33.25 17.8125H30.0833C29.4278 17.8125 28.8958 18.3445 28.8958 19C28.8958 19.6555 29.4278 20.1875 30.0833 20.1875H33.25C33.9055 20.1875 34.4375 19.6555 34.4375 19ZM12.0032 12.0032C12.4672 11.5393 12.4672 10.7872 12.0032 10.3233L9.7644 8.08448C9.30049 7.62056 8.5484 7.62056 8.08448 8.08448C7.62056 8.5484 7.62056 9.30049 8.08448 9.7644L10.3233 12.0032C10.5545 12.2344 10.8585 12.3516 11.1625 12.3516C11.4665 12.3516 11.7705 12.2344 12.0032 12.0032ZM29.9155 29.9155C30.3794 29.4516 30.3794 28.6995 29.9155 28.2356L27.6767 25.9968C27.2128 25.5328 26.4607 25.5328 25.9968 25.9968C25.5328 26.4607 25.5328 27.2128 25.9968 27.6767L28.2356 29.9155C28.4668 30.1467 28.7708 30.2639 29.0748 30.2639C29.3788 30.2639 29.6844 30.1483 29.9155 29.9155ZM9.7644 29.9155L12.0032 27.6767C12.4672 27.2128 12.4672 26.4607 12.0032 25.9968C11.5393 25.5328 10.7872 25.5328 10.3233 25.9968L8.08448 28.2356C7.62056 28.6995 7.62056 29.4516 8.08448 29.9155C8.31565 30.1467 8.61965 30.2639 8.92365 30.2639C9.22765 30.2639 9.53165 30.1483 9.7644 29.9155ZM27.6767 12.0032L29.9155 9.7644C30.3794 9.30049 30.3794 8.5484 29.9155 8.08448C29.4516 7.62056 28.6995 7.62056 28.2356 8.08448L25.9968 10.3233C25.5328 10.7872 25.5328 11.5393 25.9968 12.0032C26.2279 12.2344 26.5319 12.3516 26.8359 12.3516C27.1399 12.3516 27.4439 12.2344 27.6767 12.0032Z"
-                                        fill="white"
-                                    />
-                                </svg>
-                            </button>
                         </div>
                     </div>
 
@@ -120,7 +104,7 @@
                             <div
                                 class="text-right text-[#787878] mt-1 w-full md:pr-2"
                             >
-                                {% trans "به تمامی مبالغ 10% مالیات بر ارزش افزوده اضافه خواهد شد." %}
+                                {{ dashboard_setting.vat_notice|default:_("به تمامی مبالغ 10% مالیات بر ارزش افزوده اضافه خواهد شد.") }}
                             </div>
 
                             <div
@@ -138,12 +122,15 @@
                                         fill="#7B7B7B"
                                     />
                                 </svg>
-                                <span
-                                    >{% trans "پشتیبانی:" %}
-                                    <span class="pt-0.5 text-white"
-                                        >90002542</span
-                                    ></span
+                                <a
+                                    href="tel:{{ dashboard_setting.support_phone|default:'90002542' }}"
+                                    class="inline-flex items-center gap-1 text-[#777]"
                                 >
+                                    <span>{% trans "پشتیبانی:" %}</span>
+                                    <span class="pt-0.5 text-white"
+                                        >{{ dashboard_setting.support_phone|default:"90002542" }}</span
+                                    >
+                                </a>
                             </div>
                         </div>
 
@@ -164,6 +151,34 @@
                                     type="button"
                                     class="shrink-0 cursor-pointer bg-white hover:bg-gray-200 transition-colors text-black font-bold text-[14px] px-7 py-3 rounded-[18px]"
                                  @click="applyDiscount">{% trans "ثبت" %}</button>
+                            </div>
+
+                            <!-- Payment Method Tabs -->
+                            <div class="flex items-center gap-2 bg-[#0A0A0A] border border-[#1A1A1A] p-1.5 rounded-[18px] w-full">
+                                <button
+                                    type="button"
+                                    @click="paymentMethod = 'DIRECT'"
+                                    :class="paymentMethod === 'DIRECT' ? 'bg-[#8C0000] text-white font-bold shadow-md' : 'text-[#888] hover:text-white font-medium'"
+                                    class="flex-1 py-3 px-3 rounded-[14px] text-[13px] md:text-[14px] transition-all flex items-center justify-center gap-2 cursor-pointer"
+                                >
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                                        <line x1="1" y1="10" x2="23" y2="10"></line>
+                                    </svg>
+                                    <span>{% trans "درگاه آنلاین" %}</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    @click="paymentMethod = 'CRYPTO'"
+                                    :class="paymentMethod === 'CRYPTO' ? 'bg-[#8C0000] text-white font-bold shadow-md' : 'text-[#888] hover:text-white font-medium'"
+                                    class="flex-1 py-3 px-3 rounded-[14px] text-[13px] md:text-[14px] transition-all flex items-center justify-center gap-2 cursor-pointer"
+                                >
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <path d="M9 8h6M9 12h6M9 16h6M12 4v16"></path>
+                                    </svg>
+                                    <span>{% trans "پرداخت کریپتو" %}</span>
+                                </button>
                             </div>
 
                             <div
@@ -209,7 +224,7 @@
                                 </div>
 
                                 <div
-                                    class="flex justify-between items-center w-full pt-1.5 mb-7"
+                                    class="flex justify-between items-center w-full pt-1.5 mb-6"
                                 >
                                     <span
                                         class="text-white font-bold text-[14px] md:text-[15px]"
@@ -221,19 +236,112 @@
                                     >
                                 </div>
 
+                                <!-- Direct Online Payment Button -->
                                 <button
                                     type="button"
+                                    x-show="paymentMethod === 'DIRECT'"
                                     @click="processPayment"
                                     :disabled="isProcessingPayment"
                                     class="w-full cursor-pointer bg-[#8C0000] hover:bg-red-700 transition-colors text-white font-bold text-[15px] py-4 rounded-[14px] shadow-[0_4px_15px_rgba(140,0,0,0.2)] outline-none disabled:opacity-50"
                                 >
-                                    <span x-show="!isProcessingPayment">{% trans "پرداخت" %}</span>
-                                    <span x-show="isProcessingPayment">در حال پردازش...</span>
+                                    <span x-show="!isProcessingPayment">{% trans "پرداخت آنلاین" %}</span>
+                                    <span x-show="isProcessingPayment">{% trans "در حال پردازش..." %}</span>
                                 </button>
+
+                                <!-- Crypto Payment Form -->
+                                <div x-show="paymentMethod === 'CRYPTO'" class="flex flex-col gap-4 border-t border-[#1F1F1F] pt-4 mt-1">
+                                    <p class="text-[12px] text-[#A0A0A0] leading-6">
+                                        {{ dashboard_setting.crypto_instructions|default:_("لطفاً معادل دلاری مبلغ را به آدرس کیف پول واریز کرده و تصویر رسید یا کد پیگیری تراکنش را ارسال نمایید.") }}
+                                    </p>
+
+                                    <!-- Wallet Address Box with Copy Icon -->
+                                    <div class="flex items-start justify-between bg-[#141414] border border-[#2A2A2A] rounded-[14px] p-3 gap-3">
+                                        <div class="flex flex-col min-w-0 flex-1 gap-1">
+                                            <span class="text-[11px] text-[#777]">{% trans "آدرس کیف پول:" %}</span>
+                                            <span class="text-[12px] md:text-[13px] text-white font-mono font-medium break-all whitespace-normal dir-ltr text-left select-all">
+                                                {{ dashboard_setting.crypto_wallet_address|default:"USDT (TRC20): TYourWalletAddressHere" }}
+                                            </span>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            @click="copyWallet('{{ dashboard_setting.crypto_wallet_address|default:"USDT (TRC20): TYourWalletAddressHere"|escapejs }}')"
+                                            class="shrink-0 p-2 text-gray-400 hover:text-white bg-[#222] hover:bg-[#333] rounded-[10px] transition-all cursor-pointer flex items-center justify-center mt-1"
+                                            title="{% trans "کپی آدرس" %}"
+                                        >
+                                            <template x-if="!copiedWallet">
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                                </svg>
+                                            </template>
+                                            <template x-if="copiedWallet">
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#28C76F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                                </svg>
+                                            </template>
+                                        </button>
+                                    </div>
+
+                                    <!-- Transaction Hash / Link Input -->
+                                    <div class="flex flex-col gap-1">
+                                        <label class="text-[12px] text-[#BBB]">{% trans "کد / لینک پیگیری تراکنش:" %}</label>
+                                        <input
+                                            type="text"
+                                            x-model="cryptoTxHash"
+                                            placeholder="{% trans "مثلاً: TxHash یا لینک تراکنش" %}"
+                                            class="bg-[#141414] border border-[#2A2A2A] rounded-[14px] p-3 text-white text-[13px] outline-none focus:border-[#8C0000] transition-colors placeholder-[#555]"
+                                        />
+                                    </div>
+
+                                    <!-- Receipt File Upload -->
+                                    <div class="flex flex-col gap-1">
+                                        <label class="text-[12px] text-[#BBB]">{% trans "تصویر رسید پرداخت:" %}</label>
+                                        <input
+                                            type="file"
+                                            x-ref="receiptInput"
+                                            @change="handleReceiptSelect"
+                                            accept="image/*"
+                                            class="hidden"
+                                        />
+                                        <div
+                                            @click="$refs.receiptInput.click()"
+                                            class="flex items-center justify-between bg-[#141414] border border-dashed border-[#333] hover:border-[#8C0000] rounded-[14px] p-3 cursor-pointer transition-colors"
+                                        >
+                                            <span class="text-[13px] text-[#777] truncate" x-text="cryptoReceiptFileName || '{% trans "انتخاب تصویر رسید..." %}'"></span>
+                                            <div class="flex items-center gap-2">
+                                                <button
+                                                    type="button"
+                                                    x-show="cryptoReceiptFile"
+                                                    @click.stop="removeReceipt()"
+                                                    class="text-red-500 hover:text-red-400 p-1 font-bold"
+                                                >
+                                                    ✕
+                                                </button>
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400">
+                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                    <polyline points="17 8 12 3 7 8"></polyline>
+                                                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Submit Crypto Button -->
+                                    <button
+                                        type="button"
+                                        @click="submitCryptoPayment"
+                                        :disabled="isSubmittingCrypto"
+                                        class="w-full cursor-pointer bg-[#8C0000] hover:bg-red-700 transition-colors text-white font-bold text-[14px] py-3.5 rounded-[14px] shadow-[0_4px_15px_rgba(140,0,0,0.2)] outline-none disabled:opacity-50 mt-1"
+                                    >
+                                        <span x-show="!isSubmittingCrypto">{% trans "ثبت و ارسال رسید" %}</span>
+                                        <span x-show="isSubmittingCrypto">{% trans "در حال ارسال..." %}</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
-                        <div
+                        <a
+                            href="tel:{{ dashboard_setting.support_phone|default:'90002542' }}"
                             class="flex md:hidden items-center justify-center gap-2 text-[#777] text-[15px] w-full mb-6 mt-6"
                         >
                             <svg
@@ -252,9 +360,9 @@
                             </svg>
                             <span
                                 >{% trans "پشتیبانی:" %}
-                                <span class="text-white">90002542</span></span
+                                <span class="text-white">{{ dashboard_setting.support_phone|default:"90002542" }}</span></span
                             >
-                        </div>
+                        </a>
                     </div>
 </main>
 

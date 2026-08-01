@@ -1,3 +1,4 @@
+{% load i18n %}
         <div
             class="fixed bottom-0 left-0 right-0 z-[100] md:hidden flex justify-center"
         >
@@ -42,7 +43,7 @@
                     dir="ltr"
                 >
                     <a
-                        href="#"
+                        href="{% url 'accounts:user_info' %}"
                         class="flex flex-col items-center justify-center w-12 h-12 text-white hover:text-[#ED1C24] transition-colors"
                     >
                         <svg
@@ -71,7 +72,7 @@
                     </a>
 
                     <a
-                        href="#"
+                        href="{% url 'movie:search' %}"
                         class="flex flex-col items-center justify-center w-12 h-12 text-white hover:text-[#ED1C24] transition-colors"
                     >
                         <svg
@@ -91,7 +92,7 @@
                     <div class="w-[85px]"></div>
 
                     <a
-                        href="#"
+                        href="{% url 'movie:search' %}"
                         class="flex flex-col items-center justify-center w-12 h-12 text-white hover:text-[#ED1C24] transition-colors"
                     >
                         <svg
@@ -119,7 +120,7 @@
                     </a>
 
                     <a
-                        href="#"
+                        href="{% url 'movie:archive' %}"
                         class="flex flex-col items-center justify-center w-12 h-12 text-white hover:text-[#ED1C24] transition-colors"
                     >
                         <svg
@@ -138,7 +139,7 @@
                 </div>
 
                 <a
-                    href="#"
+                    href="{% url 'home' %}"
                     class="absolute left-1/2 top-[-20px] -translate-x-1/2 w-[60px] h-[60px] p-[1px] rounded-full hover:scale-105 transition-transform z-20 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,#990006_99.14%)]"
                 >
                     <div

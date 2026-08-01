@@ -30,3 +30,22 @@ class FooterMenuColumn2TranslationOptions(TranslationOptions):
 @register(UserTasteSettings)
 class UserTasteSettingsTranslationOptions(TranslationOptions):
     fields = ('title',)
+
+from .models import DashboardSetting, ActorsPageSetting, ArchivePageSetting, HomePageSetting
+
+@register(DashboardSetting)
+class DashboardSettingTranslationOptions(TranslationOptions):
+    fields = ('vat_notice', 'crypto_instructions')
+
+@register(ActorsPageSetting)
+class ActorsPageSettingTranslationOptions(TranslationOptions):
+    fields = ('title', 'meta_description')
+
+@register(ArchivePageSetting)
+class ArchivePageSettingTranslationOptions(TranslationOptions):
+    fields = ('movies_title', 'movies_meta_description', 'series_title', 'series_meta_description')
+
+@register(HomePageSetting)
+class HomePageSettingTranslationOptions(TranslationOptions):
+    fields = ('title', 'banner_title', 'banner_description', 'banner_button_text', 'banner_button_link')
+

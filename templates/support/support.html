@@ -1,9 +1,26 @@
 {% extends 'accounts/account_base.html' %}
 {% load static i18n %}
 
-{% block dashboard_title %}{% trans "پشتیبانی آنلاین" %}{% endblock %}
+{% block title %}{% trans "پشتیبانی" %} | {% trans "دیاستومی" %}{% endblock %}
+{% block dashboard_title %}{% trans "پشتیبانی" %}{% endblock %}
 
 {% block header_references %}
+<style>
+@font-face {
+    font-family: 'SFArabic';
+    src: url("{% static 'public/assets/fonts/sf/SFArabic-Medium.ttf' %}") format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'SFArabic';
+    src: url("{% static 'public/assets/fonts/sf/SFArabic-Bold.ttf' %}") format('truetype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+</style>
 <script>
     window.USER_AVATAR = "{% if request.user.avatar %}{{ request.user.avatar.url }}{% else %}https://ui-avatars.com/api/?name={{ request.user.get_full_name|default:request.user.username|urlencode }}&background=DD0202&color=fff{% endif %}";
 </script>
@@ -21,7 +38,7 @@
         class="items-center justify-between hidden w-full mb-6 md:flex"
     >
         <h1 class="text-white text-[22px] font-bold">
-            {% trans "پشتیبانی آنلاین" %}
+            {% trans "پشتیبانی" %}
         </h1>
 
         <div class="flex flex-row-reverse items-center gap-3">
@@ -45,29 +62,12 @@
                     >{% trans "بازگشت به سایت" %}</span
                 >
             </a>
-            <button
-                class="w-[56px] h-[56px] rounded-full cursor-pointer border border-[#4B4B4B] flex items-center justify-center hover:bg-white/5 transition-colors"
-            >
-                <svg
-                    class="w-[28px] h-[28px]"
-                    width="38"
-                    height="38"
-                    viewBox="0 0 38 38"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                >
-                    <path
-                        d="M26.125 19C26.125 22.9283 22.9283 26.125 19 26.125C15.0718 26.125 11.875 22.9283 11.875 19C11.875 15.0718 15.0718 11.875 19 11.875C22.9283 11.875 26.125 15.0718 26.125 19ZM20.1875 7.91667V4.75C20.1875 4.0945 19.6555 3.5625 19 3.5625C18.3445 3.5625 17.8125 4.0945 17.8125 4.75V7.91667C17.8125 8.57217 18.3445 9.10417 19 9.10417C19.6555 9.10417 20.1875 8.57217 20.1875 7.91667ZM20.1875 33.25V30.0833C20.1875 29.4278 19.6555 28.8958 19 28.8958C18.3445 28.8958 17.8125 29.4278 17.8125 30.0833V33.25C17.8125 33.9055 18.3445 34.4375 19 34.4375C19.6555 34.4375 20.1875 33.9055 20.1875 33.25ZM9.10417 19C9.10417 18.3445 8.57217 17.8125 7.91667 17.8125H4.75C4.0945 17.8125 3.5625 18.3445 3.5625 19C3.5625 19.6555 4.0945 20.1875 4.75 20.1875H7.91667C8.57217 20.1875 9.10417 19.6555 9.10417 19ZM34.4375 19C34.4375 18.3445 33.9055 17.8125 33.25 17.8125H30.0833C29.4278 17.8125 28.8958 18.3445 28.8958 19C28.8958 19.6555 29.4278 20.1875 30.0833 20.1875H33.25C33.9055 20.1875 34.4375 19.6555 34.4375 19ZM12.0032 12.0032C12.4672 11.5393 12.4672 10.7872 12.0032 10.3233L9.7644 8.08448C9.30049 7.62056 8.5484 7.62056 8.08448 8.08448C7.62056 8.5484 7.62056 9.30049 8.08448 9.7644L10.3233 12.0032C10.5545 12.2344 10.8585 12.3516 11.1625 12.3516C11.4665 12.3516 11.7705 12.2344 12.0032 12.0032ZM29.9155 29.9155C30.3794 29.4516 30.3794 28.6995 29.9155 28.2356L27.6767 25.9968C27.2128 25.5328 26.4607 25.5328 25.9968 25.9968C25.5328 26.4607 25.5328 27.2128 25.9968 27.6767L28.2356 29.9155C28.4668 30.1467 28.7708 30.2639 29.0748 30.2639C29.3788 30.2639 29.6844 30.1483 29.9155 29.9155ZM9.7644 29.9155L12.0032 27.6767C12.4672 27.2128 12.4672 26.4607 12.0032 25.9968C11.5393 25.5328 10.7872 25.5328 10.3233 25.9968L8.08448 28.2356C7.62056 28.6995 7.62056 29.4516 8.08448 29.9155C8.31565 30.1467 8.61965 30.2639 8.92365 30.2639C9.22765 30.2639 9.53165 30.1483 9.7644 29.9155ZM27.6767 12.0032L29.9155 9.7644C30.3794 9.30049 30.3794 8.5484 29.9155 8.08448C29.4516 7.62056 28.6995 7.62056 28.2356 8.08448L25.9968 10.3233C25.5328 10.7872 25.5328 11.5393 25.9968 12.0032C26.2279 12.2344 26.5319 12.3516 27.1399 12.3516C27.4439 12.2344 27.6767 12.0032Z"
-                        fill="white"
-                    />
-                </svg>
-            </button>
         </div>
     </div>
 
     <!-- Main Chat Card Box -->
     <div
-        class="flex-1 md:flex-none flex flex-col w-full bg-[#050505] md:bg-[#0A0A0A] md:border border-[#4B4B4B80] md:rounded-[27px] relative shadow-[0_0_30px_rgba(0,0,0,0.5)] md:h-[80vh]"
+        class="flex-1 md:flex-none flex flex-col w-full bg-transparent md:bg-[#0A0A0A] md:border border-[#4B4B4B80] rounded-t-[27px] md:rounded-[27px] relative shadow-[0_0_30px_rgba(0,0,0,0.5)] max-h-[85vh] md:h-[80vh] overflow-hidden"
     >
         <!-- Chat Gradient Header -->
         <div
@@ -106,30 +106,33 @@
                 {% trans "پاسخگوی سوالات شما هستیم!" %}
             </div>
 
-            <button
-                class="text-white transition-transform md:hidden hover:scale-110"
-            >
-                <svg
-                    width="28"
-                    height="28"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                >
-                    <path d="M19 12H5M12 19l-7-7 7-7" />
-                </svg>
-            </button>
+
         </div>
 
         <!-- Chat Messages Area -->
         <div
             x-ref="messagesContainer"
             x-init="$nextTick(() => { $el.scrollTop = $el.scrollHeight })"
-            class="flex flex-col flex-1 gap-4 p-4 overflow-y-auto md:p-8 custom-scrollbar min-h-0"
+            class="flex flex-col flex-1 gap-4 p-4 overflow-y-auto md:p-8 custom-scrollbar min-h-0 relative"
         >
+            <!-- Empty State when no messages exist -->
+            <div
+                x-show="!messages || messages.length === 0"
+                x-cloak
+                class="flex flex-col items-center justify-center flex-1 my-auto text-center p-6"
+            >
+                <div class="relative flex items-center justify-center w-20 h-20 mb-4 rounded-full bg-[#1A0506] border border-[#520000] shadow-lg shadow-red-950/30">
+                    <svg class="w-10 h-10 text-[#DD0202]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                    </svg>
+                    <!-- Subtle red pulse indicator -->
+                    <span class="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[#DD0202] animate-ping opacity-75"></span>
+                    <span class="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[#DD0202]"></span>
+                </div>
+                <h3 class="text-white font-bold text-lg md:text-xl mb-2">{% trans "هنوز پیامی ارسال نشده است" %}</h3>
+                <p class="text-gray-400 text-xs md:text-sm max-w-sm leading-relaxed font-light">{% trans "سوال یا درخواست خود را در کادر زیر بنویسید؛ کارشناسان پشتیبانی به زودی پاسخگوی شما خواهند بود." %}</p>
+            </div>
+
             <template x-for="(msg, index) in messages" :key="msg.id">
                 <div class="flex flex-col w-full">
                     <!-- Telegram-style Sticky Date Badge -->
@@ -171,6 +174,7 @@
                                 <div
                                     :class="msg.is_operator ? 'bg-[#3B0709] border-[#520000] text-white rounded-[20px] rounded-tl-sm' : 'bg-[#111111] border-[#2A2A2A] text-[#D1D1D1] rounded-[20px] rounded-tr-sm'"
                                     class="border text-[13px] md:text-[14px] p-4 leading-7 md:leading-8 text-justify w-full break-words shadow-md"
+                                    style="font-family: 'SFArabic', sans-serif !important;"
                                     x-text="msg.content"
                                 ></div>
                             </template>
@@ -294,6 +298,7 @@
                     @keydown.enter.prevent="sendMessage"
                     rows="1"
                     class="flex-1 bg-transparent border-none outline-none px-3 py-2.5 text-white placeholder-[#fff] w-full resize-none max-h-[150px] overflow-y-auto custom-scrollbar leading-6"
+                    style="font-family: 'SFArabic', sans-serif !important;"
                     placeholder="{% trans 'پیامی بنویسید...' %}"
                 ></textarea>
 

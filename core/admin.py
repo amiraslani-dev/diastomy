@@ -1,6 +1,45 @@
 from django.contrib import admin
 from modeltranslation.admin import TranslationAdmin, TranslationTabularInline
-from .models import SiteLanguage, SiteSettings, HeaderSetting, HeaderMenuItem, FooterSetting, FooterMenuColumn1, FooterMenuColumn2, FooterSocialMedia, AdminNotification, UserTasteSettings, DashboardSetting, ProfileImage, SupportAvatar
+from jalali_date.admin import ModelAdminJalaliMixin
+from jalali_date import datetime2jalali
+from .models import SiteLanguage, SiteSettings, HeaderSetting, HeaderMenuItem, FooterSetting, FooterMenuColumn1, FooterMenuColumn2, FooterSocialMedia, AdminNotification, UserTasteSettings, DashboardSetting, ProfileImage, SupportAvatar, NewsletterSubscriber, ActorsPageSetting, ArchivePageSetting, HomePageSetting, HomeTrailer
+
+@admin.register(ArchivePageSetting)
+class ArchivePageSettingAdmin(TranslationAdmin):
+    list_display = ['movies_title', 'series_title']
+
+    def has_add_permission(self, request):
+        if self.model.objects.exists():
+            return False
+        return super().has_add_permission(request)
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+@admin.register(ActorsPageSetting)
+class ActorsPageSettingAdmin(TranslationAdmin):
+    list_display = ['title', 'per_page']
+
+    def has_add_permission(self, request):
+        if self.model.objects.exists():
+            return False
+        return super().has_add_permission(request)
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+@admin.register(NewsletterSubscriber)
+class NewsletterSubscriberAdmin(ModelAdminJalaliMixin, admin.ModelAdmin):
+    list_display = ['email', 'is_active', 'get_created_at']
+    list_filter = ['is_active', 'created_at']
+    search_fields = ['email']
+    ordering = ['-created_at']
+
+    @admin.display(description='تاریخ ثبت‌نام', ordering='created_at')
+    def get_created_at(self, obj):
+        if obj.created_at:
+            return datetime2jalali(obj.created_at).strftime('%Y/%m/%d %H:%M')
+        return "-"
 
 @admin.register(SiteLanguage)
 class SiteLanguageAdmin(admin.ModelAdmin):
@@ -66,10 +105,16 @@ class FooterSettingAdmin(TranslationAdmin):
 
 
 @admin.register(AdminNotification)
-class AdminNotificationAdmin(admin.ModelAdmin):
-    list_display = ['message', 'is_read', 'created_at']
+class AdminNotificationAdmin(ModelAdminJalaliMixin, admin.ModelAdmin):
+    list_display = ['message', 'is_read', 'get_created_at']
     list_filter = ['is_read', 'created_at']
     search_fields = ['message']
+
+    @admin.display(description='تاریخ ایجاد', ordering='created_at')
+    def get_created_at(self, obj):
+        if obj.created_at:
+            return datetime2jalali(obj.created_at).strftime('%Y/%m/%d %H:%M')
+        return "-"
 
 @admin.register(UserTasteSettings)
 class UserTasteSettingsAdmin(TranslationAdmin):
@@ -92,10 +137,39 @@ class SupportAvatarInline(admin.TabularInline):
     ordering = ('order',)
 
 @admin.register(DashboardSetting)
-class DashboardSettingAdmin(admin.ModelAdmin):
+class DashboardSettingAdmin(TranslationAdmin):
     inlines = [ProfileImageInline, SupportAvatarInline]
+    fields = ('vat_notice', 'support_phone', 'crypto_wallet_address', 'crypto_instructions')
 
     def has_add_permission(self, request):
         if self.model.objects.count() >= 1:
             return False
         return super().has_add_permission(request)
+
+
+class HomeTrailerInline(admin.TabularInline):
+    model = HomeTrailer
+    extra = 1
+    ordering = ('order',)
+
+
+@admin.register(HomePageSetting)
+class HomePageSettingAdmin(TranslationAdmin):
+    inlines = [HomeTrailerInline]
+    filter_horizontal = (
+        'hero_movies',
+        'hero_series',
+        'halfprice_movies',
+        'halfprice_series',
+        'suggested_series',
+        'featured_actors',
+    )
+
+    def has_add_permission(self, request):
+        if self.model.objects.count() >= 1:
+            return False
+        return super().has_add_permission(request)
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+

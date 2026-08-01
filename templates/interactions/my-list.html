@@ -1,1022 +1,331 @@
-{% extends 'accounts/account_base.html' %}
+{% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block dashboard_title %}لیست من{% endblock %}
+{% block title %}{% trans "لیست من" %} | {% trans "دیاستومی" %}{% endblock %}
 
-{% block profile_content %}
-{% with active_tab='my-list' %}
+{% block content %}
+<!-- red circle background -->
+<div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute bg-red-500 rounded-full -left-50 size-80 -top-50 md:top-100 blur-[150px]"></div>
+    <div class="absolute bg-red-500 rounded-full -right-50 size-80 top-250 md:top-200 blur-[150px]"></div>
+</div>
 
-            <main
-                class="flex-grow w-full px-4 py-8 mt-24 md:mt-30 md:px-12 lg:px-24 md:py-10"
-            >
-                <div
-                    class="relative w-full py-4 overflow-x-hidden font-sans text-white"
-                    dir="rtl"
-                    x-data="{ 
-        activeTab: 'continue',
-        openDropdown: null
-     }"
+<div class="flex-grow w-full px-4 py-8 mt-24 md:mt-30 md:px-12 lg:px-24 md:py-10 min-h-[70vh]">
+    <div
+        class="relative w-full py-4 overflow-x-hidden font-sans text-white"
+        dir="rtl"
+        x-data="{ 
+            activeTab: (new URLSearchParams(window.location.search)).get('tab') || '{{ initial_tab|default:"continue" }}',
+            openDropdown: null,
+            historyCount: {{ total_history_count|default:0 }},
+            moviesCount: {{ total_movies_count|default:0 }},
+            seriesCount: {{ total_series_count|default:0 }},
+
+            updateHeaderBadge(amount = -1) {
+                window.dispatchEvent(new CustomEvent('save-count-changed', { detail: { amount: amount } }));
+            }
+        }"
+    >
+        <div class="relative z-10 w-full max-w-[1200px] mx-auto">
+            <!-- Tabs Header -->
+            <div class="flex justify-center w-full gap-3 pb-2 mb-10 overflow-x-auto md:justify-start no-scrollbar">
+                <button
+                    @click="activeTab = 'series'"
+                    class="px-3 md:px-7 py-4 cursor-pointer rounded-[18px] text-sm md:text-[15px] font-medium transition-all duration-300 whitespace-nowrap border"
+                    :class="activeTab === 'series' ? 'bg-[#e41a1a] border-[#e41a1a] text-white shadow-[0_0_15px_rgba(228,26,26,0.3)]' : 'bg-transparent border-[#4B4B4B8A] text-gray-300 hover:border-white/50'"
                 >
-                    <div class="relative z-10 w-full max-w-[1200px] mx-auto">
-                        <div
-                            class="flex justify-center w-full gap-3 pb-2 mb-10 overflow-x-auto md:justify-start no-scrollbar"
-                        >
+                    {% trans "سریال‌های من" %} (<span x-text="seriesCount"></span>)
+                </button>
+
+                <button
+                    @click="activeTab = 'movies'"
+                    class="px-3 md:px-7 py-4 cursor-pointer rounded-[18px] text-sm md:text-[15px] font-medium transition-all duration-300 whitespace-nowrap border"
+                    :class="activeTab === 'movies' ? 'bg-[#e41a1a] border-[#e41a1a] text-white shadow-[0_0_15px_rgba(228,26,26,0.3)]' : 'bg-transparent border-[#4B4B4B8A] text-gray-300 hover:border-white/50'"
+                >
+                    {% trans "فیلم‌های من" %} (<span x-text="moviesCount"></span>)
+                </button>
+
+                <button
+                    @click="activeTab = 'continue'"
+                    class="px-3 md:px-7 cursor-pointer py-4 rounded-[18px] text-sm md:text-[15px] font-bold transition-all duration-300 whitespace-nowrap border"
+                    :class="activeTab === 'continue' ? 'bg-[#e41a1a] border-[#e41a1a] text-white shadow-[0_0_15px_rgba(228,26,26,0.3)]' : 'bg-transparent border-[#4B4B4B8A] text-gray-300 hover:border-white/50'"
+                >
+                    {% trans "ادامه تماشا" %} (<span x-text="historyCount"></span>)
+                </button>
+            </div>
+
+            <!-- 1. Continue Watching Tab -->
+            <div
+                x-show="activeTab === 'continue'"
+                x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-y-2"
+                x-transition:enter-end="opacity-100 translate-y-0"
+                class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 md:gap-8"
+            >
+                {% for item_data in watch_history %}
+                <div
+                    class="flex flex-col w-full transition-all duration-500 ease-in-out"
+                    x-data="{ visible: true }"
+                    x-show="visible"
+                    x-transition:leave="transition ease-out duration-500 transform"
+                    x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                    x-transition:leave-end="opacity-0 scale-75 -translate-y-4"
+                >
+                    <div class="relative w-full aspect-video rounded-xl overflow-hidden bg-[#111] shadow-lg group">
+                        <img
+                            src="{% if item_data.item.movie %}{{ item_data.item.movie.poster.url }}{% elif item_data.item.episode and item_data.item.episode.season.series.poster %}{{ item_data.item.episode.season.series.poster.url }}{% else %}{% static 'public/assets/img/film.jpg' %}{% endif %}"
+                            alt="Thumbnail"
+                            class="absolute inset-0 object-cover w-full h-full transition-transform duration-500 hover:scale-105"
+                        />
+
+                        <!-- Context Menu Dropdown -->
+                        <div class="absolute z-50" style="top: 12px; left: 12px" @click.away="openDropdown = null">
                             <button
-                                @click="activeTab = 'series'"
-                                class="px-3 md:px-7 py-4 cursor-pointer rounded-[18px] text-sm md:text-[15px] font-medium transition-all duration-300 whitespace-nowrap border"
-                                :class="activeTab === 'series' ? 'bg-[#e41a1a] border-[#e41a1a] text-white' : 'bg-transparent border-[#4B4B4B8A] text-gray-300 hover:border-white/50'"
+                                @click.stop="openDropdown = openDropdown === {{ item_data.item.id }} ? null : {{ item_data.item.id }}"
+                                class="p-1 transition-all rounded-full cursor-pointer hover:bg-white/20 text-white"
                             >
-                                سریال‌های من
-                            </button>
-                            <button
-                                @click="activeTab = 'movies'"
-                                class="px-3 md:px-7 py-4 cursor-pointer rounded-[18px] text-sm md:text-[15px] font-medium transition-all duration-300 whitespace-nowrap border"
-                                :class="activeTab === 'movies' ? 'bg-[#e41a1a] border-[#e41a1a] text-white' : 'bg-transparent border-[#4B4B4B8A] text-gray-300 hover:border-white/50'"
-                            >
-                                فیلم‌های من
-                            </button>
-                            <button
-                                @click="activeTab = 'continue'"
-                                class="px-3 md:px-7 cursor-pointer py-4 rounded-[18px] text-sm md:text-[15px] font-bold transition-all duration-300 whitespace-nowrap border"
-                                :class="activeTab === 'continue' ? 'bg-[#e41a1a] border-[#e41a1a] text-white shadow-[0_0_15px_rgba(228,26,26,0.3)]' : 'bg-transparent border-[#4B4B4B8A] text-gray-300 hover:border-white/50'"
-                            >
-                                ادامه تماشا
-                            </button>
-                        </div>
-
-                        <div
-                            x-show="activeTab === 'continue'"
-                            x-transition:enter="transition ease-out duration-300"
-                            x-transition:enter-start="opacity-0 translate-y-2"
-                            x-transition:enter-end="opacity-100 translate-y-0"
-                            class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 md:gap-8"
-                        >
-                            <div class="flex flex-col w-full">
-                                <div
-                                    class="relative w-full aspect-video rounded-xl overflow-hidden bg-[#111] shadow-lg"
-                                >
-                                    <img
-                                        src="{% static 'public/assets/img/film.jpg' %}"
-                                        alt="Thumbnail"
-                                        class="absolute inset-0 object-cover w-full h-full transition-transform duration-500 hover:scale-105"
-                                    />
-
-                                    <div
-                                        class="absolute z-50"
-                                        style="top: 12px; left: 12px"
-                                        @click.away="openDropdown = null"
-                                    >
-                                        <button
-                                            @click.stop="openDropdown = openDropdown === 1 ? null : 1"
-                                            class="p-1 transition-all rounded-full cursor-pointer hover:bg-white/20"
-                                        >
-                                            <svg
-                                                width="7"
-                                                height="33"
-                                                viewBox="0 0 7 33"
-                                                fill="none"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                            >
-                                                <circle
-                                                    cx="3.5"
-                                                    cy="3.5"
-                                                    r="3.5"
-                                                    fill="#D9D9D9"
-                                                />
-                                                <circle
-                                                    cx="3.5"
-                                                    cy="16.5"
-                                                    r="3.5"
-                                                    fill="#D9D9D9"
-                                                />
-                                                <circle
-                                                    cx="3.5"
-                                                    cy="29.5"
-                                                    r="3.5"
-                                                    fill="#D9D9D9"
-                                                />
-                                            </svg>
-                                        </button>
-
-                                        <div
-                                            x-show="openDropdown === 1"
-                                            x-transition.duration.200ms
-                                            class="absolute top-10 left-0 w-40 bg-[#1a1a1a] rounded-lg shadow-2xl border border-white/10 overflow-hidden z-[60]"
-                                        >
-                                            <button
-                                                @click="openDropdown = null"
-                                                class="flex items-center justify-center w-full p-2 py-3 text-sm font-medium text-right text-white transition-colors hover:bg-white/5 gap-x-2"
-                                            >
-                                                <svg
-                                                    width="24"
-                                                    height="24"
-                                                    viewBox="0 0 24 24"
-                                                    fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                >
-                                                    <path
-                                                        d="M18.5297 17.4698C18.8227 17.7628 18.8227 18.2378 18.5297 18.5308C18.3837 18.6768 18.1917 18.7508 17.9997 18.7508C17.8077 18.7508 17.6158 18.6778 17.4698 18.5308L11.9997 13.0608L6.52975 18.5308C6.38375 18.6768 6.19175 18.7508 5.99975 18.7508C5.80775 18.7508 5.61575 18.6778 5.46975 18.5308C5.17675 18.2378 5.17675 17.7628 5.46975 17.4698L10.9398 11.9998L5.46975 6.52981C5.17675 6.23681 5.17675 5.76177 5.46975 5.46877C5.76275 5.17577 6.23775 5.17577 6.53075 5.46877L12.0008 10.9388L17.4707 5.46877C17.7637 5.17577 18.2387 5.17577 18.5317 5.46877C18.8247 5.76177 18.8247 6.23681 18.5317 6.52981L13.0617 11.9998L18.5297 17.4698Z"
-                                                        fill="white"
-                                                    />
-                                                </svg>
-                                                <span>حذف از لیست</span>
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div
-                                        class="absolute inset-0 z-30 flex items-center justify-center pointer-events-none"
-                                    >
-                                        <div
-                                            class="relative shrink-0 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center shadow-[0_4px_15px_rgba(0,0,0,0.5)] pointer-events-auto cursor-pointer hover:bg-black/60 hover:scale-110 transition-all duration-300"
-                                        >
-                                            <svg
-                                                width="53"
-                                                height="53"
-                                                viewBox="0 0 53 53"
-                                                fill="none"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                            >
-                                                <circle
-                                                    cx="26.3599"
-                                                    cy="26.3599"
-                                                    r="26.3599"
-                                                    fill="white"
-                                                    fill-opacity="0.24"
-                                                />
-                                                <path
-                                                    d="M26.3055 44.6656C36.4153 44.6656 44.6109 36.47 44.6109 26.3602C44.6109 16.2503 36.4153 8.05469 26.3055 8.05469C16.1956 8.05469 8 16.2503 8 26.3602C8 36.47 16.1956 44.6656 26.3055 44.6656Z"
-                                                    stroke="white"
-                                                    stroke-width="1.31799"
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                />
-                                                <path
-                                                    d="M20.3926 26.7813V23.7242C20.3926 19.9167 23.0835 18.3607 26.3785 20.2645L29.0328 21.8022L31.6871 23.3398C34.982 25.2436 34.982 28.3555 31.6871 30.2593L29.0328 31.797L26.3785 33.3346C23.0835 35.2384 20.3926 33.6824 20.3926 29.8749V26.7813Z"
-                                                    stroke="white"
-                                                    stroke-width="1.31799"
-                                                    stroke-miterlimit="10"
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                />
-                                                <mask
-                                                    id="path-5-inside-1_573_5379"
-                                                    fill="white"
-                                                >
-                                                    <path
-                                                        d="M21.4592 8.26354C21.2811 7.59134 21.6767 6.89661 22.3577 6.75534C25.0339 6.2001 27.7989 6.21887 30.4758 6.81608C33.5618 7.50456 36.44 8.94154 38.867 11.0055C41.294 13.0694 43.1984 15.6997 44.4192 18.6737C45.64 21.6478 46.1413 24.8783 45.8807 28.0919C45.6201 31.3055 44.6052 34.4078 42.9219 37.1365C41.2386 39.8651 38.9364 42.1398 36.2099 43.7682C33.4835 45.3966 30.413 46.3309 27.2581 46.4919C24.5175 46.6318 21.7832 46.1846 19.2297 45.1847C18.586 44.9326 18.3118 44.1873 18.5948 43.5565C18.884 42.9117 19.644 42.6334 20.3051 42.8835C22.4826 43.7072 24.8056 44.0733 27.1338 43.9545C29.8895 43.8138 32.5716 42.9978 34.9531 41.5754C37.3347 40.153 39.3456 38.1661 40.816 35.7826C42.2863 33.3992 43.1728 30.6894 43.4005 27.8823C43.6281 25.0752 43.1902 22.2534 42.1239 19.6556C41.0575 17.0578 39.394 14.7603 37.274 12.9575C35.1541 11.1546 32.64 9.89945 29.9444 9.29808C27.6666 8.78991 25.3159 8.7612 23.0348 9.2084C22.3423 9.34417 21.64 8.94569 21.4592 8.26354Z"
-                                                    />
-                                                </mask>
-                                                <path
-                                                    d="M21.4592 8.26354C21.2811 7.59134 21.6767 6.89661 22.3577 6.75534C25.0339 6.2001 27.7989 6.21887 30.4758 6.81608C33.5618 7.50456 36.44 8.94154 38.867 11.0055C41.294 13.0694 43.1984 15.6997 44.4192 18.6737C45.64 21.6478 46.1413 24.8783 45.8807 28.0919C45.6201 31.3055 44.6052 34.4078 42.9219 37.1365C41.2386 39.8651 38.9364 42.1398 36.2099 43.7682C33.4835 45.3966 30.413 46.3309 27.2581 46.4919C24.5175 46.6318 21.7832 46.1846 19.2297 45.1847C18.586 44.9326 18.3118 44.1873 18.5948 43.5565C18.884 42.9117 19.644 42.6334 20.3051 42.8835C22.4826 43.7072 24.8056 44.0733 27.1338 43.9545C29.8895 43.8138 32.5716 42.9978 34.9531 41.5754C37.3347 40.153 39.3456 38.1661 40.816 35.7826C42.2863 33.3992 43.1728 30.6894 43.4005 27.8823C43.6281 25.0752 43.1902 22.2534 42.1239 19.6556C41.0575 17.0578 39.394 14.7603 37.274 12.9575C35.1541 11.1546 32.64 9.89945 29.9444 9.29808C27.6666 8.78991 25.3159 8.7612 23.0348 9.2084C22.3423 9.34417 21.64 8.94569 21.4592 8.26354Z"
-                                                    stroke="#DD0202"
-                                                    stroke-width="2.63599"
-                                                    mask="url(#path-5-inside-1_573_5379)"
-                                                />
-                                            </svg>
-                                        </div>
-                                    </div>
-
-                                    <div
-                                        class="absolute z-40 flex flex-col justify-end bottom-3 left-4 right-4"
-                                    >
-                                        <span
-                                            class="mb-2 tracking-wide text-right text-white"
-                                            >00:30 مانده</span
-                                        >
-
-                                        <div
-                                            class="w-full h-[3px] rounded-full overflow-hidden"
-                                            style="
-                                                background-color: rgba(
-                                                    255,
-                                                    255,
-                                                    255,
-                                                    0.2
-                                                );
-                                            "
-                                            dir="ltr"
-                                        >
-                                            <div
-                                                class="h-full bg-white rounded-full"
-                                                style="width: 75%"
-                                            ></div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div
-                                    class="flex items-center justify-between w-full px-1 mt-3"
-                                >
-                                    <h3
-                                        class="text-white text-[17px] md:text-[17px] truncate max-w-[55%]"
-                                    >
-                                        سریال خانه کاغذی
-                                    </h3>
-                                    <span
-                                        class="text-white text-[15px] md:text-[15px] font-medium truncate max-w-[45%]"
-                                        >فصل 1 – قسمت 3</span
-                                    >
-                                </div>
-                            </div>
-
-                            <div class="flex flex-col w-full">
-                                <div
-                                    class="relative w-full aspect-video rounded-xl overflow-hidden bg-[#111] shadow-lg"
-                                >
-                                    <img
-                                        src="{% static 'public/assets/img/film.jpg' %}"
-                                        alt="Thumbnail"
-                                        class="absolute inset-0 object-cover w-full h-full transition-transform duration-500 hover:scale-105"
-                                    />
-
-                                    <div
-                                        class="absolute z-50"
-                                        style="top: 12px; left: 12px"
-                                        @click.away="openDropdown = null"
-                                    >
-                                        <button
-                                            @click.stop="openDropdown = openDropdown === 1 ? null : 1"
-                                            class="p-1 transition-all rounded-full cursor-pointer hover:bg-white/20"
-                                        >
-                                            <svg
-                                                width="7"
-                                                height="33"
-                                                viewBox="0 0 7 33"
-                                                fill="none"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                            >
-                                                <circle
-                                                    cx="3.5"
-                                                    cy="3.5"
-                                                    r="3.5"
-                                                    fill="#D9D9D9"
-                                                />
-                                                <circle
-                                                    cx="3.5"
-                                                    cy="16.5"
-                                                    r="3.5"
-                                                    fill="#D9D9D9"
-                                                />
-                                                <circle
-                                                    cx="3.5"
-                                                    cy="29.5"
-                                                    r="3.5"
-                                                    fill="#D9D9D9"
-                                                />
-                                            </svg>
-                                        </button>
-
-                                        <div
-                                            x-show="openDropdown === 1"
-                                            x-transition.duration.200ms
-                                            class="absolute top-10 left-0 w-40 bg-[#1a1a1a] rounded-lg shadow-2xl border border-white/10 overflow-hidden z-[60]"
-                                        >
-                                            <button
-                                                @click="openDropdown = null"
-                                                class="flex items-center justify-center w-full p-2 py-3 text-sm font-medium text-right text-white transition-colors hover:bg-white/5 gap-x-2"
-                                            >
-                                                <svg
-                                                    width="24"
-                                                    height="24"
-                                                    viewBox="0 0 24 24"
-                                                    fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                >
-                                                    <path
-                                                        d="M18.5297 17.4698C18.8227 17.7628 18.8227 18.2378 18.5297 18.5308C18.3837 18.6768 18.1917 18.7508 17.9997 18.7508C17.8077 18.7508 17.6158 18.6778 17.4698 18.5308L11.9997 13.0608L6.52975 18.5308C6.38375 18.6768 6.19175 18.7508 5.99975 18.7508C5.80775 18.7508 5.61575 18.6778 5.46975 18.5308C5.17675 18.2378 5.17675 17.7628 5.46975 17.4698L10.9398 11.9998L5.46975 6.52981C5.17675 6.23681 5.17675 5.76177 5.46975 5.46877C5.76275 5.17577 6.23775 5.17577 6.53075 5.46877L12.0008 10.9388L17.4707 5.46877C17.7637 5.17577 18.2387 5.17577 18.5317 5.46877C18.8247 5.76177 18.8247 6.23681 18.5317 6.52981L13.0617 11.9998L18.5297 17.4698Z"
-                                                        fill="white"
-                                                    />
-                                                </svg>
-                                                <span>حذف از لیست</span>
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div
-                                        class="absolute inset-0 z-30 flex items-center justify-center pointer-events-none"
-                                    >
-                                        <div
-                                            class="relative shrink-0 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center shadow-[0_4px_15px_rgba(0,0,0,0.5)] pointer-events-auto cursor-pointer hover:bg-black/60 hover:scale-110 transition-all duration-300"
-                                        >
-                                            <svg
-                                                width="53"
-                                                height="53"
-                                                viewBox="0 0 53 53"
-                                                fill="none"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                            >
-                                                <circle
-                                                    cx="26.3599"
-                                                    cy="26.3599"
-                                                    r="26.3599"
-                                                    fill="white"
-                                                    fill-opacity="0.24"
-                                                />
-                                                <path
-                                                    d="M26.3055 44.6656C36.4153 44.6656 44.6109 36.47 44.6109 26.3602C44.6109 16.2503 36.4153 8.05469 26.3055 8.05469C16.1956 8.05469 8 16.2503 8 26.3602C8 36.47 16.1956 44.6656 26.3055 44.6656Z"
-                                                    stroke="white"
-                                                    stroke-width="1.31799"
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                />
-                                                <path
-                                                    d="M20.3926 26.7813V23.7242C20.3926 19.9167 23.0835 18.3607 26.3785 20.2645L29.0328 21.8022L31.6871 23.3398C34.982 25.2436 34.982 28.3555 31.6871 30.2593L29.0328 31.797L26.3785 33.3346C23.0835 35.2384 20.3926 33.6824 20.3926 29.8749V26.7813Z"
-                                                    stroke="white"
-                                                    stroke-width="1.31799"
-                                                    stroke-miterlimit="10"
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                />
-                                                <mask
-                                                    id="path-5-inside-1_573_5379"
-                                                    fill="white"
-                                                >
-                                                    <path
-                                                        d="M21.4592 8.26354C21.2811 7.59134 21.6767 6.89661 22.3577 6.75534C25.0339 6.2001 27.7989 6.21887 30.4758 6.81608C33.5618 7.50456 36.44 8.94154 38.867 11.0055C41.294 13.0694 43.1984 15.6997 44.4192 18.6737C45.64 21.6478 46.1413 24.8783 45.8807 28.0919C45.6201 31.3055 44.6052 34.4078 42.9219 37.1365C41.2386 39.8651 38.9364 42.1398 36.2099 43.7682C33.4835 45.3966 30.413 46.3309 27.2581 46.4919C24.5175 46.6318 21.7832 46.1846 19.2297 45.1847C18.586 44.9326 18.3118 44.1873 18.5948 43.5565C18.884 42.9117 19.644 42.6334 20.3051 42.8835C22.4826 43.7072 24.8056 44.0733 27.1338 43.9545C29.8895 43.8138 32.5716 42.9978 34.9531 41.5754C37.3347 40.153 39.3456 38.1661 40.816 35.7826C42.2863 33.3992 43.1728 30.6894 43.4005 27.8823C43.6281 25.0752 43.1902 22.2534 42.1239 19.6556C41.0575 17.0578 39.394 14.7603 37.274 12.9575C35.1541 11.1546 32.64 9.89945 29.9444 9.29808C27.6666 8.78991 25.3159 8.7612 23.0348 9.2084C22.3423 9.34417 21.64 8.94569 21.4592 8.26354Z"
-                                                    />
-                                                </mask>
-                                                <path
-                                                    d="M21.4592 8.26354C21.2811 7.59134 21.6767 6.89661 22.3577 6.75534C25.0339 6.2001 27.7989 6.21887 30.4758 6.81608C33.5618 7.50456 36.44 8.94154 38.867 11.0055C41.294 13.0694 43.1984 15.6997 44.4192 18.6737C45.64 21.6478 46.1413 24.8783 45.8807 28.0919C45.6201 31.3055 44.6052 34.4078 42.9219 37.1365C41.2386 39.8651 38.9364 42.1398 36.2099 43.7682C33.4835 45.3966 30.413 46.3309 27.2581 46.4919C24.5175 46.6318 21.7832 46.1846 19.2297 45.1847C18.586 44.9326 18.3118 44.1873 18.5948 43.5565C18.884 42.9117 19.644 42.6334 20.3051 42.8835C22.4826 43.7072 24.8056 44.0733 27.1338 43.9545C29.8895 43.8138 32.5716 42.9978 34.9531 41.5754C37.3347 40.153 39.3456 38.1661 40.816 35.7826C42.2863 33.3992 43.1728 30.6894 43.4005 27.8823C43.6281 25.0752 43.1902 22.2534 42.1239 19.6556C41.0575 17.0578 39.394 14.7603 37.274 12.9575C35.1541 11.1546 32.64 9.89945 29.9444 9.29808C27.6666 8.78991 25.3159 8.7612 23.0348 9.2084C22.3423 9.34417 21.64 8.94569 21.4592 8.26354Z"
-                                                    stroke="#DD0202"
-                                                    stroke-width="2.63599"
-                                                    mask="url(#path-5-inside-1_573_5379)"
-                                                />
-                                            </svg>
-                                        </div>
-                                    </div>
-
-                                    <div
-                                        class="absolute z-40 flex flex-col justify-end bottom-3 left-4 right-4"
-                                    >
-                                        <span
-                                            class="mb-2 tracking-wide text-right text-white"
-                                            >00:30 مانده</span
-                                        >
-
-                                        <div
-                                            class="w-full h-[3px] rounded-full overflow-hidden"
-                                            style="
-                                                background-color: rgba(
-                                                    255,
-                                                    255,
-                                                    255,
-                                                    0.2
-                                                );
-                                            "
-                                            dir="ltr"
-                                        >
-                                            <div
-                                                class="h-full bg-white rounded-full"
-                                                style="width: 75%"
-                                            ></div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div
-                                    class="flex items-center justify-between w-full px-1 mt-3"
-                                >
-                                    <h3
-                                        class="text-white text-[17px] md:text-[17px] truncate max-w-[55%]"
-                                    >
-                                        سریال خانه کاغذی
-                                    </h3>
-                                    <span
-                                        class="text-white text-[15px] md:text-[15px] font-medium truncate max-w-[45%]"
-                                        >فصل 1 – قسمت 3</span
-                                    >
-                                </div>
-                            </div>
-
-                            <div class="flex flex-col w-full">
-                                <div
-                                    class="relative w-full aspect-video rounded-xl overflow-hidden bg-[#111] shadow-lg"
-                                >
-                                    <img
-                                        src="{% static 'public/assets/img/film.jpg' %}"
-                                        alt="Thumbnail"
-                                        class="absolute inset-0 object-cover w-full h-full transition-transform duration-500 hover:scale-105"
-                                    />
-
-                                    <div
-                                        class="absolute z-50"
-                                        style="top: 12px; left: 12px"
-                                        @click.away="openDropdown = null"
-                                    >
-                                        <button
-                                            @click.stop="openDropdown = openDropdown === 1 ? null : 1"
-                                            class="p-1 transition-all rounded-full cursor-pointer hover:bg-white/20"
-                                        >
-                                            <svg
-                                                width="7"
-                                                height="33"
-                                                viewBox="0 0 7 33"
-                                                fill="none"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                            >
-                                                <circle
-                                                    cx="3.5"
-                                                    cy="3.5"
-                                                    r="3.5"
-                                                    fill="#D9D9D9"
-                                                />
-                                                <circle
-                                                    cx="3.5"
-                                                    cy="16.5"
-                                                    r="3.5"
-                                                    fill="#D9D9D9"
-                                                />
-                                                <circle
-                                                    cx="3.5"
-                                                    cy="29.5"
-                                                    r="3.5"
-                                                    fill="#D9D9D9"
-                                                />
-                                            </svg>
-                                        </button>
-
-                                        <div
-                                            x-show="openDropdown === 1"
-                                            x-transition.duration.200ms
-                                            class="absolute top-10 left-0 w-40 bg-[#1a1a1a] rounded-lg shadow-2xl border border-white/10 overflow-hidden z-[60]"
-                                        >
-                                            <button
-                                                @click="openDropdown = null"
-                                                class="flex items-center justify-center w-full p-2 py-3 text-sm font-medium text-right text-white transition-colors hover:bg-white/5 gap-x-2"
-                                            >
-                                                <svg
-                                                    width="24"
-                                                    height="24"
-                                                    viewBox="0 0 24 24"
-                                                    fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                >
-                                                    <path
-                                                        d="M18.5297 17.4698C18.8227 17.7628 18.8227 18.2378 18.5297 18.5308C18.3837 18.6768 18.1917 18.7508 17.9997 18.7508C17.8077 18.7508 17.6158 18.6778 17.4698 18.5308L11.9997 13.0608L6.52975 18.5308C6.38375 18.6768 6.19175 18.7508 5.99975 18.7508C5.80775 18.7508 5.61575 18.6778 5.46975 18.5308C5.17675 18.2378 5.17675 17.7628 5.46975 17.4698L10.9398 11.9998L5.46975 6.52981C5.17675 6.23681 5.17675 5.76177 5.46975 5.46877C5.76275 5.17577 6.23775 5.17577 6.53075 5.46877L12.0008 10.9388L17.4707 5.46877C17.7637 5.17577 18.2387 5.17577 18.5317 5.46877C18.8247 5.76177 18.8247 6.23681 18.5317 6.52981L13.0617 11.9998L18.5297 17.4698Z"
-                                                        fill="white"
-                                                    />
-                                                </svg>
-                                                <span>حذف از لیست</span>
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div
-                                        class="absolute inset-0 z-30 flex items-center justify-center pointer-events-none"
-                                    >
-                                        <div
-                                            class="relative shrink-0 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center shadow-[0_4px_15px_rgba(0,0,0,0.5)] pointer-events-auto cursor-pointer hover:bg-black/60 hover:scale-110 transition-all duration-300"
-                                        >
-                                            <svg
-                                                width="53"
-                                                height="53"
-                                                viewBox="0 0 53 53"
-                                                fill="none"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                            >
-                                                <circle
-                                                    cx="26.3599"
-                                                    cy="26.3599"
-                                                    r="26.3599"
-                                                    fill="white"
-                                                    fill-opacity="0.24"
-                                                />
-                                                <path
-                                                    d="M26.3055 44.6656C36.4153 44.6656 44.6109 36.47 44.6109 26.3602C44.6109 16.2503 36.4153 8.05469 26.3055 8.05469C16.1956 8.05469 8 16.2503 8 26.3602C8 36.47 16.1956 44.6656 26.3055 44.6656Z"
-                                                    stroke="white"
-                                                    stroke-width="1.31799"
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                />
-                                                <path
-                                                    d="M20.3926 26.7813V23.7242C20.3926 19.9167 23.0835 18.3607 26.3785 20.2645L29.0328 21.8022L31.6871 23.3398C34.982 25.2436 34.982 28.3555 31.6871 30.2593L29.0328 31.797L26.3785 33.3346C23.0835 35.2384 20.3926 33.6824 20.3926 29.8749V26.7813Z"
-                                                    stroke="white"
-                                                    stroke-width="1.31799"
-                                                    stroke-miterlimit="10"
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                />
-                                                <mask
-                                                    id="path-5-inside-1_573_5379"
-                                                    fill="white"
-                                                >
-                                                    <path
-                                                        d="M21.4592 8.26354C21.2811 7.59134 21.6767 6.89661 22.3577 6.75534C25.0339 6.2001 27.7989 6.21887 30.4758 6.81608C33.5618 7.50456 36.44 8.94154 38.867 11.0055C41.294 13.0694 43.1984 15.6997 44.4192 18.6737C45.64 21.6478 46.1413 24.8783 45.8807 28.0919C45.6201 31.3055 44.6052 34.4078 42.9219 37.1365C41.2386 39.8651 38.9364 42.1398 36.2099 43.7682C33.4835 45.3966 30.413 46.3309 27.2581 46.4919C24.5175 46.6318 21.7832 46.1846 19.2297 45.1847C18.586 44.9326 18.3118 44.1873 18.5948 43.5565C18.884 42.9117 19.644 42.6334 20.3051 42.8835C22.4826 43.7072 24.8056 44.0733 27.1338 43.9545C29.8895 43.8138 32.5716 42.9978 34.9531 41.5754C37.3347 40.153 39.3456 38.1661 40.816 35.7826C42.2863 33.3992 43.1728 30.6894 43.4005 27.8823C43.6281 25.0752 43.1902 22.2534 42.1239 19.6556C41.0575 17.0578 39.394 14.7603 37.274 12.9575C35.1541 11.1546 32.64 9.89945 29.9444 9.29808C27.6666 8.78991 25.3159 8.7612 23.0348 9.2084C22.3423 9.34417 21.64 8.94569 21.4592 8.26354Z"
-                                                    />
-                                                </mask>
-                                                <path
-                                                    d="M21.4592 8.26354C21.2811 7.59134 21.6767 6.89661 22.3577 6.75534C25.0339 6.2001 27.7989 6.21887 30.4758 6.81608C33.5618 7.50456 36.44 8.94154 38.867 11.0055C41.294 13.0694 43.1984 15.6997 44.4192 18.6737C45.64 21.6478 46.1413 24.8783 45.8807 28.0919C45.6201 31.3055 44.6052 34.4078 42.9219 37.1365C41.2386 39.8651 38.9364 42.1398 36.2099 43.7682C33.4835 45.3966 30.413 46.3309 27.2581 46.4919C24.5175 46.6318 21.7832 46.1846 19.2297 45.1847C18.586 44.9326 18.3118 44.1873 18.5948 43.5565C18.884 42.9117 19.644 42.6334 20.3051 42.8835C22.4826 43.7072 24.8056 44.0733 27.1338 43.9545C29.8895 43.8138 32.5716 42.9978 34.9531 41.5754C37.3347 40.153 39.3456 38.1661 40.816 35.7826C42.2863 33.3992 43.1728 30.6894 43.4005 27.8823C43.6281 25.0752 43.1902 22.2534 42.1239 19.6556C41.0575 17.0578 39.394 14.7603 37.274 12.9575C35.1541 11.1546 32.64 9.89945 29.9444 9.29808C27.6666 8.78991 25.3159 8.7612 23.0348 9.2084C22.3423 9.34417 21.64 8.94569 21.4592 8.26354Z"
-                                                    stroke="#DD0202"
-                                                    stroke-width="2.63599"
-                                                    mask="url(#path-5-inside-1_573_5379)"
-                                                />
-                                            </svg>
-                                        </div>
-                                    </div>
-
-                                    <div
-                                        class="absolute z-40 flex flex-col justify-end bottom-3 left-4 right-4"
-                                    >
-                                        <span
-                                            class="mb-2 tracking-wide text-right text-white"
-                                            >00:30 مانده</span
-                                        >
-
-                                        <div
-                                            class="w-full h-[3px] rounded-full overflow-hidden"
-                                            style="
-                                                background-color: rgba(
-                                                    255,
-                                                    255,
-                                                    255,
-                                                    0.2
-                                                );
-                                            "
-                                            dir="ltr"
-                                        >
-                                            <div
-                                                class="h-full bg-white rounded-full"
-                                                style="width: 75%"
-                                            ></div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div
-                                    class="flex items-center justify-between w-full px-1 mt-3"
-                                >
-                                    <h3
-                                        class="text-white text-[17px] md:text-[17px] truncate max-w-[55%]"
-                                    >
-                                        سریال خانه کاغذی
-                                    </h3>
-                                    <span
-                                        class="text-white text-[15px] md:text-[15px] font-medium truncate max-w-[45%]"
-                                        >فصل 1 – قسمت 3</span
-                                    >
-                                </div>
-                            </div>
-
-                            <div class="flex flex-col w-full">
-                                <div
-                                    class="relative w-full aspect-video rounded-xl overflow-hidden bg-[#111] shadow-lg"
-                                >
-                                    <img
-                                        src="{% static 'public/assets/img/film.jpg' %}"
-                                        alt="Thumbnail"
-                                        class="absolute inset-0 object-cover w-full h-full transition-transform duration-500 hover:scale-105"
-                                    />
-
-                                    <div
-                                        class="absolute z-50"
-                                        style="top: 12px; left: 12px"
-                                        @click.away="openDropdown = null"
-                                    >
-                                        <button
-                                            @click.stop="openDropdown = openDropdown === 1 ? null : 1"
-                                            class="p-1 transition-all rounded-full cursor-pointer hover:bg-white/20"
-                                        >
-                                            <svg
-                                                width="7"
-                                                height="33"
-                                                viewBox="0 0 7 33"
-                                                fill="none"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                            >
-                                                <circle
-                                                    cx="3.5"
-                                                    cy="3.5"
-                                                    r="3.5"
-                                                    fill="#D9D9D9"
-                                                />
-                                                <circle
-                                                    cx="3.5"
-                                                    cy="16.5"
-                                                    r="3.5"
-                                                    fill="#D9D9D9"
-                                                />
-                                                <circle
-                                                    cx="3.5"
-                                                    cy="29.5"
-                                                    r="3.5"
-                                                    fill="#D9D9D9"
-                                                />
-                                            </svg>
-                                        </button>
-
-                                        <div
-                                            x-show="openDropdown === 1"
-                                            x-transition.duration.200ms
-                                            class="absolute top-10 left-0 w-40 bg-[#1a1a1a] rounded-lg shadow-2xl border border-white/10 overflow-hidden z-[60]"
-                                        >
-                                            <button
-                                                @click="openDropdown = null"
-                                                class="flex items-center justify-center w-full p-2 py-3 text-sm font-medium text-right text-white transition-colors hover:bg-white/5 gap-x-2"
-                                            >
-                                                <svg
-                                                    width="24"
-                                                    height="24"
-                                                    viewBox="0 0 24 24"
-                                                    fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                >
-                                                    <path
-                                                        d="M18.5297 17.4698C18.8227 17.7628 18.8227 18.2378 18.5297 18.5308C18.3837 18.6768 18.1917 18.7508 17.9997 18.7508C17.8077 18.7508 17.6158 18.6778 17.4698 18.5308L11.9997 13.0608L6.52975 18.5308C6.38375 18.6768 6.19175 18.7508 5.99975 18.7508C5.80775 18.7508 5.61575 18.6778 5.46975 18.5308C5.17675 18.2378 5.17675 17.7628 5.46975 17.4698L10.9398 11.9998L5.46975 6.52981C5.17675 6.23681 5.17675 5.76177 5.46975 5.46877C5.76275 5.17577 6.23775 5.17577 6.53075 5.46877L12.0008 10.9388L17.4707 5.46877C17.7637 5.17577 18.2387 5.17577 18.5317 5.46877C18.8247 5.76177 18.8247 6.23681 18.5317 6.52981L13.0617 11.9998L18.5297 17.4698Z"
-                                                        fill="white"
-                                                    />
-                                                </svg>
-                                                <span>حذف از لیست</span>
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div
-                                        class="absolute inset-0 z-30 flex items-center justify-center pointer-events-none"
-                                    >
-                                        <div
-                                            class="relative shrink-0 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center shadow-[0_4px_15px_rgba(0,0,0,0.5)] pointer-events-auto cursor-pointer hover:bg-black/60 hover:scale-110 transition-all duration-300"
-                                        >
-                                            <svg
-                                                width="53"
-                                                height="53"
-                                                viewBox="0 0 53 53"
-                                                fill="none"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                            >
-                                                <circle
-                                                    cx="26.3599"
-                                                    cy="26.3599"
-                                                    r="26.3599"
-                                                    fill="white"
-                                                    fill-opacity="0.24"
-                                                />
-                                                <path
-                                                    d="M26.3055 44.6656C36.4153 44.6656 44.6109 36.47 44.6109 26.3602C44.6109 16.2503 36.4153 8.05469 26.3055 8.05469C16.1956 8.05469 8 16.2503 8 26.3602C8 36.47 16.1956 44.6656 26.3055 44.6656Z"
-                                                    stroke="white"
-                                                    stroke-width="1.31799"
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                />
-                                                <path
-                                                    d="M20.3926 26.7813V23.7242C20.3926 19.9167 23.0835 18.3607 26.3785 20.2645L29.0328 21.8022L31.6871 23.3398C34.982 25.2436 34.982 28.3555 31.6871 30.2593L29.0328 31.797L26.3785 33.3346C23.0835 35.2384 20.3926 33.6824 20.3926 29.8749V26.7813Z"
-                                                    stroke="white"
-                                                    stroke-width="1.31799"
-                                                    stroke-miterlimit="10"
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                />
-                                                <mask
-                                                    id="path-5-inside-1_573_5379"
-                                                    fill="white"
-                                                >
-                                                    <path
-                                                        d="M21.4592 8.26354C21.2811 7.59134 21.6767 6.89661 22.3577 6.75534C25.0339 6.2001 27.7989 6.21887 30.4758 6.81608C33.5618 7.50456 36.44 8.94154 38.867 11.0055C41.294 13.0694 43.1984 15.6997 44.4192 18.6737C45.64 21.6478 46.1413 24.8783 45.8807 28.0919C45.6201 31.3055 44.6052 34.4078 42.9219 37.1365C41.2386 39.8651 38.9364 42.1398 36.2099 43.7682C33.4835 45.3966 30.413 46.3309 27.2581 46.4919C24.5175 46.6318 21.7832 46.1846 19.2297 45.1847C18.586 44.9326 18.3118 44.1873 18.5948 43.5565C18.884 42.9117 19.644 42.6334 20.3051 42.8835C22.4826 43.7072 24.8056 44.0733 27.1338 43.9545C29.8895 43.8138 32.5716 42.9978 34.9531 41.5754C37.3347 40.153 39.3456 38.1661 40.816 35.7826C42.2863 33.3992 43.1728 30.6894 43.4005 27.8823C43.6281 25.0752 43.1902 22.2534 42.1239 19.6556C41.0575 17.0578 39.394 14.7603 37.274 12.9575C35.1541 11.1546 32.64 9.89945 29.9444 9.29808C27.6666 8.78991 25.3159 8.7612 23.0348 9.2084C22.3423 9.34417 21.64 8.94569 21.4592 8.26354Z"
-                                                    />
-                                                </mask>
-                                                <path
-                                                    d="M21.4592 8.26354C21.2811 7.59134 21.6767 6.89661 22.3577 6.75534C25.0339 6.2001 27.7989 6.21887 30.4758 6.81608C33.5618 7.50456 36.44 8.94154 38.867 11.0055C41.294 13.0694 43.1984 15.6997 44.4192 18.6737C45.64 21.6478 46.1413 24.8783 45.8807 28.0919C45.6201 31.3055 44.6052 34.4078 42.9219 37.1365C41.2386 39.8651 38.9364 42.1398 36.2099 43.7682C33.4835 45.3966 30.413 46.3309 27.2581 46.4919C24.5175 46.6318 21.7832 46.1846 19.2297 45.1847C18.586 44.9326 18.3118 44.1873 18.5948 43.5565C18.884 42.9117 19.644 42.6334 20.3051 42.8835C22.4826 43.7072 24.8056 44.0733 27.1338 43.9545C29.8895 43.8138 32.5716 42.9978 34.9531 41.5754C37.3347 40.153 39.3456 38.1661 40.816 35.7826C42.2863 33.3992 43.1728 30.6894 43.4005 27.8823C43.6281 25.0752 43.1902 22.2534 42.1239 19.6556C41.0575 17.0578 39.394 14.7603 37.274 12.9575C35.1541 11.1546 32.64 9.89945 29.9444 9.29808C27.6666 8.78991 25.3159 8.7612 23.0348 9.2084C22.3423 9.34417 21.64 8.94569 21.4592 8.26354Z"
-                                                    stroke="#DD0202"
-                                                    stroke-width="2.63599"
-                                                    mask="url(#path-5-inside-1_573_5379)"
-                                                />
-                                            </svg>
-                                        </div>
-                                    </div>
-
-                                    <div
-                                        class="absolute z-40 flex flex-col justify-end bottom-3 left-4 right-4"
-                                    >
-                                        <span
-                                            class="mb-2 tracking-wide text-right text-white"
-                                            >00:30 مانده</span
-                                        >
-
-                                        <div
-                                            class="w-full h-[3px] rounded-full overflow-hidden"
-                                            style="
-                                                background-color: rgba(
-                                                    255,
-                                                    255,
-                                                    255,
-                                                    0.2
-                                                );
-                                            "
-                                            dir="ltr"
-                                        >
-                                            <div
-                                                class="h-full bg-white rounded-full"
-                                                style="width: 75%"
-                                            ></div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div
-                                    class="flex items-center justify-between w-full px-1 mt-3"
-                                >
-                                    <h3
-                                        class="text-white text-[17px] md:text-[17px] truncate max-w-[55%]"
-                                    >
-                                        سریال خانه کاغذی
-                                    </h3>
-                                    <span
-                                        class="text-white text-[15px] md:text-[15px] font-medium truncate max-w-[45%]"
-                                        >فصل 1 – قسمت 3</span
-                                    >
-                                </div>
-                            </div>
-
-                            <div class="flex flex-col w-full">
-                                <div
-                                    class="relative w-full aspect-video rounded-xl overflow-hidden bg-[#111] shadow-lg"
-                                >
-                                    <img
-                                        src="{% static 'public/assets/img/film.jpg' %}"
-                                        alt="Thumbnail"
-                                        class="absolute inset-0 object-cover w-full h-full transition-transform duration-500 hover:scale-105"
-                                    />
-
-                                    <div
-                                        class="absolute z-50"
-                                        style="top: 12px; left: 12px"
-                                        @click.away="openDropdown = null"
-                                    >
-                                        <button
-                                            @click.stop="openDropdown = openDropdown === 1 ? null : 1"
-                                            class="p-1 transition-all rounded-full cursor-pointer hover:bg-white/20"
-                                        >
-                                            <svg
-                                                width="7"
-                                                height="33"
-                                                viewBox="0 0 7 33"
-                                                fill="none"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                            >
-                                                <circle
-                                                    cx="3.5"
-                                                    cy="3.5"
-                                                    r="3.5"
-                                                    fill="#D9D9D9"
-                                                />
-                                                <circle
-                                                    cx="3.5"
-                                                    cy="16.5"
-                                                    r="3.5"
-                                                    fill="#D9D9D9"
-                                                />
-                                                <circle
-                                                    cx="3.5"
-                                                    cy="29.5"
-                                                    r="3.5"
-                                                    fill="#D9D9D9"
-                                                />
-                                            </svg>
-                                        </button>
-
-                                        <div
-                                            x-show="openDropdown === 1"
-                                            x-transition.duration.200ms
-                                            class="absolute top-10 left-0 w-40 bg-[#1a1a1a] rounded-lg shadow-2xl border border-white/10 overflow-hidden z-[60]"
-                                        >
-                                            <button
-                                                @click="openDropdown = null"
-                                                class="flex items-center justify-center w-full p-2 py-3 text-sm font-medium text-right text-white transition-colors hover:bg-white/5 gap-x-2"
-                                            >
-                                                <svg
-                                                    width="24"
-                                                    height="24"
-                                                    viewBox="0 0 24 24"
-                                                    fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                >
-                                                    <path
-                                                        d="M18.5297 17.4698C18.8227 17.7628 18.8227 18.2378 18.5297 18.5308C18.3837 18.6768 18.1917 18.7508 17.9997 18.7508C17.8077 18.7508 17.6158 18.6778 17.4698 18.5308L11.9997 13.0608L6.52975 18.5308C6.38375 18.6768 6.19175 18.7508 5.99975 18.7508C5.80775 18.7508 5.61575 18.6778 5.46975 18.5308C5.17675 18.2378 5.17675 17.7628 5.46975 17.4698L10.9398 11.9998L5.46975 6.52981C5.17675 6.23681 5.17675 5.76177 5.46975 5.46877C5.76275 5.17577 6.23775 5.17577 6.53075 5.46877L12.0008 10.9388L17.4707 5.46877C17.7637 5.17577 18.2387 5.17577 18.5317 5.46877C18.8247 5.76177 18.8247 6.23681 18.5317 6.52981L13.0617 11.9998L18.5297 17.4698Z"
-                                                        fill="white"
-                                                    />
-                                                </svg>
-                                                <span>حذف از لیست</span>
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div
-                                        class="absolute inset-0 z-30 flex items-center justify-center pointer-events-none"
-                                    >
-                                        <div
-                                            class="relative shrink-0 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center shadow-[0_4px_15px_rgba(0,0,0,0.5)] pointer-events-auto cursor-pointer hover:bg-black/60 hover:scale-110 transition-all duration-300"
-                                        >
-                                            <svg
-                                                width="53"
-                                                height="53"
-                                                viewBox="0 0 53 53"
-                                                fill="none"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                            >
-                                                <circle
-                                                    cx="26.3599"
-                                                    cy="26.3599"
-                                                    r="26.3599"
-                                                    fill="white"
-                                                    fill-opacity="0.24"
-                                                />
-                                                <path
-                                                    d="M26.3055 44.6656C36.4153 44.6656 44.6109 36.47 44.6109 26.3602C44.6109 16.2503 36.4153 8.05469 26.3055 8.05469C16.1956 8.05469 8 16.2503 8 26.3602C8 36.47 16.1956 44.6656 26.3055 44.6656Z"
-                                                    stroke="white"
-                                                    stroke-width="1.31799"
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                />
-                                                <path
-                                                    d="M20.3926 26.7813V23.7242C20.3926 19.9167 23.0835 18.3607 26.3785 20.2645L29.0328 21.8022L31.6871 23.3398C34.982 25.2436 34.982 28.3555 31.6871 30.2593L29.0328 31.797L26.3785 33.3346C23.0835 35.2384 20.3926 33.6824 20.3926 29.8749V26.7813Z"
-                                                    stroke="white"
-                                                    stroke-width="1.31799"
-                                                    stroke-miterlimit="10"
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                />
-                                                <mask
-                                                    id="path-5-inside-1_573_5379"
-                                                    fill="white"
-                                                >
-                                                    <path
-                                                        d="M21.4592 8.26354C21.2811 7.59134 21.6767 6.89661 22.3577 6.75534C25.0339 6.2001 27.7989 6.21887 30.4758 6.81608C33.5618 7.50456 36.44 8.94154 38.867 11.0055C41.294 13.0694 43.1984 15.6997 44.4192 18.6737C45.64 21.6478 46.1413 24.8783 45.8807 28.0919C45.6201 31.3055 44.6052 34.4078 42.9219 37.1365C41.2386 39.8651 38.9364 42.1398 36.2099 43.7682C33.4835 45.3966 30.413 46.3309 27.2581 46.4919C24.5175 46.6318 21.7832 46.1846 19.2297 45.1847C18.586 44.9326 18.3118 44.1873 18.5948 43.5565C18.884 42.9117 19.644 42.6334 20.3051 42.8835C22.4826 43.7072 24.8056 44.0733 27.1338 43.9545C29.8895 43.8138 32.5716 42.9978 34.9531 41.5754C37.3347 40.153 39.3456 38.1661 40.816 35.7826C42.2863 33.3992 43.1728 30.6894 43.4005 27.8823C43.6281 25.0752 43.1902 22.2534 42.1239 19.6556C41.0575 17.0578 39.394 14.7603 37.274 12.9575C35.1541 11.1546 32.64 9.89945 29.9444 9.29808C27.6666 8.78991 25.3159 8.7612 23.0348 9.2084C22.3423 9.34417 21.64 8.94569 21.4592 8.26354Z"
-                                                    />
-                                                </mask>
-                                                <path
-                                                    d="M21.4592 8.26354C21.2811 7.59134 21.6767 6.89661 22.3577 6.75534C25.0339 6.2001 27.7989 6.21887 30.4758 6.81608C33.5618 7.50456 36.44 8.94154 38.867 11.0055C41.294 13.0694 43.1984 15.6997 44.4192 18.6737C45.64 21.6478 46.1413 24.8783 45.8807 28.0919C45.6201 31.3055 44.6052 34.4078 42.9219 37.1365C41.2386 39.8651 38.9364 42.1398 36.2099 43.7682C33.4835 45.3966 30.413 46.3309 27.2581 46.4919C24.5175 46.6318 21.7832 46.1846 19.2297 45.1847C18.586 44.9326 18.3118 44.1873 18.5948 43.5565C18.884 42.9117 19.644 42.6334 20.3051 42.8835C22.4826 43.7072 24.8056 44.0733 27.1338 43.9545C29.8895 43.8138 32.5716 42.9978 34.9531 41.5754C37.3347 40.153 39.3456 38.1661 40.816 35.7826C42.2863 33.3992 43.1728 30.6894 43.4005 27.8823C43.6281 25.0752 43.1902 22.2534 42.1239 19.6556C41.0575 17.0578 39.394 14.7603 37.274 12.9575C35.1541 11.1546 32.64 9.89945 29.9444 9.29808C27.6666 8.78991 25.3159 8.7612 23.0348 9.2084C22.3423 9.34417 21.64 8.94569 21.4592 8.26354Z"
-                                                    stroke="#DD0202"
-                                                    stroke-width="2.63599"
-                                                    mask="url(#path-5-inside-1_573_5379)"
-                                                />
-                                            </svg>
-                                        </div>
-                                    </div>
-
-                                    <div
-                                        class="absolute z-40 flex flex-col justify-end bottom-3 left-4 right-4"
-                                    >
-                                        <span
-                                            class="mb-2 tracking-wide text-right text-white"
-                                            >00:30 مانده</span
-                                        >
-
-                                        <div
-                                            class="w-full h-[3px] rounded-full overflow-hidden"
-                                            style="
-                                                background-color: rgba(
-                                                    255,
-                                                    255,
-                                                    255,
-                                                    0.2
-                                                );
-                                            "
-                                            dir="ltr"
-                                        >
-                                            <div
-                                                class="h-full bg-white rounded-full"
-                                                style="width: 75%"
-                                            ></div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div
-                                    class="flex items-center justify-between w-full px-1 mt-3"
-                                >
-                                    <h3
-                                        class="text-white text-[17px] md:text-[17px] truncate max-w-[55%]"
-                                    >
-                                        سریال خانه کاغذی
-                                    </h3>
-                                    <span
-                                        class="text-white text-[15px] md:text-[15px] font-medium truncate max-w-[45%]"
-                                        >فصل 1 – قسمت 3</span
-                                    >
-                                </div>
-                            </div>
-                        </div>
-
-                        <div
-                            x-show="activeTab === 'movies'"
-                            style="display: none"
-                            x-transition:enter="transition ease-out duration-300"
-                            x-transition:enter-start="opacity-0 translate-y-2"
-                            x-transition:enter-end="opacity-100 translate-y-0"
-                        >
-                            <div
-                                class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5 md:gap-6 lg:gap-8"
-                            >
-                                <template
-                                    x-data
-                                    x-for="item in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]"
-                                    :key="item"
-                                >
-                                    <div
-                                        class="flex flex-col cursor-pointer group"
-                                    >
-                                        <div
-                                            class="relative rounded-2xl overflow-hidden aspect-[2/3] mb-4 border border-transparent hover:border-white/10 transition-colors"
-                                        >
-                                            <img
-                                                src="./src/assets/img/Rectangle.jpg"
-                                                class="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
-                                                alt="Movie Poster"
-                                            />
-
-                                            <div
-                                                class="absolute inset-0 bg-[#0a0a0a]/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-4 gap-3"
-                                            >
-                                                <p
-                                                    class="text-white text-[11px] md:text-[13px] leading-relaxed text-right md:text-justify font-medium line-clamp-4"
-                                                >
-                                                    لورم ایپسوم متن ساختگی با
-                                                    تولید سادگی نامفهوم از صنعت
-                                                    چاپ و با استفاده از طراحان
-                                                    گرافیک است. چاپگرها و متون
-                                                    بلکه روزنامه و مجله در ستون
-                                                    است..
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <h3
-                                            class="text-white text-right text-sm md:text-[15px] text-center mb-2.5 font-sans tracking-wide truncate"
-                                            dir="ltr"
-                                        >
-                                            Hitman: Agent 47
-                                        </h3>
-                                        <div
-                                            class="flex items-center justify-between w-full px-1"
-                                        >
-                                            <span
-                                                class="text-gray-300 text-[11px] md:text-sm"
-                                                >اکشن، جنایی</span
-                                            >
-                                            <div
-                                                class="flex items-center gap-1 bg-[#292B33] rounded-[100px] px-2 py-0.5"
-                                                dir="ltr"
-                                            >
-                                                <span
-                                                    class="text-white font-bold text-[11px] mt-0.5"
-                                                    >5.7</span
-                                                >
-                                                <svg
-                                                    class="w-3 h-3 text-yellow-500"
-                                                    fill="currentColor"
-                                                    viewBox="0 0 20 20"
-                                                >
-                                                    <path
-                                                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-                                                    />
-                                                </svg>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
-                        </div>
-
-                        <div
-                            x-show="activeTab === 'series'"
-                            style="display: none"
-                            x-transition:enter="transition ease-out duration-300"
-                            x-transition:enter-start="opacity-0 translate-y-2"
-                            x-transition:enter-end="opacity-100 translate-y-0"
-                            class="flex flex-col items-center justify-center w-full py-24 md:py-32"
-                        >
-                            <div
-                                class="flex items-center justify-center w-20 h-20 mb-4 rounded-full bg-white/5"
-                            >
-                                <svg
-                                    class="w-10 h-10 text-white/30"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    stroke-width="1.5"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
-                                    />
+                                <svg width="7" height="33" viewBox="0 0 7 33" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="3.5" cy="3.5" r="3.5" fill="#D9D9D9"/>
+                                    <circle cx="3.5" cy="16.5" r="3.5" fill="#D9D9D9"/>
+                                    <circle cx="3.5" cy="29.5" r="3.5" fill="#D9D9D9"/>
                                 </svg>
-                            </div>
-                            <p
-                                class="text-base font-medium text-gray-400 md:text-lg"
+                            </button>
+
+                            <div
+                                x-show="openDropdown === {{ item_data.item.id }}"
+                                x-transition.duration.200ms
+                                class="absolute top-10 left-0 w-44 bg-[#1a1a1a] rounded-lg shadow-2xl border border-white/10 overflow-hidden z-[60]"
                             >
-                                شما هنوز سریالی به لیست خود اضافه نکرده‌اید.
-                            </p>
+                                <button
+                                    @click="
+                                        openDropdown = null;
+                                        visible = false;
+                                        historyCount = Math.max(0, historyCount - 1);
+                                        updateHeaderBadge(-1);
+                                        fetch('{% url 'interactions:api_remove_watch_history' item_data.item.id %}', {method: 'POST', headers: {'X-CSRFToken': '{{ csrf_token }}'}});
+                                    "
+                                    class="flex items-center justify-center w-full p-2 py-3 text-sm font-medium text-right text-white transition-colors hover:bg-white/5 gap-x-2 cursor-pointer"
+                                >
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M18.5297 17.4698C18.8227 17.7628 18.8227 18.2378 18.5297 18.5308C18.3837 18.6768 18.1917 18.7508 17.9997 18.7508C17.8077 18.7508 17.6158 18.6778 17.4698 18.5308L11.9997 13.0608L6.52975 18.5308C6.38375 18.6768 6.19175 18.7508 5.99975 18.7508C5.80775 18.7508 5.61575 18.6778 5.46975 18.5308C5.17675 18.2378 5.17675 17.7628 5.46975 17.4698L10.9398 11.9998L5.46975 6.52981C5.17675 6.23681 5.17675 5.76177 5.46975 5.46877C5.76275 5.17577 6.23775 5.17577 6.53075 5.46877L12.0008 10.9388L17.4707 5.46877C17.7637 5.17577 18.2387 5.17577 18.5317 5.46877C18.8247 5.76177 18.8247 6.23681 18.5317 6.52981L13.0617 11.9998L18.5297 17.4698Z" fill="white"/>
+                                    </svg>
+                                    <span>{% trans "حذف از ادامه تماشا" %}</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Play Button Link -->
+                        <div class="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
+                            <a
+                                href="{% if item_data.item.movie %}{% url 'movie:movie_detail' item_data.item.movie.slug %}{% elif item_data.item.episode %}{% url 'movie:series_detail' item_data.item.episode.season.series.slug %}{% else %}#{% endif %}"
+                                class="relative shrink-0 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center shadow-[0_4px_15px_rgba(0,0,0,0.5)] pointer-events-auto cursor-pointer hover:bg-black/60 hover:scale-110 transition-all duration-300"
+                            >
+                                <svg width="53" height="53" viewBox="0 0 53 53" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="26.3599" cy="26.3599" r="26.3599" fill="white" fill-opacity="0.24"/>
+                                    <path d="M26.3055 44.6656C36.4153 44.6656 44.6109 36.47 44.6109 26.3602C44.6109 16.2503 36.4153 8.05469 26.3055 8.05469C16.1956 8.05469 8 16.2503 8 26.3602C8 36.47 16.1956 44.6656 26.3055 44.6656Z" stroke="white" stroke-width="1.31799" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M20.3926 26.7813V23.7242C20.3926 19.9167 23.0835 18.3607 26.3785 20.2645L29.0328 21.8022L31.6871 23.3398C34.982 25.2436 34.982 28.3555 31.6871 30.2593L29.0328 31.797L26.3785 33.3346C23.0835 35.2384 20.3926 33.6824 20.3926 29.8749V26.7813Z" stroke="white" stroke-width="1.31799" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <mask id="path-5-inside-1_573_5379_{{ item_data.item.id }}" fill="white">
+                                        <path d="M21.4592 8.26354C21.2811 7.59134 21.6767 6.89661 22.3577 6.75534C25.0339 6.2001 27.7989 6.21887 30.4758 6.81608C33.5618 7.50456 36.44 8.94154 38.867 11.0055C41.294 13.0694 43.1984 15.6997 44.4192 18.6737C45.64 21.6478 46.1413 24.8783 45.8807 28.0919C45.6201 31.3055 44.6052 34.4078 42.9219 37.1365C41.2386 39.8651 38.9364 42.1398 36.2099 43.7682C33.4835 45.3966 30.413 46.3309 27.2581 46.4919C24.5175 46.6318 21.7832 46.1846 19.2297 45.1847C18.586 44.9326 18.3118 44.1873 18.5948 43.5565C18.884 42.9117 19.644 42.6334 20.3051 42.8835C22.4826 43.7072 24.8056 44.0733 27.1338 43.9545C29.8895 43.8138 32.5716 42.9978 34.9531 41.5754C37.3347 40.153 39.3456 38.1661 40.816 35.7826C42.2863 33.3992 43.1728 30.6894 43.4005 27.8823C43.6281 25.0752 43.1902 22.2534 42.1239 19.6556C41.0575 17.0578 39.394 14.7603 37.274 12.9575C35.1541 11.1546 32.64 9.89945 29.9444 9.29808C27.6666 8.78991 25.3159 8.7612 23.0348 9.2084C22.3423 9.34417 21.64 8.94569 21.4592 8.26354Z"/>
+                                    </mask>
+                                    <path d="M21.4592 8.26354C21.2811 7.59134 21.6767 6.89661 22.3577 6.75534C25.0339 6.2001 27.7989 6.21887 30.4758 6.81608C33.5618 7.50456 36.44 8.94154 38.867 11.0055C41.294 13.0694 43.1984 15.6997 44.4192 18.6737C45.64 21.6478 46.1413 24.8783 45.8807 28.0919C45.6201 31.3055 44.6052 34.4078 42.9219 37.1365C41.2386 39.8651 38.9364 42.1398 36.2099 43.7682C33.4835 45.3966 30.413 46.3309 27.2581 46.4919C24.5175 46.6318 21.7832 46.1846 19.2297 45.1847C18.586 44.9326 18.3118 44.1873 18.5948 43.5565C18.884 42.9117 19.644 42.6334 20.3051 42.8835C22.4826 43.7072 24.8056 44.0733 27.1338 43.9545C29.8895 43.8138 32.5716 42.9978 34.9531 41.5754C37.3347 40.153 39.3456 38.1661 40.816 35.7826C42.2863 33.3992 43.1728 30.6894 43.4005 27.8823C43.6281 25.0752 43.1902 22.2534 42.1239 19.6556C41.0575 17.0578 39.394 14.7603 37.274 12.9575C35.1541 11.1546 32.64 9.89945 29.9444 9.29808C27.6666 8.78991 25.3159 8.7612 23.0348 9.2084C22.3423 9.34417 21.64 8.94569 21.4592 8.26354Z" stroke="#DD0202" stroke-width="2.63599" mask="url(#path-5-inside-1_573_5379_{{ item_data.item.id }})"/>
+                                </svg>
+                            </a>
+                        </div>
+
+                        <!-- Progress Bar & Remaining Time -->
+                        <div class="absolute z-40 flex flex-col justify-end bottom-3 left-4 right-4 pointer-events-none">
+                            <span class="mb-2 tracking-wide text-right text-white font-sans text-xs">{{ item_data.remaining_str }} {% trans "مانده" %}</span>
+                            <div class="w-full h-[3px] rounded-full overflow-hidden" style="background-color: rgba(255, 255, 255, 0.2);" dir="ltr">
+                                <div class="h-full bg-white rounded-full transition-all duration-300" style="width: {{ item_data.progress_pct }}%"></div>
+                            </div>
                         </div>
                     </div>
+
+                    <div class="flex items-center justify-between w-full px-1 mt-3">
+                        <h3 class="text-white text-[17px] md:text-[17px] truncate max-w-[55%] font-medium">
+                            {% if item_data.item.movie %}{{ item_data.item.movie.title }}{% elif item_data.item.episode %}{{ item_data.item.episode.season.series.title }}{% endif %}
+                        </h3>
+                        <span class="text-white text-[15px] md:text-[15px] font-medium truncate max-w-[45%]">
+                            {% if item_data.item.episode %}{% trans "فصل" %} {{ item_data.item.episode.season.season_number }} – {% trans "قسمت" %} {{ item_data.item.episode.episode_number }}{% endif %}
+                        </span>
+                    </div>
                 </div>
-            </main>
+                {% empty %}
+                <div class="col-span-full flex flex-col items-center justify-center w-full py-24 md:py-32">
+                    <div class="flex items-center justify-center w-20 h-20 mb-4 rounded-full bg-white/5">
+                        <svg class="w-10 h-10 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <p class="text-base font-medium text-gray-400 md:text-lg">
+                        {% trans "شما هنوز آیتمی به لیست ادامه تماشای خود اضافه نکرده‌اید." %}
+                    </p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- 2. Saved Movies Tab -->
+            <div
+                x-show="activeTab === 'movies'"
+                x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-y-2"
+                x-transition:enter-end="opacity-100 translate-y-0"
+                class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5 md:gap-6 lg:gap-8"
+            >
+                {% for movie in saved_movies %}
+                <div
+                    class="flex flex-col cursor-pointer group relative transition-all duration-500 ease-in-out"
+                    x-data="{ visible: true }"
+                    x-show="visible"
+                    x-transition:leave="transition ease-out duration-500 transform"
+                    x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                    x-transition:leave-end="opacity-0 scale-75 -translate-y-4"
+                >
+                    <div class="relative rounded-2xl overflow-hidden aspect-[2/3] mb-4 border border-transparent hover:border-white/10 transition-colors bg-[#111]">
+                        <img
+                            src="{% if movie.poster %}{{ movie.poster.url }}{% else %}{% static 'public/assets/img/film.jpg' %}{% endif %}"
+                            class="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+                            alt="{{ movie.title }}"
+                        />
+
+                        <div class="absolute inset-0 bg-[#0a0a0a]/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-4 gap-3">
+                            <p class="text-white text-[11px] md:text-[13px] leading-relaxed text-right md:text-justify font-medium line-clamp-4">
+                                {{ movie.description|default:'' }}
+                            </p>
+
+                            <a href="{% url 'movie:movie_detail' movie.slug %}" class="w-full py-2 bg-[#e41a1a] hover:bg-red-700 text-white text-center rounded-xl text-xs font-bold shadow-lg transition-colors">
+                                {% trans "مشاهده فیلم" %}
+                            </a>
+
+                            <button
+                                @click="
+                                    visible = false;
+                                    moviesCount = Math.max(0, moviesCount - 1);
+                                    updateHeaderBadge(-1);
+                                    fetch('{% url 'interactions:api_toggle_bookmark' %}?item_type=movie&item_id={{ movie.id }}', {method: 'POST', headers: {'X-CSRFToken': '{{ csrf_token }}'}});
+                                "
+                                class="text-xs text-red-400 hover:text-red-300 font-medium cursor-pointer"
+                            >
+                                {% trans "حذف از لیست" %}
+                            </button>
+                        </div>
+                    </div>
+
+                    <h3 class="text-white text-right text-sm md:text-[15px] mb-2.5 font-sans tracking-wide truncate">
+                        {{ movie.title }}
+                    </h3>
+
+                    <div class="flex items-center justify-between w-full px-1">
+                        <span class="text-gray-300 text-[11px] md:text-sm">
+                            {% for g in movie.genres.all %}{{ g.name }}{% if not forloop.last %}، {% endif %}{% empty %}{% trans "فیلم" %}{% endfor %}
+                        </span>
+
+                        {% if movie.imdb_rating %}
+                        <div class="flex items-center gap-1 bg-[#292B33] rounded-[100px] px-2 py-0.5" dir="ltr">
+                            <span class="text-white font-bold text-[11px] mt-0.5">{{ movie.imdb_rating }}</span>
+                            <svg class="w-3 h-3 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="flex flex-col items-center justify-center w-full py-24 md:py-32 col-span-full">
+                    <div class="flex items-center justify-center w-20 h-20 mb-4 rounded-full bg-white/5">
+                        <svg class="w-10 h-10 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                        </svg>
+                    </div>
+                    <p class="text-base font-medium text-gray-400 md:text-lg">
+                        {% trans "شما هنوز فیلمی به لیست خود اضافه نکرده‌اید." %}
+                    </p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- 3. Saved Series Tab -->
+            <div
+                x-show="activeTab === 'series'"
+                x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-y-2"
+                x-transition:enter-end="opacity-100 translate-y-0"
+                class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5 md:gap-6 lg:gap-8"
+            >
+                {% for serial in saved_series %}
+                <div
+                    class="flex flex-col cursor-pointer group relative transition-all duration-500 ease-in-out"
+                    x-data="{ visible: true }"
+                    x-show="visible"
+                    x-transition:leave="transition ease-out duration-500 transform"
+                    x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                    x-transition:leave-end="opacity-0 scale-75 -translate-y-4"
+                >
+                    <div class="relative rounded-2xl overflow-hidden aspect-[2/3] mb-4 border border-transparent hover:border-white/10 transition-colors bg-[#111]">
+                        <img
+                            src="{% if serial.poster %}{{ serial.poster.url }}{% else %}{% static 'public/assets/img/film.jpg' %}{% endif %}"
+                            class="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+                            alt="{{ serial.title }}"
+                        />
+
+                        <div class="absolute inset-0 bg-[#0a0a0a]/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-4 gap-3">
+                            <p class="text-white text-[11px] md:text-[13px] leading-relaxed text-right md:text-justify font-medium line-clamp-4">
+                                {{ serial.description|default:'' }}
+                            </p>
+
+                            <a href="{% url 'movie:series_detail' serial.slug %}" class="w-full py-2 bg-[#e41a1a] hover:bg-red-700 text-white text-center rounded-xl text-xs font-bold shadow-lg transition-colors">
+                                {% trans "مشاهده سریال" %}
+                            </a>
+
+                            <button
+                                @click="
+                                    visible = false;
+                                    seriesCount = Math.max(0, seriesCount - 1);
+                                    updateHeaderBadge(-1);
+                                    fetch('{% url 'interactions:api_toggle_bookmark' %}?item_type=series&item_id={{ serial.id }}', {method: 'POST', headers: {'X-CSRFToken': '{{ csrf_token }}'}});
+                                "
+                                class="text-xs text-red-400 hover:text-red-300 font-medium cursor-pointer"
+                            >
+                                {% trans "حذف از لیست" %}
+                            </button>
+                        </div>
+                    </div>
+
+                    <h3 class="text-white text-right text-sm md:text-[15px] mb-2.5 font-sans tracking-wide truncate">
+                        {{ serial.title }}
+                    </h3>
+
+                    <div class="flex items-center justify-between w-full px-1">
+                        <span class="text-gray-300 text-[11px] md:text-sm">
+                            {% for g in serial.genres.all %}{{ g.name }}{% if not forloop.last %}، {% endif %}{% empty %}{% trans "سریال" %}{% endfor %}
+                        </span>
+
+                        {% if serial.imdb_rating %}
+                        <div class="flex items-center gap-1 bg-[#292B33] rounded-[100px] px-2 py-0.5" dir="ltr">
+                            <span class="text-white font-bold text-[11px] mt-0.5">{{ serial.imdb_rating }}</span>
+                            <svg class="w-3 h-3 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="flex flex-col items-center justify-center w-full py-24 md:py-32 col-span-full">
+                    <div class="flex items-center justify-center w-20 h-20 mb-4 rounded-full bg-white/5">
+                        <svg class="w-10 h-10 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                        </svg>
+                    </div>
+                    <p class="text-base font-medium text-gray-400 md:text-lg">
+                        {% trans "شما هنوز سریالی به لیست خود اضافه نکرده‌اید." %}
+                    </p>
+                </div>
+                {% endfor %}
+            </div>
         </div>
-
-        <!-- Footer -->
-
-{% endwith %}
-{% endblock %}
-
-{% block footer_references %}
-
+    </div>
+</div>
 {% endblock %}

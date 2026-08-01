@@ -3,17 +3,17 @@ from .models import Country, Genre, Person, Movie, Series, MovieCollectionItem, 
 
 @register(Country)
 class CountryTranslationOptions(TranslationOptions):
-    fields = ('name',)
+    fields = ('name', 'description')
 
 
 @register(Genre)
 class GenreTranslationOptions(TranslationOptions):
-    fields = ('name',)
+    fields = ('name', 'description')
 
 
 @register(Person)
 class PersonTranslationOptions(TranslationOptions):
-    fields = ('bio',)
+    fields = ('bio', 'meta_description')
 
 
 @register(Movie)

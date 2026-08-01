@@ -128,7 +128,9 @@ class OnboardingMiddleware:
             is_exempt = any(path.startswith(ep) for ep in exempt_paths)
 
             if not is_exempt and not getattr(request.user, 'has_completed_onboarding', True):
-                return redirect('/selection/')
+                import urllib.parse
+                full_path = request.get_full_path()
+                return redirect(f'/selection/?next={urllib.parse.quote(full_path)}')
 
         response = self.get_response(request)
         return response
@@ -186,6 +188,7 @@ class DeviceTrackingMiddleware:
 
             try:
                 from .models import UserDevice
+                from django.utils import timezone
 
                 session_key = request.session.session_key
                 user_agent = request.META.get('HTTP_USER_AGENT', '')
@@ -197,19 +200,24 @@ class DeviceTrackingMiddleware:
                 else:
                     ip = request.META.get('REMOTE_ADDR')
 
-                device, created = UserDevice.objects.get_or_create(
-                    user=request.user,
-                    session_key=session_key,
-                    defaults={
-                        'device_name': device_name,
-                        'ip_address': ip,
-                    }
-                )
+                device = UserDevice.objects.filter(user=request.user, session_key=session_key).first()
+                if not device:
+                    device = UserDevice.objects.filter(user=request.user, device_name=device_name, ip_address=ip).order_by('-last_activity').first()
 
-                if not created:
+                if device:
+                    device.session_key = session_key
                     device.device_name = device_name
                     device.ip_address = ip
-                    device.save(update_fields=['device_name', 'ip_address', 'last_activity'])
+                    device.last_activity = timezone.now()
+                    device.save()
+                else:
+                    UserDevice.objects.create(
+                        user=request.user,
+                        session_key=session_key,
+                        device_name=device_name,
+                        ip_address=ip,
+                        last_activity=timezone.now()
+                    )
 
                 request.session['_last_device_track_ts'] = now
             except Exception:

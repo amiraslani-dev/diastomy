@@ -61,6 +61,11 @@ class User(AbstractUser):
         from django.utils import timezone
         return self.subscriptions.filter(is_active=True, end_date__gt=timezone.now()).exists()
 
+    @property
+    def active_subscription(self):
+        from django.utils import timezone
+        return self.subscriptions.filter(is_active=True, end_date__gt=timezone.now()).select_related('plan').order_by('-end_date').first()
+
 
 class Notification(models.Model):
     NOTIFICATION_TYPES = (
@@ -85,6 +90,12 @@ class Notification(models.Model):
         blank=True, 
         related_name='dismissed_notifications',
         verbose_name="کاربرانی که این اعلان را بسته‌اند"
+    )
+    read_users = models.ManyToManyField(
+        User,
+        blank=True,
+        related_name='read_notifications',
+        verbose_name="کاربرانی که این اعلان را خوانده‌اند"
     )
 
     class Meta:

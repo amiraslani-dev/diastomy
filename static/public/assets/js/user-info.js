@@ -14,6 +14,7 @@ document.addEventListener("alpine:init", () => {
         const initData = window.DASHBOARD_DATA || {};
         
         return {
+            showMobileMenu: false,
             isAvatarModalOpen: false,
             currentAvatar: initData.avatar || "", 
             predefinedAvatars: initData.default_avatars || [],

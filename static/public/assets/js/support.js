@@ -193,11 +193,17 @@ document.addEventListener("alpine:init", () => {
         },
 
         scrollToBottom() {
-            this.$nextTick(() => {
+            const doScroll = () => {
                 const container = this.$refs.messagesContainer;
                 if (container) {
                     container.scrollTop = container.scrollHeight;
                 }
+            };
+            this.$nextTick(() => {
+                doScroll();
+                setTimeout(doScroll, 50);
+                setTimeout(doScroll, 150);
+                setTimeout(doScroll, 350);
             });
         }
     }));

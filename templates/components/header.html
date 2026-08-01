@@ -1,5 +1,9 @@
+{% load i18n %}
 <header
                 class="absolute top-0 inset-x-0 z-50 flex items-center justify-between px-6 md:px-2 md:px-4 lg:px-5 py-3 md:my-6 md:mt-[45px] mx-0 md:mx-4 lg:mx-20 bg-transparent md:bg-[#0C0C0C]/80 md:backdrop-blur-[4px] md:rounded-full border border-transparent md:border-white/5 mt-4"
+                style="z-index: 1000;"
+                x-data="{ isGlobalSearchOpen: false }"
+                @open-global-search.window="isGlobalSearchOpen = true; $nextTick(() => { const inp = document.querySelector('.search-box-input'); if (inp) inp.focus(); })"
             >
                 <button
                     class="md:hidden w-[43px] h-[43px] border border-[#FFCC00] rounded-full flex items-center justify-center text-white shrink-0"
@@ -21,7 +25,7 @@
                 <div
                     class="items-center hidden gap-6 md:flex lg:gap-3 shrink-0"
                 >
-                    <div class="flex items-center gap-2 mr-1">
+                    <a href="{% url 'home' %}" class="flex items-center gap-2 mr-1 cursor-pointer">
                         {% if header_settings.logo %}
                             <img src="{{ header_settings.logo.url }}" alt="Logo" class="h-[30px] w-auto object-contain">
                         {% else %}
@@ -85,7 +89,7 @@
                             </defs>
                         </svg>
                         {% endif %}
-                    </div>
+                    </a>
 
                     <div
                         class="h-8 w-[1px] bg-white/20 hidden lg:block mx-1"
@@ -299,7 +303,10 @@
                         class="hidden md:inline-flex w-[43px] h-[43px] items-center justify-center rounded-full bg-[linear-gradient(to_bottom_right,white_0%,#e41a1a_60%,#e41a1a_100%)] p-[2px] shadow-lg shadow-red-600/30"
                     >
                         <button
-                            class="flex w-[39px] h-[39px] items-center justify-center rounded-full bg-[#e41a1a] text-white shrink-0 hover:bg-red-700 transition-colors"
+                            @click="isGlobalSearchOpen = true; $nextTick(() => { const inp = document.querySelector('.search-box-input'); if (inp) inp.focus(); })"
+                            type="button"
+                            title="{% trans "جستجو" %}"
+                            class="flex w-[39px] h-[39px] items-center justify-center rounded-full bg-[#e41a1a] text-white shrink-0 hover:bg-red-700 transition-colors cursor-pointer"
                         >
                             <svg
                                 width="22"
@@ -316,10 +323,12 @@
                         </button>
                     </div>
 
-                    <button
+                    <a
+                        href="{% url 'interactions:my_list' %}?tab=movies"
+                        title="{% trans "لیست من" %}"
                         {% if request.user.is_authenticated %}
                         x-data="{ count: {{ total_saved_count|default:0 }} }"
-                        @save-count-changed.window="count += $event.detail.amount"
+                        @save-count-changed.window="count = Math.max(0, count + ($event.detail.amount || 0))"
                         {% endif %}
                         class="relative w-[43px] h-[43px] hidden md:flex items-center justify-center bg-[#242424] hover:bg-[#242424d6] transition-colors rounded-full shrink-0 order-1 md:order-none border border-[#505050]"
                     >
@@ -340,10 +349,12 @@
                             <span class="absolute -top-[1px] -right-[1px] w-[12px] h-[12px] bg-[#e41a1a] rounded-full flex items-center justify-center text-[7px] text-white" x-text="count"></span>
                         </template>
                         {% endif %}
-                    </button>
+                    </a>
 
-                    <button
+                    <a
+                        href="{% url 'accounts:notifications' %}"
                         class="relative w-[43px] h-[43px] flex items-center justify-center bg-white hover:bg-gray-200 transition-colors rounded-full text-black shrink-0 order-1 md:order-none"
+                        title="{% trans "اعلان‌ها" %}"
                     >
                         <svg
                             width="24"
@@ -357,15 +368,17 @@
                                 fill="#1E0C0C"
                             />
                         </svg>
+                        {% if unread_notifications_count > 0 %}
                         <span
-                            class="absolute -top-[1px] -right-[1px] w-[12px] h-[12px] bg-[#e41a1a] rounded-full flex items-center justify-center text-[7px] text-white"
-                            >۳</span
+                            class="absolute -top-[1px] -right-[1px] min-w-[16px] h-[16px] px-1 bg-[#e41a1a] rounded-full flex items-center justify-center text-[9px] font-bold text-white leading-none shadow-sm"
+                            >{{ unread_notifications_count }}</span
                         >
-                    </button>
+                        {% endif %}
+                    </a>
 
                     <div class="relative order-2 hidden md:flex group shrink-0 md:order-none">
                         {% if request.user.is_authenticated %}
-                        <button class="flex items-center gap-3 bg-[#111] md:bg-transparent hover:bg-white/5 transition-colors md:pl-3 md:pr-1 md:py-2 p-0 rounded-full border border-[#FFFFFF33] w-[3.25rem] h-[3.25rem] md:w-auto md:h-[3.25rem] justify-center md:justify-start">
+                        <a href="{% url 'accounts:user_info' %}" class="flex items-center gap-3 bg-[#111] md:bg-transparent hover:bg-white/5 transition-colors md:pl-3 md:pr-1 md:py-2 p-0 rounded-full border border-[#FFFFFF33] w-[3.25rem] h-[3.25rem] md:w-auto md:h-[3.25rem] justify-center md:justify-start">
                             <div class="w-[43px] h-[43px] md:bg-[#58585833] rounded-full flex items-center justify-center bg-transparent shrink-0 overflow-hidden">
                                 {% if request.user.avatar %}
                                     <img src="{{ request.user.avatar.url }}" alt="avatar" class="w-full h-full object-cover">
@@ -378,7 +391,7 @@
                             </div>
                             <div class="flex-col justify-center hidden text-right md:flex">
                                 <p class="text-[11px] font-medium text-white mb-[2px]">
-                                    {% if request.user.full_name %}{{ request.user.full_name }}{% else %}کاربر عزیز{% endif %}
+                                    {% if request.user.full_name %}{{ request.user.full_name }}{% else %}{% trans "کاربر عزیز" %}{% endif %}
                                 </p>
                                 <p class="text-[10px] text-gray-500 leading-none" dir="ltr">
                                     {{ request.user.phone|default:"" }}
@@ -387,59 +400,64 @@
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-white hidden md:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
-                        </button>
+                        </a>
 
                         <div class="absolute left-0 top-full pt-2 w-60 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-[60]">
                             <div class="bg-[#000] p-4 rounded-2xl border border-white/5 shadow-2xl overflow-hidden p-2">
-                                <div class="pl-3 mb-3 flex items-center justify-between border-b border-white/5 cursor-pointer hover:bg-white/5 transition group/item rounded-3xl bg-[#FFFFFF18]">
+                                <a href="{% url 'accounts:subscriptions:subscription' %}" class="pl-3 mb-3 flex items-center justify-between border-b border-white/5 cursor-pointer hover:bg-white/5 transition group/item rounded-3xl bg-[#FFFFFF18]">
                                     <div class="flex items-center justify-between gap-3">
                                         <div class="inline-flex w-[38px] h-[38px] items-center justify-center rounded-full bg-[linear-gradient(to_bottom_right,white_0%,#1A8244_60%,#1A8244_100%)] p-[2px] shadow-lg shadow-[#1A8244]/30">
-                                            <button class="flex w-[36px] h-[36px] items-center justify-center rounded-full bg-[#1A8244] text-white shrink-0 hover:bg-[#146635] transition-colors">
+                                            <div class="flex w-[36px] h-[36px] items-center justify-center rounded-full bg-[#1A8244] text-white shrink-0 hover:bg-[#146635] transition-colors">
                                                 <svg width="17" height="21" viewBox="0 0 17 21" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                     <path d="M16.2199 12.4367C16.2199 16.908 12.5823 20.5467 8.10997 20.5467C3.63759 20.5467 0 16.908 0 12.4367C0 10.0059 0.694209 8.27468 2.32053 6.64728C2.63952 6.3272 3.00069 6.00712 3.37483 5.67623C4.90599 4.32025 6.48797 2.9178 6.48797 0.541043C6.48797 0.342078 6.59828 0.158209 6.77345 0.0641332C6.94863 -0.0299424 7.16165 -0.020184 7.32818 0.0911929C7.39306 0.134446 13.4247 4.26833 10.3321 11.3705C11.0577 10.965 11.926 10.3 12.4591 9.26731C12.8008 8.60554 12.9749 7.85299 12.9749 7.02902C12.9749 6.80951 13.1079 6.61161 13.3112 6.52835C13.5123 6.44508 13.7469 6.49266 13.9016 6.64946C15.3754 8.1471 16.2199 10.2568 16.2199 12.4367Z" fill="white" />
                                                 </svg>
-                                            </button>
+                                            </div>
                                         </div>
                                         <div class="py-1 text-right">
-                                            <p class="text-[11px] text-white font-medium">اشتراک یکماهه</p>
-                                            <p class="text-[10px] text-green-500">فعال</p>
+                                            {% if request.user.has_active_subscription and request.user.active_subscription %}
+                                                <p class="text-[11px] text-white font-medium">{% if request.user.active_subscription.plan %}{{ request.user.active_subscription.plan.name }}{% else %}{% trans "اشتراک فعال" %}{% endif %}</p>
+                                                <p class="text-[10px] text-green-500">{% trans "فعال" %}</p>
+                                            {% else %}
+                                                <p class="text-[11px] text-white font-medium">{% trans "خرید اشتراک" %}</p>
+                                                <p class="text-[10px] text-red-500">{% trans "غیرفعال" %}</p>
+                                            {% endif %}
                                         </div>
                                     </div>
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white transition-colors group-hover/item:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                                     </svg>
-                                </div>
+                                </a>
 
-                                <div class="flex items-center justify-between py-3 pl-3 transition cursor-pointer hover:bg-white/5 group/item">
+                                <a href="{% url 'interactions:my_list' %}" class="flex items-center justify-between py-3 pl-3 transition cursor-pointer hover:bg-white/5 group/item">
                                     <div class="flex items-center gap-3 text-white transition-colors group-hover/item:text-white">
                                         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M13.5 2.4375H4.5C2.6865 2.4375 1.6875 3.49797 1.6875 5.42322V11.0768C1.6875 13.002 2.6865 14.0625 4.5 14.0625H13.5C15.3135 14.0625 16.3125 13.002 16.3125 11.0768V5.42322C16.3125 3.49797 15.3135 2.4375 13.5 2.4375ZM15.1875 11.0768C15.1875 12.381 14.6827 12.9375 13.5 12.9375H4.5C3.31725 12.9375 2.8125 12.381 2.8125 11.0768V5.42322C2.8125 4.11897 3.31725 3.5625 4.5 3.5625H13.5C14.6827 3.5625 15.1875 4.11897 15.1875 5.42322V11.0768ZM13.3125 15.75C13.3125 16.0605 13.0605 16.3125 12.75 16.3125H5.25C4.9395 16.3125 4.6875 16.0605 4.6875 15.75C4.6875 15.4395 4.9395 15.1875 5.25 15.1875H12.75C13.0605 15.1875 13.3125 15.4395 13.3125 15.75ZM11.2297 7.21124L8.86871 5.76599C8.47721 5.52599 7.98526 5.51702 7.58551 5.74127C7.17976 5.96852 6.93823 6.38096 6.93823 6.84521V9.65479C6.93823 10.119 7.17976 10.5315 7.58551 10.7587C7.77826 10.8667 7.99194 10.9208 8.20569 10.9208C8.43594 10.9208 8.66546 10.8585 8.86871 10.734L11.2289 9.28949C11.5942 9.06599 11.8125 8.6775 11.8125 8.25C11.8125 7.8225 11.5942 7.43399 11.2297 7.21124ZM10.6417 8.32947L8.28076 9.77472C8.21926 9.81222 8.16819 9.79583 8.13519 9.77783C8.10219 9.75908 8.0625 9.72304 8.0625 9.65479V6.84521C8.0625 6.77771 8.10219 6.74092 8.13519 6.72217C8.15319 6.71167 8.17792 6.70276 8.20642 6.70276C8.22892 6.70276 8.25449 6.70878 8.28149 6.72528L10.6425 8.17053C10.6425 8.17053 10.6424 8.17053 10.6432 8.17053C10.6724 8.18853 10.6882 8.21552 10.6882 8.24927C10.6882 8.28302 10.6717 8.31147 10.6417 8.32947Z" fill="white" />
                                         </svg>
-                                        <p class="text-xs">لیست فیـــلم‌های من</p>
+                                        <p class="text-xs">{% trans "لیست فیلم‌های من" %}</p>
                                     </div>
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white transition-colors group-hover/item:text-white shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                                     </svg>
-                                </div>
+                                </a>
 
-                                <div class="flex items-center justify-between py-3 pl-3 transition cursor-pointer hover:bg-white/5 group/item">
+                                <a href="{% url 'accounts:user_info' %}" class="flex items-center justify-between py-3 pl-3 transition cursor-pointer hover:bg-white/5 group/item">
                                     <div class="flex items-center gap-3 text-white transition-colors group-hover/item:text-white">
                                         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M17.0623 9.00012C17.0623 4.55412 13.4458 0.937622 8.99982 0.937622C4.55382 0.937622 0.937317 4.55412 0.937317 9.00012C0.937317 11.6026 2.18156 13.9142 4.10156 15.3894C4.10456 15.3924 4.10909 15.3939 4.11209 15.3969C5.47034 16.4372 7.16155 17.0626 9.00055 17.0626C10.8395 17.0626 12.5308 16.4372 13.8891 15.3969C13.8921 15.3939 13.8965 15.3924 13.8995 15.3894C15.818 13.9142 17.0623 11.6026 17.0623 9.00012ZM2.06232 9.00012C2.06232 5.17437 5.17407 2.06262 8.99982 2.06262C12.8256 2.06262 15.9373 5.17437 15.9373 9.00012C15.9373 10.8924 15.1738 12.6092 13.9408 13.8617C13.6041 12.4359 12.5263 11.1151 10.2823 11.1151H7.71735C5.47335 11.1151 4.39481 12.4359 4.05881 13.8617C2.82581 12.6092 2.06232 10.8924 2.06232 9.00012ZM5.06909 14.7106C5.11259 13.9411 5.46435 12.2401 7.71735 12.2401H10.2823C12.5353 12.2401 12.887 13.9411 12.9305 14.7106C11.8123 15.4831 10.4586 15.9376 8.99982 15.9376C7.54107 15.9376 6.18734 15.4824 5.06909 14.7106ZM9.00586 10.3126C10.5561 10.3126 11.8184 9.05112 11.8184 7.50012C11.8184 5.94912 10.5561 4.68762 9.00586 4.68762C7.45561 4.68762 6.19336 5.94912 6.19336 7.50012C6.19336 9.05112 7.45486 10.3126 9.00586 10.3126ZM9.00586 5.81262C9.93586 5.81262 10.6934 6.56937 10.6934 7.50012C10.6934 8.43087 9.93586 9.18762 9.00586 9.18762C8.07586 9.18762 7.31836 8.43087 7.31836 7.50012C7.31836 6.56937 8.07586 5.81262 9.00586 5.81262Z" fill="white" />
                                         </svg>
-                                        <p class="text-xs">ورود به پنــــل کاربـری</p>
+                                        <p class="text-xs">{% trans "ورود به پنل کاربری" %}</p>
                                     </div>
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white transition-colors group-hover/item:text-white shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                                     </svg>
-                                </div>
+                                </a>
 
                                 <a href="{% url 'accounts:logout' %}" class="flex items-center justify-between py-3 transition border-t cursor-pointer hover:bg-white/5 border-white/5 group/item">
                                     <div class="flex items-center gap-3 text-red-500 transition-colors group-hover/item:text-red-400">
                                         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M15.5664 2.99951V6.74951C15.5664 7.06001 15.3144 7.31201 15.0039 7.31201C14.6934 7.31201 14.4414 7.06001 14.4414 6.74951V4.35779L8.65143 10.1478C8.54193 10.2573 8.39791 10.3127 8.25391 10.3127C8.10991 10.3127 7.96588 10.258 7.85638 10.1478C7.63663 9.92802 7.63663 9.57174 7.85638 9.35199L13.6464 3.56201H11.2539C10.9434 3.56201 10.6914 3.31001 10.6914 2.99951C10.6914 2.68901 10.9434 2.43701 11.2539 2.43701H15.0039C15.0774 2.43701 15.1502 2.45209 15.2192 2.48059C15.3565 2.53759 15.466 2.6471 15.5237 2.7851C15.5515 2.85335 15.5664 2.92601 15.5664 2.99951ZM15.0039 9.18701C14.6934 9.18701 14.4414 9.43901 14.4414 9.74951V12.7495C14.4414 13.9323 13.9367 14.437 12.7539 14.437H5.25391C4.07116 14.437 3.56641 13.9323 3.56641 12.7495V5.24951C3.56641 4.06676 4.07116 3.56201 5.25391 3.56201H8.25391C8.56441 3.56201 8.81641 3.31001 8.81641 2.99951C8.81641 2.68901 8.56441 2.43701 8.25391 2.43701H5.25391C3.44041 2.43701 2.44141 3.43601 2.44141 5.24951V12.7495C2.44141 14.563 3.44041 15.562 5.25391 15.562H12.7539C14.5674 15.562 15.5664 14.563 15.5664 12.7495V9.74951C15.5664 9.43901 15.3144 9.18701 15.0039 9.18701Z" fill="#CD0303" />
                                         </svg>
-                                        <p class="text-xs font-semibold text-white">خروج از حساب</p>
+                                        <p class="text-xs font-semibold text-white">{% trans "خروج از حساب" %}</p>
                                     </div>
                                 </a>
                             </div>
@@ -462,4 +480,30 @@
                         {% endif %}
                     </div>
                 </div>
+
+                <!-- Global Search Modal Popup -->
+                <template x-teleport="body">
+                    <div
+                        x-show="isGlobalSearchOpen"
+                        x-transition.opacity.duration.300ms
+                        class="fixed inset-0 flex items-start justify-center p-4 md:p-8 pt-16 md:pt-20 pb-12 overflow-y-auto bg-black/90 backdrop-blur-xl"
+                        style="display: none; z-index: 9999999 !important;"
+                        @keydown.escape.window="isGlobalSearchOpen = false"
+                    >
+                        <div class="fixed inset-0 bg-black/80" style="z-index: 9999999 !important;" @click="isGlobalSearchOpen = false"></div>
+                        
+                        <div class="relative w-full max-w-[850px] my-auto" style="z-index: 10000000 !important;" @click.stop>
+                            <div class="flex items-center justify-between mb-4 px-2">
+                                <span class="text-lg md:text-xl font-bold text-white">{% trans "جستجوی پیشرفته" %}</span>
+                                <button @click="isGlobalSearchOpen = false" class="text-gray-400 hover:text-white transition-colors cursor-pointer p-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                            {% include 'components/search_box.html' with is_popup=True %}
+                        </div>
+                    </div>
+                </template>
             </header>

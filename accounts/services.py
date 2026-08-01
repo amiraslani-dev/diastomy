@@ -44,7 +44,7 @@ def check_user_status(phone):
 def generate_and_send_otp(phone):
     """
     Generates a 6-digit OTP, stores it in the cache for 2 minutes,
-    and simulates sending an SMS.
+    and sends an SMS via MeliPayamak pattern service.
     Prevents sending multiple SMS within the 2-minute window.
     """
     cache_key = f"otp_{phone}"
@@ -55,15 +55,18 @@ def generate_and_send_otp(phone):
         
     otp_code = f"{random.randint(100000, 999999)}"
     
+    # Send SMS via MeliPayamak pattern
+    from core.sms import send_sms_pattern
+    sms_success, sms_result = send_sms_pattern(to=phone, text=otp_code)
+    
+    if not sms_success:
+        logger.error(f"Failed to send OTP SMS to {phone}: {sms_result}")
+        return False, _("خطا در ارسال پیامک کد تایید. لطفاً دوباره تلاش کنید.")
+    
     # Store OTP in cache for 120 seconds (2 minutes)
     cache.set(cache_key, otp_code, timeout=120)
     
-    # TODO: Integrate real SMS provider here (e.g., Kavenegar)
-    print(f"\n{'='*40}")
-    print(f"SMS Service - To: {phone}")
-    print(f"Your login code is: {otp_code}")
-    print(f"{'='*40}\n")
-    logger.info(f"Generated OTP {otp_code} for phone {phone}")
+    logger.info(f"Generated and sent OTP {otp_code} for phone {phone}")
     
     return True, _("کد تایید با موفقیت ارسال شد")
 
@@ -229,6 +232,38 @@ def get_user_notifications(user):
     ).exclude(
         dismissed_users=user
     ).order_by('-created_at')
+
+
+def get_unread_notifications_count(user):
+    """
+    Returns count of active, non-dismissed notifications that the user has not read yet.
+    """
+    if not user or not user.is_authenticated:
+        return 0
+    return Notification.objects.filter(
+        is_active=True
+    ).exclude(
+        dismissed_users=user
+    ).exclude(
+        read_users=user
+    ).count()
+
+
+def mark_all_notifications_as_read(user):
+    """
+    Marks all active, non-dismissed notifications as read for the given user.
+    """
+    if not user or not user.is_authenticated:
+        return
+    unread_notifications = Notification.objects.filter(
+        is_active=True
+    ).exclude(
+        dismissed_users=user
+    ).exclude(
+        read_users=user
+    )
+    for n in unread_notifications:
+        n.read_users.add(user)
 
 
 def dismiss_user_notification(user, notification_id):

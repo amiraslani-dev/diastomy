@@ -1,4 +1,4 @@
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext as _, get_language
 import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
@@ -10,8 +10,34 @@ from django.core.paginator import Paginator
 from .models import Notification, UserDevice
 from . import services
 
+import urllib.parse
+
+def get_redirect_url(request, user, default_onboarding_url='/selection/', default_user_url='/accounts/user-info/'):
+    next_url = request.GET.get('next') or request.POST.get('next')
+    if not next_url and request.body:
+        try:
+            body_data = json.loads(request.body)
+            next_url = body_data.get('next')
+        except Exception:
+            pass
+            
+    valid_next = next_url if (next_url and next_url.startswith('/') and not next_url.startswith('//')) else None
+
+    if not user.has_completed_onboarding:
+        if valid_next:
+            return f"/selection/?next={urllib.parse.quote(valid_next)}"
+        return default_onboarding_url
+
+    if valid_next:
+        return valid_next
+
+    return default_user_url
+
 def login_view(request):
     if request.user.is_authenticated:
+        next_url = request.GET.get('next')
+        if next_url and next_url.startswith('/') and not next_url.startswith('//'):
+            return redirect(next_url)
         return redirect('/accounts/user-info/')
     
     context = {
@@ -65,8 +91,25 @@ def api_update_profile_view(request):
 
 def logout_view(request):
     if request.user.is_authenticated:
+        current_key = request.session.session_key
+        if current_key:
+            UserDevice.objects.filter(user=request.user, session_key=current_key).delete()
         logout(request)
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.content_type == 'application/json':
+        return JsonResponse({'success': True, 'message': _('با موفقیت از حساب کاربری خارج شدید.')})
+
     return redirect('accounts:login')
+
+
+def api_logout_view(request):
+    """REST API endpoint for logout for mobile apps and API clients."""
+    if request.user.is_authenticated:
+        current_key = request.session.session_key
+        if current_key:
+            UserDevice.objects.filter(user=request.user, session_key=current_key).delete()
+        logout(request)
+    return JsonResponse({'success': True, 'message': _('با موفقیت از حساب کاربری خارج شدید.')})
 
 @require_POST
 def check_phone_view(request):
@@ -88,6 +131,12 @@ def check_phone_view(request):
 def notifications_view(request):
     notifications_list = services.get_user_notifications(request.user)
 
+    # Get list of unread notification IDs before marking as read to highlight new ones in template
+    unread_ids = list(notifications_list.exclude(read_users=request.user).values_list('id', flat=True))
+
+    # Mark all unread notifications as read for this user
+    services.mark_all_notifications_as_read(request.user)
+
     total_count = notifications_list.count()
 
     paginator = Paginator(notifications_list, 20)  # 20 per page
@@ -98,6 +147,7 @@ def notifications_view(request):
         'active_tab': 'notifications',
         'page_obj': page_obj,
         'notifications': page_obj.object_list,
+        'unread_ids': unread_ids,
         'total_count': total_count,
     }
     return render(request, 'accounts/notifications.html', context)
@@ -115,6 +165,7 @@ def dismiss_notification_view(request, pk):
 @login_required
 def api_notifications_list_view(request):
     notifications = services.get_user_notifications(request.user)
+    read_ids = set(request.user.read_notifications.values_list('id', flat=True))
     data = []
     for n in notifications:
         data.append({
@@ -122,9 +173,23 @@ def api_notifications_list_view(request):
             'title': n.title,
             'message': n.message,
             'type': n.notification_type,
+            'is_read': n.id in read_ids,
             'created_at': n.created_at.strftime('%Y-%m-%d %H:%M'),
         })
-    return JsonResponse({'success': True, 'count': len(data), 'notifications': data})
+    unread_count = services.get_unread_notifications_count(request.user)
+    return JsonResponse({
+        'success': True,
+        'count': len(data),
+        'unread_count': unread_count,
+        'notifications': data
+    })
+
+
+@login_required
+@require_POST
+def api_mark_notifications_read_view(request):
+    services.mark_all_notifications_as_read(request.user)
+    return JsonResponse({'success': True, 'message': _('تمام اعلان‌ها با موفقیت به عنوان خوانده‌شده علامت‌گذاری شدند.')})
 
 
 
@@ -132,17 +197,38 @@ from jalali_date import datetime2jalali
 
 @login_required
 def settings_view(request):
-    devices = UserDevice.objects.filter(user=request.user).order_by('-last_activity')
     current_key = request.session.session_key
 
+    # Deduplicate old duplicate device entries for current user
+    all_user_devices = UserDevice.objects.filter(user=request.user).order_by('-last_activity')
+    seen = set()
+    devices = []
+    to_delete_ids = []
+
+    for d in all_user_devices:
+        combo = (d.device_name, d.ip_address)
+        if combo in seen and d.session_key != current_key:
+            to_delete_ids.append(d.id)
+        else:
+            seen.add(combo)
+            devices.append(d)
+
+    if to_delete_ids:
+        UserDevice.objects.filter(id__in=to_delete_ids).delete()
+
     active_devices = []
+    current_lang = get_language()
     for d in devices:
-        jalali_time = datetime2jalali(d.last_activity).strftime('%Y/%m/%d ، %H:%M:%S') if d.last_activity else ''
+        if current_lang == 'fa':
+            formatted_time = datetime2jalali(d.last_activity).strftime('%Y/%m/%d ، %H:%M:%S') if d.last_activity else ''
+        else:
+            formatted_time = d.last_activity.strftime('%Y-%m-%d %H:%M:%S') if d.last_activity else ''
+
         active_devices.append({
             'id': d.id,
             'device_name': d.device_name,
             'ip_address': d.ip_address,
-            'last_activity': jalali_time,
+            'last_activity': formatted_time,
             'is_current': (d.session_key == current_key),
         })
 
@@ -280,7 +366,7 @@ def verify_otp_view(request):
         if user:
             # Explicitly specify backend to avoid Multiple authentication backends error
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            redirect_url = '/accounts/user-info/' if user.has_completed_onboarding else '/selection/'
+            redirect_url = get_redirect_url(request, user)
             return JsonResponse({'message': _('با موفقیت وارد شدید'), 'redirect_url': redirect_url})
         elif needs_registration:
             request.session['verified_phone'] = phone
@@ -325,7 +411,7 @@ def complete_registration_view(request):
         del request.session['verified_phone']
         
         login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-        redirect_url = '/accounts/user-info/' if user.has_completed_onboarding else '/selection/'
+        redirect_url = get_redirect_url(request, user)
         return JsonResponse({'message': _('ثبت‌نام با موفقیت انجام شد'), 'redirect_url': redirect_url})
         
     except json.JSONDecodeError:
@@ -346,7 +432,7 @@ def login_password_view(request):
         
         if user:
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            redirect_url = '/accounts/user-info/' if user.has_completed_onboarding else '/selection/'
+            redirect_url = get_redirect_url(request, user)
             return JsonResponse({'message': _('با موفقیت وارد شدید'), 'redirect_url': redirect_url})
         else:
             return JsonResponse({'error': _('شماره موبایل یا رمز عبور اشتباه است')}, status=400)
@@ -371,7 +457,7 @@ def google_login_view(request):
                 return JsonResponse({'needs_google_completion': True, 'email': user.email})
             else:
                 login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-                redirect_url = '/accounts/user-info/' if user.has_completed_onboarding else '/selection/'
+                redirect_url = get_redirect_url(request, user)
                 return JsonResponse({'message': _('با موفقیت وارد شدید'), 'redirect_url': redirect_url})
         else:
             return JsonResponse({'error': error_msg}, status=400)
@@ -441,7 +527,7 @@ def google_verify_otp_view(request):
                 del request.session['pending_google_username']
                 
                 login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-                redirect_url = '/accounts/user-info/' if user.has_completed_onboarding else '/selection/'
+                redirect_url = get_redirect_url(request, user)
                 return JsonResponse({'message': _('ثبت‌نام با موفقیت تکمیل شد'), 'redirect_url': redirect_url})
             except services.User.DoesNotExist:
                 return JsonResponse({'error': _('کاربر یافت نشد')}, status=400)

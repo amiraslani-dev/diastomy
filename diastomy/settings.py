@@ -186,3 +186,14 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # Allow Google Auth popup to communicate with the main window
 SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin-allow-popups'
+
+# Zarinpal Gateway Settings
+ZARINPAL_MERCHANT_ID = os.getenv('ZARINPAL_MERCHANT_ID', '')
+ZARINPAL_ACCESS_TOKEN = os.getenv('ZARINPAL_ACCESS_TOKEN', '')
+ZARINPAL_SANDBOX = os.getenv('ZARINPAL_SANDBOX', 'True').lower() in ('true', '1', 't')
+
+# MeliPayamak SMS Settings
+MELIPAYAMAK_USERNAME = os.getenv('MELIPAYAMAK_USERNAME', '')
+MELIPAYAMAK_PASSWORD = os.getenv('MELIPAYAMAK_PASSWORD', '')
+MELIPAYAMAK_OTP_BODY_ID = os.getenv('MELIPAYAMAK_OTP_BODY_ID', '')
+

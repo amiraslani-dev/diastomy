@@ -2,6 +2,8 @@
 {% load static %}
 {% load i18n %}
 
+{% block title %}{% trans "حساب کاربری" %} | {% trans "دیاستومی" %}{% endblock %}
+
 {% block header %}{% endblock %}
 {% block footer %}{% endblock %}
 {% block navbar %}{% endblock %}
@@ -79,13 +81,20 @@
                 @change="handleAvatarUpload"
             />
 
+            {% include 'accounts/mobile-menu.html' %}
+
             <header
                 class="md:hidden fixed top-0 left-0 w-full flex items-center justify-between px-5 py-5 bg-gradient-to-b from-[#1a0000] to-transparent z-50"
             >
                 <h1 class="text-[17px] font-bold text-white tracking-wide">
                     {% block dashboard_title %}{% trans "اطلاعات کاربری" %}{% endblock %}
                 </h1>
-                <button class="text-white transition-transform hover:scale-110">
+                <button
+                    @click="showMobileMenu = !showMobileMenu"
+                    type="button"
+                    title="{% trans 'منوی کاربری' %}"
+                    class="text-white transition-transform hover:scale-110 cursor-pointer"
+                >
                     <svg
                         width="31"
                         height="31"
@@ -208,6 +217,7 @@
                     <div
                         class="relative z-10 flex flex-col items-center py-10 px-5 h-full overflow-y-auto custom-scrollbar [&::-webkit-scrollbar]:w-[4px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/25 [&::-webkit-scrollbar-thumb]:rounded-full"
                         style="scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.25) transparent;"
+                        x-init="$nextTick(() => { $refs.activeMenuItem?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); })"
                     >
                         <div class="flex justify-center w-full mb-10">
                             <svg
@@ -305,7 +315,7 @@
                         </div>
 
                         <ul class="w-full flex flex-col gap-0.5 px-4">
-                            <li>
+                            <li {% if active_tab == 'user-info' %}x-ref="activeMenuItem"{% endif %}>
                                 <a
                                     href="{% url 'accounts:user_info' %}"
                                     class="{% if active_tab == 'user-info' %}flex flex-row-reverse items-center justify-end px-2.5 py-1 text-white transition-colors hover:text-white{% else %}flex flex-row-reverse items-center justify-end gap-3 px-5 py-3 text-white transition-colors hover:text-white{% endif %}"
@@ -374,7 +384,7 @@
                                 </defs>
                             </svg>
 
-                            <li>
+                            <li {% if active_tab == 'subscription' %}x-ref="activeMenuItem"{% endif %}>
                                 <a
                                     href="{% url 'accounts:subscriptions:subscription' %}"
                                     class="{% if active_tab == 'subscription' %}flex flex-row-reverse items-center justify-end px-2.5 py-1 text-white transition-colors hover:text-white{% else %}flex flex-row-reverse items-center justify-end gap-3 px-5 py-3 text-white transition-colors hover:text-white{% endif %}"
@@ -440,7 +450,7 @@
                                 />
                             </svg>
 
-                            <li>
+                            <li {% if active_tab == 'payment-info' %}x-ref="activeMenuItem"{% endif %}>
                                 <a
                                     href="{% url 'accounts:subscriptions:payment_info' %}"
                                     class="{% if active_tab == 'payment-info' %}flex flex-row-reverse items-center justify-end px-2.5 py-1 text-white transition-colors hover:text-white{% else %}flex flex-row-reverse items-center justify-end gap-3 px-5 py-3 text-white transition-colors hover:text-white{% endif %}"
@@ -506,7 +516,7 @@
                                 />
                             </svg>
 
-                            <li>
+                            <li {% if active_tab == 'notifications' %}x-ref="activeMenuItem"{% endif %}>
                                 <a
                                     href="{% url 'accounts:notifications' %}"
                                     class="{% if active_tab == 'notifications' %}flex flex-row-reverse items-center justify-end px-2.5 py-1 text-white transition-colors hover:text-white{% else %}flex flex-row-reverse items-center justify-end gap-3 px-5 py-3 text-white transition-colors hover:text-white{% endif %}"
@@ -572,7 +582,7 @@
                                 />
                             </svg>
 
-                            <li>
+                            <li {% if active_tab == 'settings' %}x-ref="activeMenuItem"{% endif %}>
                                 <a
                                     href="{% url 'accounts:settings' %}"
                                     class="{% if active_tab == 'settings' %}flex flex-row-reverse items-center justify-end px-2.5 py-1 text-white transition-colors hover:text-white{% else %}flex flex-row-reverse items-center justify-end gap-3 px-5 py-3 text-white transition-colors hover:text-white{% endif %}"
@@ -638,7 +648,7 @@
                                 />
                             </svg>
 
-                            <li>
+                            <li {% if active_tab == 'support' %}x-ref="activeMenuItem"{% endif %}>
                                 <a
                                     href="{% url 'accounts:support:support' %}"
                                     class="{% if active_tab == 'support' %}flex flex-row-reverse items-center justify-end px-2.5 py-1 text-white transition-colors hover:text-white{% else %}flex flex-row-reverse items-center justify-end gap-3 px-5 py-3 text-white transition-colors hover:text-white{% endif %}"

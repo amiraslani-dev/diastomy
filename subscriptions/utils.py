@@ -8,7 +8,7 @@ def add_jalali_months(g_date, months_to_add):
     new_year = j_date.year + (new_month - 1) // 12
     new_month = (new_month - 1) % 12 + 1
     
-    if new_month == 12 and j_date.isleap(new_year):
+    if new_month == 12 and jdatetime.date(new_year, 1, 1).isleap():
         max_days = 30
     elif new_month == 12:
         max_days = 29

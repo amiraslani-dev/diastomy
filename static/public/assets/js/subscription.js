@@ -105,6 +105,86 @@ document.addEventListener("alpine:init", () => {
             }
         },
 
+        paymentMethod: 'DIRECT',
+        cryptoTxHash: '',
+        cryptoReceiptFile: null,
+        cryptoReceiptFileName: '',
+        copiedWallet: false,
+        isSubmittingCrypto: false,
+
+        copyWallet(address) {
+            if (!address) return;
+            navigator.clipboard.writeText(address).then(() => {
+                this.copiedWallet = true;
+                setTimeout(() => this.copiedWallet = false, 2000);
+            }).catch(() => {});
+        },
+
+        handleReceiptSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                this.cryptoReceiptFile = file;
+                this.cryptoReceiptFileName = file.name;
+            }
+        },
+
+        removeReceipt() {
+            this.cryptoReceiptFile = null;
+            this.cryptoReceiptFileName = '';
+            if (this.$refs.receiptInput) {
+                this.$refs.receiptInput.value = '';
+            }
+        },
+
+        async submitCryptoPayment() {
+            if (!this.selectedPlan) return;
+            if (!this.cryptoTxHash && !this.cryptoReceiptFile) {
+                window.dispatchEvent(new CustomEvent("show-modal", { detail: { type: "error", title: "خطا", message: "لطفاً حداقل کد/لینک پیگیری یا تصویر رسید را وارد نمایید." } }));
+                return;
+            }
+
+            this.isSubmittingCrypto = true;
+
+            try {
+                let csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+                let formData = new FormData();
+                formData.append('plan_id', this.selectedPlan);
+                if (this.discountSuccess && this.discountCode) {
+                    formData.append('discount_code', this.discountCode);
+                }
+                if (this.cryptoTxHash) {
+                    formData.append('crypto_tx_hash', this.cryptoTxHash);
+                }
+                if (this.cryptoReceiptFile) {
+                    formData.append('crypto_receipt', this.cryptoReceiptFile);
+                }
+
+                const response = await fetch('/accounts/api/create-crypto-payment/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken || ''
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    window.dispatchEvent(new CustomEvent("show-modal", { detail: { type: "success", title: "ثبت موفق", message: data.message } }));
+                    setTimeout(() => {
+                        window.location.href = data.redirect_url || '/accounts/payment-info/';
+                    }, 1500);
+                } else {
+                    window.dispatchEvent(new CustomEvent("show-modal", { detail: { type: "error", title: "خطا در ثبت رسید", message: data.message || "خطایی رخ داد" } }));
+                }
+            } catch (error) {
+                console.error(error);
+                window.dispatchEvent(new CustomEvent("show-modal", { detail: { type: "error", title: "خطا", message: "خطای ارتباط با سرور" } }));
+            } finally {
+                this.isSubmittingCrypto = false;
+            }
+        },
+
         init() {
             this.$watch('selectedPlan', () => {
                 if(this.discountAmount > 0) {
