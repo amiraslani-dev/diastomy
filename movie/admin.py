@@ -1,10 +1,13 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.db.models import Q
+
 from modeltranslation.admin import TranslationAdmin, TranslationTabularInline, TranslationStackedInline
 from .models import (
     Person, Country, Genre, Quality, Movie, Series, Season, Episode,
-    EpisodeVideo, MovieVideo, MovieCollectionItem, MovieCollectionItemVideo, SeriesTrailer, MovieComment, SeriesComment
+    EpisodeVideo, MovieVideo, MovieCollectionItem, MovieCollectionItemVideo, SeriesTrailer, MovieComment, SeriesComment,
+    ContentIngestion
 )
+
 from core.models import AdminNotification
 
 # Custom Mixin to mark notifications as read when an admin opens the change view
@@ -185,6 +188,27 @@ class MovieAdmin(TranslationAdmin):
     autocomplete_fields = ['country', 'genres', 'actors', 'director']
     search_fields = ['title', 'english_title_primary', 'english_title_secondary', 'description', 'seo_title', 'meta_description']
     list_filter = [CountrySearchFilter, GenreSearchFilter, 'highest_quality', 'age_limit']
+    actions = ['sync_from_tmdb']
+
+    def sync_from_tmdb(self, request, queryset):
+        client = TMDBClient()
+        success_count = 0
+        fail_count = 0
+        error_msgs = []
+        for item in queryset:
+            try:
+                client.sync_existing_instance(item)
+                success_count += 1
+            except Exception as e:
+                fail_count += 1
+                error_msgs.append(f"فیلم «{item.title}»: {str(e)}")
+        
+        if success_count:
+            messages.success(request, f"اطلاعات {success_count} فیلم با موفقیت از TMDB به‌روزرسانی شد.")
+        if fail_count:
+            messages.error(request, f"بروزرسانی {fail_count} فیلم با خطا مواجه شد: " + " | ".join(error_msgs))
+    sync_from_tmdb.short_description = "بروزرسانی و همگام‌سازی اطلاعات از TMDB"
+
 
 
 class SeasonInline(TranslationTabularInline):
@@ -205,6 +229,25 @@ class SeriesAdmin(TranslationAdmin):
     autocomplete_fields = ['country', 'genres', 'actors', 'director']
     search_fields = ['title', 'english_title_primary', 'english_title_secondary', 'description', 'seo_title', 'meta_description']
     list_filter = [CountrySearchFilter, GenreSearchFilter, 'highest_quality', 'age_limit']
+    actions = ['sync_from_tmdb']
+
+    def sync_from_tmdb(self, request, queryset):
+        client = TMDBClient()
+        success_count = 0
+        fail_count = 0
+        for item in queryset:
+            try:
+                client.sync_existing_instance(item)
+                success_count += 1
+            except Exception:
+                fail_count += 1
+        
+        if success_count:
+            messages.success(request, f"اطلاعات {success_count} سریال با موفقیت از TMDB به‌روزرسانی شد.")
+        if fail_count:
+            messages.error(request, f"بروزرسانی {fail_count} سریال با خطا مواجه شد.")
+    sync_from_tmdb.short_description = "بروزرسانی و همگام‌سازی اطلاعات از TMDB"
+
 
 
 @admin.register(Season)
@@ -277,3 +320,58 @@ class SeriesCommentAdmin(NotificationMarkReadMixin, admin.ModelAdmin):
     def approve_comments(self, request, queryset):
         queryset.update(is_approved=True)
     approve_comments.short_description = "تایید دیدگاه‌های انتخاب شده"
+
+
+from django.utils.html import format_html
+from .services.tmdb import TMDBClient
+
+@admin.register(ContentIngestion)
+class ContentIngestionAdmin(admin.ModelAdmin):
+    list_display = ['imdb_id', 'content_type', 'status_badge', 'created_movie', 'created_series', 'created_at']
+    list_filter = ['content_type', 'status', 'created_at']
+    search_fields = ['imdb_id', 'error_log']
+    readonly_fields = ['created_movie', 'created_series', 'error_log', 'created_at', 'updated_at']
+    actions = ['reprocess_ingestion']
+
+    def status_badge(self, obj):
+        colors = {
+            'pending': 'orange',
+            'processing': 'blue',
+            'completed': 'green',
+            'failed': 'red',
+        }
+        color = colors.get(obj.status, 'black')
+        return format_html('<span style="color: {}; font-weight: bold;">{}</span>', color, obj.get_status_display())
+    status_badge.short_description = "وضعیت پردازش"
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        if obj.status in ['pending', 'failed']:
+            client = TMDBClient()
+            try:
+                client.ingest(obj)
+                if "قبلاً در دیتابیس موجود بوده" in obj.error_log:
+                    messages.info(request, obj.error_log)
+                else:
+                    messages.success(request, f"محتوا با موفقیت از TMDB دریافت و ذخیره گردید.")
+            except Exception as e:
+                messages.error(request, f"خطا در دریافت متادیتا: {str(e)}")
+
+
+    def reprocess_ingestion(self, request, queryset):
+        client = TMDBClient()
+        success_count = 0
+        fail_count = 0
+        for obj in queryset:
+            try:
+                client.ingest(obj)
+                success_count += 1
+            except Exception:
+                fail_count += 1
+        
+        if success_count:
+            messages.success(request, f"{success_count} درخواست با موفقیت پردازش شد.")
+        if fail_count:
+            messages.error(request, f"{fail_count} درخواست با خطا مواجه شد.")
+    reprocess_ingestion.short_description = "پردازش مجدد موارد انتخاب شده"
+

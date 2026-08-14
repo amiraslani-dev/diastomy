@@ -79,7 +79,10 @@ class Quality(models.Model):
 
 
 class MovieBase(models.Model):
+    tmdb_id = models.IntegerField(null=True, blank=True, unique=True, verbose_name="شناسه TMDB")
+    imdb_id = models.CharField(max_length=50, null=True, blank=True, unique=True, verbose_name="شناسه IMDb")
     title = models.CharField(max_length=255, verbose_name="عنوان")
+
     english_title_primary = models.CharField(max_length=255, verbose_name="بخش اول عنوان انگلیسی (رنگی)", blank=True)
     english_title_secondary = models.CharField(max_length=255, verbose_name="بخش دوم عنوان انگلیسی (سفید)", blank=True)
     slug = models.SlugField(max_length=255, unique=True, verbose_name="اسلاگ")
@@ -381,3 +384,75 @@ def create_series_comment_notification(sender, instance, created, **kwargs):
             object_id=instance.id,
             message=f"دیدگاه جدید برای سریال «{instance.series.title_fa}» توسط {instance.user.username}"
         )
+
+
+class ContentIngestion(models.Model):
+    CONTENT_TYPE_CHOICES = (
+        ('movie', 'فیلم سینمایی'),
+        ('series', 'سریال'),
+    )
+    STATUS_CHOICES = (
+        ('pending', 'در انتظار پردازش'),
+        ('processing', 'در حال پردازش'),
+        ('completed', 'تکمیل شده'),
+        ('failed', 'خطا در پردازش'),
+    )
+
+    imdb_id = models.CharField(
+        max_length=50,
+        verbose_name="شناسه IMDb یا TMDB ID",
+        help_text="مثلاً tt1375666 یا کد عددی TMDB"
+    )
+    content_type = models.CharField(
+        max_length=10,
+        choices=CONTENT_TYPE_CHOICES,
+        default='movie',
+        verbose_name="نوع محتوا"
+    )
+    status = models.CharField(
+        max_length=15,
+        choices=STATUS_CHOICES,
+        default='pending',
+        verbose_name="وضعیت پردازش"
+    )
+    error_log = models.TextField(
+        blank=True,
+        verbose_name="توضیحات / لوگ خطا"
+    )
+    created_movie = models.ForeignKey(
+        'Movie',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='ingestion_requests',
+        verbose_name="فیلم ساخته‌شده"
+    )
+    created_series = models.ForeignKey(
+        'Series',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='ingestion_requests',
+        verbose_name="سریال ساخته‌شده"
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ثبت")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="تاریخ آخرین بروزرسانی")
+
+    class Meta:
+        verbose_name = "درخواست ورود محتوا (Ingestion)"
+        verbose_name_plural = "درخواست‌های ورود محتوا (Ingestion)"
+        ordering = ['-created_at']
+
+    def clean(self):
+        super().clean()
+        if self.imdb_id and not self.pk:
+            clean_id = self.imdb_id.strip()
+            existing_ingest = ContentIngestion.objects.filter(imdb_id=clean_id, status='completed').first()
+            if existing_ingest:
+                title = existing_ingest.created_movie.title if existing_ingest.created_movie else (existing_ingest.created_series.title if existing_ingest.created_series else clean_id)
+                raise ValidationError(f"فیلم/سریال با شناسه «{clean_id}» قبلاً با عنوان «{title}» در دیتابیس ثبت شده است و امکان ثبت تکراری وجود ندارد.")
+
+    def __str__(self):
+        return f"{self.get_content_type_display()} - {self.imdb_id} [{self.get_status_display()}]"
+
+

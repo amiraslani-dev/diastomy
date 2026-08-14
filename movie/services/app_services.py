@@ -1,6 +1,10 @@
+import re
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404
-from .models import Person, Movie, Series
+from django.db.models import Q
+from django.utils import translation
+
+from movie.models import Person, Movie, Series, Genre, Country
 from core.models import ActorsPageSetting
 
 def get_actors_page_setting():
@@ -58,11 +62,6 @@ def get_actor_paginated_filmography(actor, page_number=1, per_page=10):
     page_obj = paginator.get_page(page_number)
     return page_obj
 
-
-import re
-from django.db.models import Q
-from django.utils import translation
-from .models import Genre, Country
 
 def live_quick_search(query_text, limit=8):
     """
@@ -334,6 +333,3 @@ def filter_movies_and_series(filters, page_number=1, per_page=20):
     paginator = Paginator(combined, per_page)
     page_obj = paginator.get_page(page_number)
     return page_obj
-
-
-
